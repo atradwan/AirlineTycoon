@@ -84,21 +84,6 @@ jobs:
             cpp_compiler: cl
             name: 'windows'
             build_type: ${{ needs.env.outputs.build-type }}
-          - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-            name: 'linux'
-            build_type: ${{ needs.env.outputs.build-type }}
-          - os: macos-15-intel
-            c_compiler: gcc
-            cpp_compiler: g++
-            name: 'macos-x64'
-            build_type: ${{ needs.env.outputs.build-type }}
-          - os: macos-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-            name: 'macos'
-            build_type: ${{ needs.env.outputs.build-type }}
             
 
     # Execute this for each matrix
