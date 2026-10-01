@@ -245,6 +245,8 @@ void PLAYER::NetSynchronizePlanes() {
             }
         }
 
+        /* One file per day, to compare against what a receiver could not read. */
+        NetDumpMessage("sent", Message.MemBuffer, static_cast<SLONG>(Message.MemBufferUsed), true);
         SIM::SendMemFile(Message);
     }
 }

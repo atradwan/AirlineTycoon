@@ -31,6 +31,8 @@ SLONG nPlayerAppsDisabled[4] = {0, 0, 0, 0}; // Ist ein anderer Spieler gerade i
 SLONG nPlayerWaiting[4] = {0, 0, 0, 0};      // Hinkt jemand hinterher?
 
 extern SLONG gTimerCorrection; // Is it necessary to adapt the local clock to the server clock?
+extern SLONG SaveVersion;
+extern SLONG SaveVersionSub;
 
 // Zum Debuggen:
 SLONG rChkTime = 0;
@@ -150,6 +152,30 @@ void NetApplyPendingTook() {
         const PendingTook Took = gPendingTook.front();
         gPendingTook.pop_front();
         NetApplyTook(Took.Type, Took.Index, Took.City);
+    }
+}
+
+//--------------------------------------------------------------------------------------------
+// Logs size and hash of a plane sync message, so that the sender's and the receiver's logs
+// tell whether both saw the same bytes. With bWriteFile the message is also written next to
+// the game, to be taken apart after a failed read.
+//--------------------------------------------------------------------------------------------
+void NetDumpMessage(const char *Tag, const UBYTE *Data, SLONG Bytes, bool bWriteFile) {
+    ULONG Hash = 2166136261U;
+    for (SLONG c = 0; c < Bytes; c++) {
+        Hash = (Hash ^ Data[c]) * 16777619U;
+    }
+
+    AT_Log("SYNC_PLANES %s bytes=%ld hash=%08lx save=%ld.%ld day=%ld t=%ld", Tag, static_cast<long>(Bytes), static_cast<unsigned long>(Hash),
+           static_cast<long>(SaveVersion), static_cast<long>(SaveVersionSub), static_cast<long>(Sim.Date), static_cast<long>(Sim.Time));
+
+    if (bWriteFile) {
+        std::string Filename = std::string(AppPath.c_str()) + bprintf("netdump_planes_%s_day%ld.bin", Tag, static_cast<long>(Sim.Date));
+        SDL_RWops *Ctx = SDL_RWFromFile(Filename.c_str(), "wb");
+        if (Ctx != nullptr) {
+            SDL_RWwrite(Ctx, Data, 1, Bytes);
+            SDL_RWclose(Ctx);
+        }
     }
 }
 
@@ -1082,17 +1108,88 @@ void PumpNetwork() {
                 SLONG Anz = 0;
                 SLONG PlayerNum = 0;
 
-                Message >> Anz;
+                /* This message used to be read straight into the live players. A reader that
+                   failed halfway left a player with half overwritten planes, and the game died a
+                   few steps later. Read into scratch objects first and only take them over once
+                   the whole message has parsed. */
+                struct PendingPlanes {
+                    SLONG PlayerNum{};
+                    CPlanes Planes;
+                    CAuftraege Auftraege;
+                    CFrachten Frachten;
+                    CRentCities RentCities;
+                };
+                std::deque<PendingPlanes> Pending;
 
-                while (Anz > 0) {
-                    Message >> PlayerNum;
-                    PlayerNum = NetCheckPlayerNum(PlayerNum, MessageType);
+                const char *Stage = "count";
+                SLONG StageStart = Message.MemPointer;
+                SLONG Entry = 0;
+                bool bParsed = false;
 
-                    PLAYER &qPlayer = Sim.Players.Players[PlayerNum];
+                NetDumpMessage("recv", Message.MemBuffer, static_cast<SLONG>(Message.MemBufferUsed), false);
 
-                    Message >> qPlayer.Planes >> qPlayer.Auftraege >> qPlayer.Frachten >> qPlayer.RentCities;
+                try {
+                    Message >> Anz;
+                    if (Anz < 0 || Anz > 4) {
+                        TeakLibW_Exception(FNL, "Invalid player count %ld in message %s", static_cast<long>(Anz), Translate_ATNET(MessageType));
+                    }
 
-                    Anz--;
+                    for (Entry = 0; Entry < Anz; Entry++) {
+                        Stage = "playernum";
+                        StageStart = Message.MemPointer;
+                        Message >> PlayerNum;
+                        PlayerNum = NetCheckPlayerNum(PlayerNum, MessageType);
+
+                        Pending.emplace_back();
+                        PendingPlanes &qPending = Pending.back();
+                        qPending.PlayerNum = PlayerNum;
+
+                        Stage = "planes";
+                        StageStart = Message.MemPointer;
+                        Message >> qPending.Planes;
+
+                        Stage = "orders";
+                        StageStart = Message.MemPointer;
+                        Message >> qPending.Auftraege;
+
+                        Stage = "freight";
+                        StageStart = Message.MemPointer;
+                        Message >> qPending.Frachten;
+
+                        Stage = "rentcities";
+                        StageStart = Message.MemPointer;
+                        Message >> qPending.RentCities;
+                    }
+                    bParsed = true;
+                } catch (TeakLibException &ex) {
+                    AT_Log("SYNC_PLANES rejected: %s", ex.what());
+                    ex.caught();
+                } catch (std::exception &ex) {
+                    /* A misread length ends in std::length_error or std::bad_alloc, which nobody
+                       above catches. */
+                    AT_Log("SYNC_PLANES rejected: %s", ex.what());
+                }
+
+                if (!bParsed) {
+                    AT_Log("SYNC_PLANES rejected: entry=%ld/%ld player=%ld stage=%s stagestart=%ld failedat=%ld bytes=%ld save=%ld.%ld day=%ld t=%ld",
+                           static_cast<long>(Entry), static_cast<long>(Anz), static_cast<long>(PlayerNum), Stage, static_cast<long>(StageStart),
+                           static_cast<long>(Message.MemPointer), static_cast<long>(Message.MemBufferUsed), static_cast<long>(SaveVersion),
+                           static_cast<long>(SaveVersionSub), static_cast<long>(Sim.Date), static_cast<long>(Sim.Time));
+                    NetTraceEvent("DROP name=%s reason=stage %s", Translate_ATNET(MessageType), Stage);
+                    NetDumpMessage("recv", Message.MemBuffer, static_cast<SLONG>(Message.MemBufferUsed), true);
+
+                    /* Nothing was taken over, so the tail check below has nothing to say. */
+                    Message.MemPointer = static_cast<SLONG>(Message.MemBufferUsed);
+                    break;
+                }
+
+                for (auto &qPending : Pending) {
+                    PLAYER &qPlayer = Sim.Players.Players[qPending.PlayerNum];
+
+                    qPlayer.Planes = std::move(qPending.Planes);
+                    qPlayer.Auftraege = std::move(qPending.Auftraege);
+                    qPlayer.Frachten = std::move(qPending.Frachten);
+                    qPlayer.RentCities = std::move(qPending.RentCities);
                 }
             } break;
 

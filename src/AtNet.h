@@ -15,6 +15,8 @@ void NetGenericAsync(SLONG SyncId, SLONG Par, SLONG player = -1);
 SLONG NetJobsRefillEpoch();
 /* Marks the orders other peers took, once this peer's boards have reached the same refill. */
 void NetApplyPendingTook();
+/* Logs size and hash of a plane sync message; bWriteFile also writes it next to the game. */
+void NetDumpMessage(const char *Tag, const UBYTE *Data, SLONG Bytes, bool bWriteFile);
 
 // Messages for creating a new game
 static const ULONG ATNET_WANNAJOIN = 0xadaa0000;        // Server, I want to join, Please send list of players and their names
