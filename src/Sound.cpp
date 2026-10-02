@@ -502,61 +502,51 @@ void NextMidi() {
 
     if ((Sim.Options.OptionMusik != 0) && Sim.Options.OptionMusicType != 0) {
         if (WasHere != 0) {
-            switch ((Sim.Options.OptionLoopMusik == 0) ? MidiRandom.Rand(1, 16) : Sim.Options.OptionLoopMusik) {
-            case 1:
+            switch ((Sim.Options.OptionLoopMusik == 0) ? MidiRandom.Rand(0, 8) : (Sim.Options.OptionLoopMusik - 1)) {
+                /*case 0:  PlayMidi ("swing.mid");    break;
+                  case 1:  PlayMidi ("reggae.mid");   break;
+                  case 2:  PlayMidi ("dream1g.mid");  break;
+                  case 3:  PlayMidi ("indust.mid");   break;
+                  case 4:  PlayMidi ("funk.mid");     break;
+                  case 5:  PlayMidi ("shuffle.mid");  break; */
+
+            case 0:
                 PlayMidi("lating.mid");
                 break;
-            case 2:
+            case 1:
                 PlayMidi("reggaeg.mid");
                 break;
-            case 3:
+            case 2:
                 PlayMidi("shuffleg.mid");
                 break;
-            case 4:
+            case 3:
                 PlayMidi("at2.mid");
                 break;
-            default:
-            /*case 5:*/
+            case 4:
                 PlayMidi("funky2.mid");
                 break;
-            case 6:
+            case 5:
                 PlayMidi("karibik.mid");
                 break;
-            case 7:
+            case 6:
                 PlayMidi("reag1.mid");
                 break;
-            case 8:
+            case 7:
                 PlayMidi("shuffle2.mid");
                 break;
-            case 9:
+            case 8:
                 PlayMidi("swingin2.mid");
                 break;
-            case 10:
-                PlayMidi("swing.mid");
-                break;
-            case 11:
-                PlayMidi("reggae.mid");
-                break;
-            case 12:
-                PlayMidi("dream1g.mid");
-                break;
-            case 13:
-                PlayMidi("indust.mid");
-                break;
-            case 14:
-                PlayMidi("funk.mid");
-                break;
-            case 15:
-                PlayMidi("shuffle.mid");
-                break;
-            case 16:
-                PlayMidi("title.mid");
+
+            default:
+                PlayMidi("funky2.mid");
             }
         } else {
             PlayMidi("funky2.mid");
-            WasHere = TRUE;
         }
     }
+
+    WasHere = TRUE;
 }
 
 //--------------------------------------------------------------------------------------------
