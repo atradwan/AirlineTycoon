@@ -20,6 +20,11 @@ inline constexpr int ceil_div(int a, int b) {
     return a / b + (a % b != 0);
 }
 
+inline constexpr __int64 ceil_div(__int64 a, __int64 b) {
+    assert(b != 0);
+    return a / b + (a % b != 0);
+}
+
 class PlaneTime {
   public:
     PlaneTime() = default;
@@ -179,6 +184,14 @@ class SabotageMode {
 
     std::string getName() const;
 
+    bool operator==(const SabotageMode &other) const { return (mCategory == other.mCategory && mJobNumber == other.mJobNumber); }
+    bool operator<(const SabotageMode &other) const {
+        if (mCategory == other.mCategory) {
+            return mJobNumber < other.mJobNumber;
+        }
+        return mCategory < other.mCategory;
+    }
+
   private:
     static constexpr std::array<SLONG, 5> hintArray1{2, 4, 10, 20, 100};
     static constexpr std::array<SLONG, 4> hintArray2{8, 0, 25, 40};
@@ -188,6 +201,15 @@ class SabotageMode {
     SLONG mJobHints{0};
     SLONG mJobCost{0};
 };
+
+enum class SpecialSabotage { Any = 0, No = 1, CutWires, StinkBomb, Glue };
+constexpr bool operator==(SpecialSabotage a, SpecialSabotage b) {
+    /* Beware: Not transitive */
+    auto ai = static_cast<int>(a);
+    auto bi = static_cast<int>(b);
+    return (ai == 0 && bi != 1) || (bi == 0 && ai != 1) || (ai == bi);
+}
+constexpr bool operator!=(SpecialSabotage a, SpecialSabotage b) { return !(a == b); }
 
 namespace Helper {
 
@@ -286,7 +308,9 @@ void printAllSchedules(bool infoOnly);
 
 bool checkRoomOpen(SLONG actionId);
 SLONG getRoomFromAction(SLONG PlayerNum, SLONG actionId);
-SLONG getWalkDistance(int playerNum, SLONG roomId);
+SLONG getDistance(XY origin, XY target);
+SLONG getWalkDistancePlayerToRoom(SLONG playerNum, SLONG roomId);
+SLONG getWalkDistanceToRoom(XY origin, SLONG roomB);
 
 const char *getItemName(SLONG item);
 
@@ -299,13 +323,17 @@ inline SLONG getRequiredImageBasedOnLowestRoute(SLONG lowestImage) {
     return howMuchImageDoWeNeed;
 }
 
-inline SLONG getNumberOfPlanesNeededForRoute(const CRoute &qRoute, SLONG planeTypeId, SLONG maxUtilizationPercent) {
-    SLONG duration = kDurationExtra + Cities.CalcFlugdauer(qRoute.VonCity, qRoute.NachCity, PlaneTypes[planeTypeId].Geschwindigkeit);
+inline SLONG getNumberOfPlanesNeededForRoute(const CRoute &qRoute, const CPlaneType &qPlaneType, SLONG maxUtilizationPercent) {
+    SLONG duration = kDurationExtra + Cities.CalcFlugdauer(qRoute.VonCity, qRoute.NachCity, qPlaneType.Geschwindigkeit);
     SLONG numTripsPerWeek = 24 * 7 / duration;
     SLONG maxWeekyRegeneration = qRoute.AnzPassagiere() * 427 / 100;
     SLONG finalTarget = ceil_div(maxWeekyRegeneration * maxUtilizationPercent, 100);
-    SLONG numPlanesTotal = ceil_div(finalTarget, numTripsPerWeek * PlaneTypes[planeTypeId].Passagiere);
+    SLONG numPlanesTotal = ceil_div(finalTarget, numTripsPerWeek * qPlaneType.Passagiere);
     return numPlanesTotal;
+}
+
+inline SLONG getNumberOfPlanesNeededForRoute(const CRoute &qRoute, SLONG planeTypeId, SLONG maxUtilizationPercent) {
+    return getNumberOfPlanesNeededForRoute(qRoute, PlaneTypes[planeTypeId], maxUtilizationPercent);
 }
 
 inline void calcCostAndDuration(int startCity, int destCity, const CPlaneType &qPlane, bool emptyFlight, int &cost, int &duration, int &distance) {
@@ -330,7 +358,7 @@ inline void calcCostAndDuration(int startCity, int destCity, const CPlaneType &q
     }
 
     if (emptyFlight) {
-        cost -= (qPlane.Passagiere * distance / 1000 / 40);
+        cost -= (qPlane.Passagiere * (distance / 1000) / 40);
     }
 }
 
@@ -356,9 +384,12 @@ inline void calcCostAndDuration(int startCity, int destCity, const CPlane &qPlan
     }
 
     if (emptyFlight) {
-        cost -= (qPlane.ptPassagiere * distance / 1000 / 40);
+        cost -= (qPlane.ptPassagiere * (distance / 1000) / 40);
     }
 }
+
+CXPlane getHardcodedDesignerPlaneLarge();
+CXPlane getHardcodedDesignerPlaneEco();
 
 } // namespace Helper
 

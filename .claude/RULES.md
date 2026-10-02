@@ -72,6 +72,10 @@ The `ClaudeBot` class already has the two friend functions:
 
 Remember to always update these two functions when you add a new data member to the `ClaudeBot` class.
 
+Savegame loading shall be backwards compatible. This means that savegames created from previous releases (tagged commits) should still load by checking a version number in the savegame and using default values for any variables added in the meantime. However, only saves from tagged commits shall be compatible, not from any untagged version. Any access restrictions to game state a temporarily lifted during savegame loading if and only if this is necessary to enable backwards compability.
+
+Never bump or change the savegame version that is written into new savegames. Do not introduce new savegame versions.
+
 Game actions
 ============
 
@@ -81,7 +85,7 @@ Use `RobotPlan()` to determine what shall be done next. In this function, a prim
 
 Use `RobotExecuteAction()` to actually perform a planned action. It shall be checked which action ID (primary or secondary) was successful by checking `qPlayer.RobotActions[0]`.
 
-ClaudeBot shall check that it is in the correct room by using the function: `qPlayer.GetRoom()`. If it is not the correct room, only print a warning for now and do still perform the planned action.
+ClaudeBot shall check that it is in the correct room by using the function: `qPlayer.GetRoom()`. If it is not the correct room, only print a warning for now and do still perform the planned action. To reduce log spam, you may stop printing the warning after some time. During "fast-forward" mode (`Sim.CallItADay == 1`), player characters do not actually walk anywhere and `qPlayer.GetRoom()` will always return 1 and the room check does not need to be performed.
 
 Due to a bug in a game, `RobotExecuteAction()` sometimes executes too early. Because of this, ClaudeBot is not allowed to perform any action when `(Sim.Time <= 540000) == TRUE`.
 
@@ -89,6 +93,8 @@ Note that some rooms open and close at a specific time. Opening hours also depen
 - ClaudeBot shall use the following function to check if the room is open: `bool checkRoomOpen(SLONG actionId)`
 - ClaudeBot shall use the following to translate an action ID to a room ID: `SLONG getRoomFromAction(SLONG PlayerNum, SLONG actionId)`
 - When planning the next action, consider the time it requires to walk to a room
+
+Some rooms do or do not exist depending on whether this is a free game or a mission. You may use the function `Airport.DoesRuneExist(RUNE_2SHOP, roomId)` to check if a room with the specified ID exists.
 
 We will list now all actions that can be performed in the game via the class `GameMechanic`.
 If `GameMechanic` returns a bool this usually means whether or not the action could be completed.
@@ -114,6 +120,8 @@ Recommended action ID: ACTION_DROPMONEY
 
 ### Emit stock
 
+`EmitStockResult canEmitStock(PLAYER &qPlayer, SLONG *outHowMany = nullptr)`: Helper function which may be called at any time to determine if and how many stock can be emitted.
+
 `bool GameMechanic::emitStock(PLAYER &qPlayer, SLONG neueAktien, SLONG mode)`: Issue new shares. Gives the airline some money however, reduces stock price and more float means competitors could take you over. Analyze the code of this function to see how the mode affects how much money is made and by how much the stock price drops.
 
 Recommended action ID: ACTION_EMITSHARES
@@ -126,13 +134,13 @@ Recommended action ID: ACTION_SET_DIVIDEND
 
 ### Buy stock
 
-`std::pair<bool, __int64> GameMechanic::buyStock(PLAYER &qPlayer, SLONG airlineNum, SLONG amount, bool commit)`: Purchase shares in another airline identified by airlineNum. Analyze the code to see how high the bank fee is. If commit == false, no action is made. The second return value gives the total amount of money that will be spent. Note that stock price will increase.
+`std::pair<bool, __int64> GameMechanic::buyStock(PLAYER &qPlayer, SLONG airlineNum, SLONG amount, bool commit)`: Purchase shares in another airline identified by airlineNum. Analyze the code to see how high the bank fee is. If commit == false, no action is made. The second return value gives the resulting account balance. Note that stock price will increase.
 
 Recommended action ID: ACTION_BUYSHARES
 
 ### Sell stock
 
-`std::pair<bool, __int64> GameMechanic::sellStock(PLAYER &qPlayer, SLONG airlineNum, SLONG amount, bool commit)`: Sell shares held in another airline identified by airlineNum. Analyze the code to see how high the bank fee is. If commit == false, no action is made. The second return value gives the total amount of money that will be gained. Note that stock price will decrease.
+`std::pair<bool, __int64> GameMechanic::sellStock(PLAYER &qPlayer, SLONG airlineNum, SLONG amount, bool commit)`: Sell shares held in another airline identified by airlineNum. Analyze the code to see how high the bank fee is. If commit == false, no action is made. The second return value gives the resulting account balance. Note that stock price will decrease.
 
 Recommended action ID: ACTION_SELLSHARES
 
@@ -140,7 +148,7 @@ Recommended action ID: ACTION_SELLSHARES
 
 `bool GameMechanic::overtakeAirline(PLAYER &qPlayer, SLONG targetAirline, bool liquidate)`: Action for trying to take over another airline via stock acquisition. Airline is taken over with all planes, routes, money and debt. Parameter `liquidate` can be used to erase airline completely instead.
 
-The function `canOvertakeAirline()` checks whether the target is valid, whether you have enough stock (>= 50%), and whether the enemy blocks acquisition by owning stock from your airline (>= 30%). Note that your competitors can also overtake you when they meet the respective conditions.
+The function `canOvertakeAirline()` checks whether the target is valid, whether you have enough stock (>= 50%), and whether the enemy blocks acquisition by owning stock from your airline (>= 30%). The function may be called any time if `(qPlayer.HasBerater(BERATERTYP_INFO) >= 50) && (qPlayer.HasBerater(BERATERTYP_GELD) >= 50)` holds. Note that your competitors can also overtake you when they meet the respective conditions.
 
 Recommended action ID: ACTION_OVERTAKE_AIRLINE
 
@@ -217,7 +225,7 @@ The item "phone" is required. Everything else said about ACTION_CALL_INTERNATION
 
 Calling via mobile is only possible if `qPlayer.TelephoneDown == 0` and `qPlayer.IsStuck == 0` are holding.
 
-Every time the phone is used, set the existing variable `mOnThePhone` to 30.
+Every time the mobile phone is used, set the existing variable `mOnThePhone` to 30.
 
 ### Call cost
 
@@ -261,7 +269,7 @@ You can use the following helper functions:
 Flight jobs that have been taken shall be planned. If not, they will expire and this might incur a fine.
 
 Flights can only be planned in the player's office or when the item "laptop" is available.
-To walk to your office, use the action ID ACTION_BUERO. Note that the office is only usuable when `(qPlayer.OfficeState != 2)`.
+To walk to your office, use the action ID ACTION_BUERO. Note that the office is only usuable when `(qPlayer.OfficeState != 2)`. Use this condition for planning your actions. Within `RobotExecuteAction()`, you do not need to check as the game will not allow the character to enter an unusable office. If you plan an office action in `RobotPlan()` even though your office is destroyed, you will arrive at the secondary action instead.
 The laptop can be used at any point during any action as long as the condition `qPlayer.HasItem(ITEM_LAPTOP) && (qPlayer.LaptopVirus == 0)` holds (laptop available and no virus).
 
 Do not modify anything in the plane, flight plan or flight plan object classes directly. Instead, use the following functions:
@@ -366,7 +374,9 @@ The action ID ACTION_VISITROUTEBOX or ACTION_VISITROUTEBOX2 shall be used to wal
 
 `BUFFER_V<BOOL> GameMechanic::getBuyableRoutes(PLAYER &qPlayer)`: Check which routes are buyable. It returns an array with a boolean for each route at the corresponding index. A route always connects two cities. A route is buyable if either city is the home airport or either city is already connected by a different route that the player flies sufficiently enough. This can checked via `qPlayer.RentRouten.RentRouten[c].RoutenAuslastung  >= 20` where `c` is the index of any route which has either the same `VonCity` or same `NachCity` as the route that you want to rent.
 
-`bool GameMechanic::killRoute(PLAYER &qPlayer, SLONG routeA)`: Stop renting the specified route. First ensure that no plane will be flying this route anymore.
+`bool GameMechanic::killRoute(PLAYER &qPlayer, SLONG routeA)`: Stop renting the specified route. First ensure that no plane will be flying this route anymore. This function may also be called while in office or when having access to a laptop.
+
+`SLONG GameMechanic::getAnyPlaneOnRoute(PLAYER &qPlayer, SLONG routeA)`: Check if any plane is still flying the specified route. May be called at any time.
 
 ### Route mechanics
 
@@ -435,9 +445,9 @@ The advisor BERATERTYP_FITNESS increases movement speed of the player character.
 Office actions
 --------------
 
-Use the action ID ACTION_BUERO, ACTION_UPGRADE_PLANES or ACTION_CALL_INTERNATIONAL to go to the player’s personal office. Only while in this room, the following functions may be called.
+Use the action ID ACTION_BUERO, ACTION_STARTDAY, ACTION_UPGRADE_PLANES or ACTION_CALL_INTERNATIONAL to go to the player’s personal office. Only while in this room, the following functions may be called.
 
-The action ID ACTION_STARTDAY is the standard “begin day” room action and is automatically executed at the beginning of the day. Do not return this action ID from the `RobotPlan()` function.
+The action ID ACTION_STARTDAY is the standard “begin day” room action and is automatically executed at the beginning of the day.
 
 ### Open kerosine tanks
 
@@ -552,7 +562,14 @@ Use action ID ACTION_BUYUSEDPLANE to walk to the museum. Only there, the followi
 
 `bool GameMechanic::sellPlane(PLAYER &qPlayer, SLONG planeID)`: Sells a plane to the museum. Ensure that no flights are scheduled for this plane before selling. Use the function `CPlane::CanBeSold` to check. Value of a plane is calculated as `CPlane::ptPreis * CPlane::Zustand / 10000 * CPlane::Zustand * (CPlane::Baujahr - kYearsSinceRelease - 1900) / 120`. Value is reduced to only 10% if it is a starting plane (`CPlane::Sponsored != 0`).
 
-`std::vector<SLONG> GameMechanic::buyXPlane(PLAYER &qPlayer, const CString &filename, SLONG amount)`: Buys a designed plane. DO NOT USE CURRENTLY.
+Designer actions
+----------------
+
+Use the action ID ACTION_VISITDESIGNER to visit the plane designer room. Only while in this room, the following functions may be called.
+
+`std::vector<SLONG> GameMechanic::buyXPlane(PLAYER &qPlayer, const CString &filename, SLONG amount)`: Buys the specified amount of the designed plane defined in file `filename`.
+
+Reading the global array `gPlanePartRelations` is necessary to check if parts are compatible.
 
 Advertisement / marketing actions
 ---------------------------------
@@ -605,6 +622,8 @@ The game has an item mechanic. Items can be used to sabotage competitors or prot
 
 `bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item)`: Attempts to use the specified item at the current location.
 
+`SLONG GameMechanic::numFreeSlots(PLAYER &qPlayer)`: Returns the number of free slots in the inventory.
+
 `GameMechanic::BuyItemResult GameMechanic::buyDutyFreeItem(PLAYER &qPlayer, UBYTE item):` This action can only be used in the "Duty Free" shop. Use the action ID ACTION_VISITDUTYFREE to walk there. Use this function to buy certain items for money.
 
 We now explain certain items. The are more items but for now, please do not use these yet.
@@ -652,6 +671,10 @@ To gain the trust of the saboteur, buy item `ITEM_MG` at the "Duty Free" shop. G
 
 To sabotage the security office, pick up the item `ITEM_ZANGE` at the saboteur. Use it while in the security office by calling `GameMechanic::sabotageSecurityOffice(PLAYER &qPlayer))`.
 
+### Sabotage competitor office
+
+To sabotage a competitor's office, pick up the item `ITEM_ZANGE` at the saboteur. Entering an office owned by a competitor will then automatically disable the lights in the office for the rest of the day and remove the item. Note that this will only impede a human player (black screen, human can still use all office actions if they remember the location of the clickable areas). This only works during regular play, not fast-forward mode.
+
 ### Buy laptop
 
 Buy a laptop (`ITEM_LAPTOP`) at the "Duty Free" shop to be able to plan flights anywhere. Shop only has one laptop in stock at any given day, a competitor might have been faster. This action can be repeated to improve laptop quality (`qPlayer.LaptopQuality`) point-by-point until maximum quality of 4. Laptops only become available starting at a specific day. Use `Sim.Date > DAYS_WITHOUT_LAPTOP` to check.
@@ -659,6 +682,27 @@ Buy a laptop (`ITEM_LAPTOP`) at the "Duty Free" shop to be able to plan flights 
 ### Buy mobile phone
 
 Buy a mobile phone (`ITEM_HANDY`) at the "Duty Free" shop to be able to get international flight jobs from other cities.
+
+### Stink bombs
+
+Stink bombs can only be properly used when the game does not fast-forward.
+
+Follow these steps:
+
+- Pick up the gloves (`ITEM_GLOVE`) at the Arab.
+- Pick up the energy drink (`ITEM_REDBULL`) at the vending machine (`ROOM_ELECTRO`, walk there using action ID `ACTION_ENERGY_DRINK`). Picking up the drink will automatically remove the gloves.
+- Use `ITEM_REDBULL` while at the kiosk.
+- Pick up `ITEM_STINKBOMBE` while at the kiosk.
+
+### Glue
+
+Glue can only be properly used when the game does not fast-forward. It can be dropped on the floor. The next player character that steps into it gets stuck for a certain amount of time.
+
+Follow these steps:
+
+- Pick up the gloves (`ITEM_PAPERCLIP`) at the route box.
+- Use `ITEM_PAPERCLIP` while at the freight depot.
+- Pick up `ITEM_GLUE` while at the freight depot.
 
 Security office
 ---------------
@@ -752,6 +796,15 @@ Job 5 grounds the selected airplane for 15 hours.
 
 Job 6 takes the selected route (identified confusingly by `ArabPlaneSelection`) away from the competitor and gives it to ClaudeBot at the victim's rank.
 
+NASA room
+---------
+
+Use the action ID ACTION_VISITNASA to visit the NASA room. Only exists in the missions DIFF_FINAL and DIFF_ADDON10. In the room, the following functions may be called on the PLAYER object that refers to ClaudeBot.
+
+- `AddRocketPart(SLONG rocketPart)`: Buy a rocket part.
+
+- `AddSpaceStationPart(SLONG rocketPart, SLONG textId)`: Buy a space station part. Always use `textId==3400`.
+
 Misc rooms
 ----------
 
@@ -814,25 +867,39 @@ You have read access to:
 - `Sim.Date`, `Sim.Time`, `Sim.GetHour()`, `Sim.GetMinute()`: Query in-game time.
 - `Sim.Weekday`: Get current day of the week.
 - `Sim.StartWeekday`: Get day of the week where game was started.
+- `Sim.CallItADay`: "1" means all human players do not want to do any actions this day. Game then runs in a "fast-forward" mode.
 - `Sim.Difficulty`: Denotes whether we are in a free game or a mission. Always assume free game `Sim.Difficulty == -1`.
 - `Sim.UsedPlanes`: List of used planes to buy. Access permitted while in museum.
 - `Sim.HoleKerosinPreis()`: Fetches current price for kerosene. Permitted while visiting the Arab and personal office (or using laptop). `Sim.HoleKerosinPreis(1)` returns `Sim.Kerosin` directly (price for regular quality kerosene) which may also be accessed directly under the same conditions. The price does not change during the day, so ClaudeBot may read it once per day and cache the value for use in any room.
 - `Sim.HomeAirportId`: City ID of the home airport.
-- `Sim.ItemZange`: Is the item `ITEM_ZANGE` still available at the saboteur?
-- `Sim.ItemPostcard`: Is the item `ITEM_POSTKARTE` still available at the HR office?
+- `Sim.ItemClips`: Is the item `ITEM_PAPERCLIP` still available at the route box? May only be read while at the route box.
+- `Sim.ItemGlue`: State of the item `ITEM_GLUE` at the freight depot: 0 = not there yet (somebody has to hand over `ITEM_PAPERCLIP` first), 1 = can be picked up, 2 = already taken. May only be read while in the freight depot.
+- `Sim.ItemGlove`: Is the item `ITEM_GLOVE` still available at the arab? May only be read while in the arab room.
+- `Sim.ItemPostcard`: Is the item `ITEM_POSTKARTE` still available at the boss office? May only be read while in the boss office.
+- `Sim.ItemZange`: Is the item `ITEM_ZANGE` still available at the saboteur? May only be read while in the saboteur room.
+- `Sim.localPlayer`: Gives the player ID of the local player of this game instance.
 - `Sim.nSecOutDays`: Check for how many days the security office is closed. Security office can close due to sabotage.
 - `Sim.bNetwork`: Check if this is a network game.
 - `Sim.bIsHost`: Check if this game instance is the host in a network game.
+
+### Global Airport instance
+
+The following may always be called to check whether a room exists.
+
+- `Airport.Runes.AnzEntries() != 0`: Check if airport has been fully loaded yet. Important guard for the following function.
+- `Airport.DoesRuneExist(RUNE_2SHOP, roomId)`: If airport was loaded, use this function to check if room specified by ID does exist.
 
 ### Player objects (yourself)
 
 You can access the following fields in the PLAYER class instance that refers to your player. A reference to this instance is passed as variable qPlayer.
 
-All instances of the PLAYER class can be found in the global array `Sim.Players.Players`. If the reference `qPlayer` is not available, use this expression `Sim.Persons[Sim.Persons.GetPlayerIndex(playerNum)]`.
+All instances of the PLAYER class can be found in the global array `Sim.Players.Players`. If the reference `qPlayer` is not available, use this expression `Sim.Persons[Sim.Persons.GetPlayerIndex(playerNum)]`. Use `Sim.Players.AnzPlayers` to check the number of players which currently is always 4.
 
 All classifications are read-only except where explicitly shown as read/write.
 
 - `Abk`: Abbreviation of airline name.
+- `AddRocketPart(SLONG rocketPart)`: Buy a rocket part. Only call while in the NASA room.
+- `AddSpaceStationPart(SLONG rocketPart, SLONG textId)`: Buy a space station part. Always use `textId==3400`. Only call while in the NASA room.
 - `AnzAktien`: Total number of shares.
 - `ArabPlaneSelection`: Album index of target plane (or sometimes target route) selected for sabotage. Can be read and written to while visiting the saboteur.
 - `ArabTrust`: Current trust level of the saboteur.
@@ -840,17 +907,21 @@ All classifications are read-only except where explicitly shown as read/write.
 - `BilanzGestern`, `BilanzWoche.Hole()` and `BilanzGesamt`: Yesterday's balance, the sum of the last seven daily balances and the balance over the whole game. Only read in personal office (or using laptop) and while a financial advisor is employed (`qPlayer.HasBerater(BERATERTYP_GELD) > 0`).
 - `BotLevel`: Determines the type of the computer player. ClaudeBot uses the values 6 to 8.
 - `CalcCreditLimit()`: Calculate how much money can be loaned from the bank.
-- `CalcPlanePropSum()`: Calculates the cost of open plane upgrades.
+- `CalcCreditLimit(__int64 money, __int64 credit)`: Calculate how much money can be loaned from the bank for a hypothetical account balance and existing credit.
+- `CalcPlanePropSum()`: Calculates the cost of open plane upgrades. Only call while in personal office.
 - `CalcSecurityCosts()`: Calculates the daily cost of security.
+- `CheckRocketPart(SLONG rocketPart)`: Check if a specific rocket or space station part has already been bought.
 - `Credit`: Current loan amount.
 - `Dividende`: Check current dividend.
 - `Frachten`: List of taken freight jobs. May always be read.
 - `Gates.Auslastung` and `Gates.NumRented`: Current gate utilization level and total number of owned gates.
-- `GetMissionRating()`: Used for missions to determine how much of the goal has been completed. Only read if `qPlayer.HasBerater(BERATERTYP_GELD) >= 0`.
+- `GetMissionRating()`: Used for missions to determine how much of the goal has been completed. Note that this may always be called, even if the values that determine the score are gated.
 - `GetRoom()`: Returns the current room the player character is in.
 - `HasBerater()`: Check advisor availability.
 - `HasItem()`: Check item ownership.
 - `Image`: Current airline image. May always be read while in the advertising room, even without an advisor. With `qPlayer.HasBerater(BERATERTYP_GELD) >= 50` it may be read anywhere.
+- `IsOut`: Check if the player is still in the game. May always be read.
+- `Items`: Listing the IDs of all items the player currently has. May be read anywhere.
 - `IsStuck`: Whether player character is currently stuck. Can be read at any time.
 - `KerosinQuali`: Current kerosene quality level. Only read if `qPlayer.HasBerater(BERATERTYP_KEROSIN) >= 30`.
 - `Kooperation`: Cooperation flags with other players.
@@ -861,7 +932,7 @@ All classifications are read-only except where explicitly shown as read/write.
 - `MechMode`: Which mechanic is currently employed. Only read while visiting the mechanic.
 - `Money`: Current cash balance.
 - `Name`: Name of the player
-- `OfficeState`: Office usability status.
+- `OfficeState`: Office usability status. May always be read.
 - `OwnsAktien`: Shares owned in each airline, array access by airline ID. May always be read.
 - `Planes`: Plane collection (accessing, iterating, reading plane data). Access rights depend on the exact field of `CPlane` and are given below.
 - `PlayerNum`: Player number, used as index in many arrays.
@@ -869,6 +940,7 @@ All classifications are read-only except where explicitly shown as read/write.
 - `RentCities`: Rented branch offices. Can be read at any time.
 - `RentRouten`: Rented routes. Special access rights are explained in a dedicated section further below.
 - `RobotActions`: Read and write access permitted. Used to store the planned actions. 
+- `RobotUse(SLONG FeatureId)`: Check specific configurations of the bot which are mainly relevant for missions.
 - `StrikeEndType`: If larger than zero, this gives the method by which the strike was ended. May always be read.
 - `StrikeHours`: Larger than zero if employees are currently striking. Gives number of hours remaining. May always be read.
 - `Tank`: Total volume of kerosene tank.
@@ -877,7 +949,7 @@ All classifications are read-only except where explicitly shown as read/write.
 - `TankPreis`: Average price paid for the kerosene currently in the tank. May always be read.
 - `TelephoneDown`: Whether the player can currently call branch offices. Can be checked any time.
 - `TrinkerTrust`: Whether or not the trust of the drunk guy was earned (at Rick's bar, can help to end a strike).
-- `WorkCountdown`: Shall be set to `2` in `RobotExecuteAction()` if no action is performed. Otherwise, no access is permitted.
+- `WorkCountdown`: Shall be set to `2` in `RobotExecuteAction()` if no action is performed. Otherwise, no access is permitted. In "hurricane" mode, read/write permission is given.
 - `xBegleiter`: Number of superfluous stewardesses. A negative number indicates a shortage. Only read when `qPlayer.HasBerater(BERATERTYP_PERSONAL) > 0` or while in personal office (or using laptop) or while in the HR room.
 - `xPiloten`: Number of superfluous pilots. A negative number indicates a shortage. Only read when `qPlayer.HasBerater(BERATERTYP_PERSONAL) > 0` or while in personal office (or using laptop) or while in the HR room.
 
@@ -892,13 +964,14 @@ All classifications are read-only.
 - `Abk`: Abbreviation of airline name.
 - `AnzAktien`: Total number of shares. May always be read while in bank, even without an advisor. With `qPlayer.HasBerater(BERATERTYP_INFO) >= 50` it may be read anywhere.
 - `BilanzWoche`: Weekly balance. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) >= 50`.
-- `Credit`: Current loan amount. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) >= 0`.
-- `GetMissionRating()`: Used for missions to determine how much of the goal has been completed. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) >= 0`.
+- `CheckRocketPart(SLONG rocketPart)`: Check if a specific rocket or space station part has already been bought.
+- `Credit`: Current loan amount. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) > 0`.
+- `GetMissionRating()`: Used for missions to determine how much of the goal has been completed. Note that this may always be called, even if the values that determine the score are gated.
 - `Image`: Current airline image. Only read when `qPlayer.HasBerater(BERATERTYP_INFO) >= 50`.
 - `IsOut`: Check if the player is still in the game. May always be read.
 - `Kurse`: The last ten share prices of this airline. May always be read.
 - `MaxAktien`: Maximum number of shares including those that can still be emitted. May always be read.
-- `Money`: Current cash balance. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) >= 0`.
+- `Money`: Current cash balance. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) > 0`.
 - `Name`: Name of the player
 - `OfficeState`: Office usability status. May always be read.
 - `Owner`: Human=0, computer=1, network player=2, unclaimed network slot=3.
@@ -908,6 +981,7 @@ All classifications are read-only.
 - `RentRouten`: Rented routes. Special access rights are explained in a dedicated section further below.
 - `Statistiken[STAT_NIEDERLASSUNGEN]`: Number of international offices. Only read if `qPlayer.HasBerater(BERATERTYP_INFO) >= 50`.
 - `Statistiken[STAT_ROUTEN]`: Number of rented routes. May be read while at the saboteur or anywhere if `qPlayer.HasBerater(BERATERTYP_INFO) >= 40`.
+- `Gates.Gates[]`: The gates the competitor rents. Only the fields `Miete` (`-1` = slot unused) and `Nummer` (the gate number, as in `CFlugplanEintrag::Gate` and the `RUNE_2WAIT` rune of that gate) may be read, anywhere: the owner of a gate is visible in the airport.
 
 ### CPlane object
 
@@ -962,6 +1036,31 @@ A plane is only able to operate if the following conditions are met:
 The following member function may be called:
 - `CPlane::CalculatePrice`: Current value of the plane. Call allowed while in museum.
 - `CPlane::CanBeSold`: Checks if plane has flights scheduled. Call allowed while in museum.
+
+### CXPlane object
+
+Describes a custom plane design. The following fields may be accessed:
+
+- `Name`: Name of the design. May be read and written.
+- `Cost`: Cost of the design. Read-only.
+- `Parts`: List of individual parts. May be read and written.
+- `CalcCost()`: May be called to get the cost of this design.
+- `CalcPassagiere()`: May be called to get the max. passenger count of this design.
+- `CalcReichweite()`: May be called to get the max. range of this design.
+- `CalcVerbrauch()`: May be called to get the fuel consumption of this design.
+- `CalcWeight()`: May be called to get the weight of this design.
+- `CalcPower()`: May be called to get the engine power of this design.
+- `CalcNoise()`: May be called to get the noise of this design.
+- `CalcWartung()`: May be called to get the maintenance cost factor of this design.
+- `CalcTank(bool bFaked = false)`: Use the default argument. May be called to get the tank volume of this design.
+- `CalcSpeed()`: May be called to get the max. speed of this design.
+- `CalcPiloten()`: May be called to get the required number of pilots of this design.
+- `CalcBegleiter()`: May be called to get the required number of stewardesses of this design.
+- `Load(const CString &Filename)`: Loads design from the specified file.
+- `Save(const CString &Filename)`: Stores design in the specified file.
+- `IsBuildable()`: Check if current design is valid and whether planes with this design can be bought.
+
+A plane is designed by filling the `Parts` array and check if it is buildable using `IsBuildable()`. The design needs to be saved in order to use it to buy planes with this design. Save plane designs to `AppPath + MyPlanePath`, create the folder if necessary.
 
 ### RentRouten objects
 
@@ -1034,8 +1133,10 @@ You may also read the following global tables and helpers when the rules permit 
 - `TafelData` may only be read while in the boss office
 - `Cities[...]`, `Cities.find(...)`, `Cities.CalcDistance(...)`, `Cities.CalcFlugdauer(...)` always to query informations about cities and flight distances/duration.
 - `SeatCosts`, `FoodCosts`, `TrayCosts`, `DecoCosts`, `TriebwerkCosts`, `ReifenCosts`, `ElektronikCosts`, `SicherheitCosts` any time to check costs of plane upgrades.
-- `gPlanePartRelations` may only be read while at the airplane designer.
+- `gPlanePartRelations` may always be read.
 - `gWerbePrice` may always be read.
+- `SabotagePrice`, `SabotagePrice2` and `SabotagePrice3` may always be read.
+- `TankSize` and `TankPrice` may always be read.
 
 Independently, the following functions of any global array of type `BUFFER_V` or `ALBUM_V` may always be used:
 
@@ -1050,6 +1151,8 @@ Global functions
 ----------------
 
 `Hdu.HercPrintfMsg(...)`: Read-only. Logging interface for ClaudeBot.
+
+`CalculateFlightCost(qRoute.VonCity, qRoute.NachCity, 800, 800, -1)`: Helper function to calculate the "base cost" of a route which is important to determine pricing. Function may be called only with these exact arguments where `qRoute` is a `CRoute` object.
 
 GameMechanic class
 ------------------
@@ -1088,12 +1191,190 @@ Functions and variables for missions
 
 The following shall only be used when implementing ClaudeBot for missions instead of the free game.
 
-- `BOOL PLAYER::CheckRocketPart(SLONG rocketPart)`: Check if a specific rocket or space station part has already been bought.
-- `void PLAYER::AddRocketPart(SLONG rocketPart)`: Buy a rocket part.
-- `void PLAYER::AddSpaceStationPart(SLONG rocketPart, SLONG textId)`: Buy a space station part. Always use `textId==3400`.
-- `bool RobotUse(SLONG FeatureId)`: Check specific configurations of the bot which are mainly relevant for missions.
 - `Sim.MissionCities`: Array of cities relevant for a specific mission.
 - `RocketPrices` and `StationPrices`: Array listing prices for various rocket and space station parts.
+
+Additional access rights for "Hurricane" mode
+---------------------------------------------
+
+In this mode, the navigation of the bot-controlled character in the airport may be overriden. Only in this mode, the bot may act outside of `RobotInit()`, `RobotPlan()` or `RobotExecuteAction()`. Additional read and write permissions only for this mode are also given in the following list.
+
+For the following list, read permission is always granted, write permission only when noted.
+
+- `qPlayer.BroadcastRooms()`: May be called to sync network state.
+- `qPlayer.DirectToRoom`: Room ID if character is going to a room. May be set to 0.
+- `qPlayer.iWalkActive`: Whether currently walking
+- `qPlayer.Locations`: Location array, "smallest" room first (e.g. whiteboard in boss office, boss office, airport). Permitted to set `ROOM_LEAVING` flag when leaving a room.
+- `qPlayer.NewDir`: Was walking direction changed?
+- `qPlayer.RunningToToilet`: Whether currently forced to run to toilet
+- `qPlayer.SpeedCount`: Used for "fast-forwarding" mode. May be written as well.
+- `qPlayer.StandStillSince`: Used for standstill detection. May be set to 0.
+- `qPlayer.WaitForRoom`: Whether character is waiting for a room. May be set to 0.
+- `qPlayer.WalkSpeed`: Current walk speed
+- `qPlayer.WalkToPlate`: Walk to specified plate, may always be called
+- `qPlayer.WalkStopEx`: Stop walking, may always be called
+- `qPlayer.WorkCountdown`: How much time the bot will spend in a location. May be written as well.
+- `Airport.Runes`: Array of "floor plates"
+- `Airport.iPlate`: Stores flags of "floor plates"
+- `Airport.PlateDimension`: Dimensions of airports
+- `AIRPORT::DoesRuneExist()`: Check if a rune exists, may always be called
+- `AIRPORT::GetRandomTypedRune()`: Return random rune of specified type, may always be called
+- `AIRPORT::GetRuneParNear()`: Return parameter of nearby rune, may always be called
+- `Sim.Persons`: Read access to the array entry corresponding to the bot-controlled character (`Sim.Persons[Sim.Persons.GetPlayerIndex(qPlayer.PlayerNum)]`) is permitted
+- `Sim.TimeSlice`: Timer used for animations
+- `PERSON::Dir`: Direction of character
+- `PERSON::Phase`: Animation phase
+- `PERSON::Position`: Position of character
+- `PERSON::Running`: Whether character is running. May be written as well.
+- `PERSON::StatePar`: State parameter (0: no room, >0: room number & entry/exit flag, -1: leaving room)
+
+These access rights also are granted for MertenBot.
+
+Game missions
+=============
+
+The game has several mission where a specific target has to be met. There are also some rule changes in some missions. Use the function `PLAYER::GetMissionRating()`: to determine how much of the goal has been completed. Analyze `PLAYER::HasWon()` to see the actual win condition for each mission. `GetMissionRating()` returns -1 when the player is out (`IsOut != 0`).
+
+Start money differs in missions: Computer player gets 200,000 in the tutorial, 500,000 in FIRST, 1,000,000 in EASY and every ADDON mission, 3,000,000 in NORMAL and all ATFS, 4,000,000 in HARD, 6,000,000 in FINAL — against 2,000,000 in the free game.
+
+Interest rates differ per mission (`SollZins`/`HabenZins`): 5/5 for the first three missions, 6/4 for NORMAL, 10/3 for HARD, 15/1 for FINAL and all ADDON missions, 15/0 for all ATFS missions.
+
+Some missions end when a player reaches the goal, others run for a set number of days and the player with the highest mission rating wins. The win condition is only evaluated at 09:00 at the supervisor.
+
+`Sim.Difficulty` is -1 for a freegame or for missions equal to a macro starting with "DIFF_".
+
+DIFF_TUTORIAL:
+- Target: Complete 10 regular jobs first
+- No ITEM_POSTKARTE / ITEM_BH / ITEM_DISKETTE / ITEM_DART
+- No access to route box / arab air
+- No access to ads
+- No access to designer room or designed planes
+- Max. two gates / check-in-halls
+- No freight depot available
+
+DIFF_FIRST:
+- Target: Transport 2500 passengers first
+- No ITEM_DISKETTE / ITEM_DART
+- No access to ads
+- No access to designer room or designed planes
+- Max. two gates / check-in-halls
+- No freight depot available
+
+DIFF_EASY:
+- Target: Generate a profit of 5 million first
+- Different starting planes
+- No ITEM_DISKETTE / ITEM_DART
+- No access to ads
+- No access to designer room or designed planes
+- Max. two gates / check-in-halls
+- No freight depot available
+
+DIFF_NORMAL:
+- Target: Connect 5 of the 6 cities listed in `Sim.MissionCities` with routes that have more than 20% utilization in each direction at the same time
+- Different starting planes
+- Max. two gates / check-in-halls
+- Higher chance to rent mission cities
+- No freight depot available
+
+DIFF_HARD:
+- Target: Reach an image of 750
+- No freight depot available
+
+DIFF_FINAL:
+- Target: Be first to have bought 10 rocket parts from NASA
+- NASA room is available
+- Telescope room changed
+- No freight depot available
+
+DIFF_ADDON01:
+- Target: Reduce debt to 0 (`PLAYER::Credit == 0` and `PLAYER::Money >= 0`)
+- Note: The lower `GetMissionRating()` here the better. Win condition is `==0`
+- Starts with debt of 10000000
+- All planes Zustand = 60
+- No freight depot available
+
+DIFF_ADDON02:
+- Target: Be first to transport 1000 tons of freight
+- First time freight access
+
+DIFF_ADDON03:
+- Target: After 21 days, have transported the most tons of special freight missions (`CFracht::Praemie == 0`)
+- Generating special freight jobs
+
+DIFF_ADDON04:
+- Target: After 30 days, be the one who flew the most miles
+
+DIFF_ADDON05:
+- Target: Be first to reach 151 "service points" (calculated in `GetMissionRating` based on plane upgrades and crew skill level)
+
+DIFF_ADDON06:
+- Target: Highest company value after 21 days
+- No travel holding
+- Starting image is 300
+
+DIFF_ADDON07
+- Target: Be first to have atleast two planes with maintenance level of 90% or more
+- Note: `GetMissionRating()` returns fleet average maintenance level here
+- All planes Zustand = 35
+
+DIFF_ADDON08
+- Target: Be the first to reach a stock price of 220
+
+DIFF_ADDON09
+- Target: Fly 200 jobs that are automatically added each morning to the planner backlog
+- Game generates 5 jobs for each player every morning with `CAuftrag::bUhrigFlight == 1`
+- On day 0: Start with `2 + (PlayerNum & 1)` jobs
+
+DIFF_ADDON10
+- Target: Be first to have bought all 10 space station parts from NASA
+- NASA room is available
+- Telescope room changed
+
+DIFF_ATFS01:
+- Target: Be first to have 15 million on the bank account
+
+DIFF_ATFS02:
+- Target: Be first to have 5 planes that have a maintenance level of atleast 90% and have the following upgrades at level 2: tires, engines, safety and electronics.
+
+DIFF_ATFS03:
+- Target: Be first to have at least 4 planes in use and average 500 passengers per plane per day over the previous five days
+
+DIFF_ATFS04:
+- Target: Survive 15 days without becoming a victim of sabotage and have atleast 5 planes
+
+DIFF_ATFS05:
+- Target: Be first to have three planes that can transport 600 passengers (requires airplane designer: `Planes[d].TypeId == -1`)
+- A plane design that meets this expectation can be obtained from `Helper::getHardcodedDesignerPlaneLarge()`
+
+DIFF_ATFS06:
+- Target: Survive 15 days without becoming a victim of sabotage and have atleast 5 planes
+- Additional sabotage missions launched by a third actor
+
+DIFF_ATFS07:
+- Target: Be the first to reach an average stock price of 200 over the previous 29 days (or game start) while not holding more than 20% of own airline for the previous 30 days
+- Note: `GetMissionRating()` returns the averaged stock price for `bAnderer==false` and number of days where too much stock was held for `bAnderer==true`
+
+DIFF_ATFS08:
+- Target: Be first to have five planes that with `Planes[d].ptVerbrauch * 100 / Planes[d].ptGeschwindigkeit <= 500` (requires airplane designer: `Planes[d].TypeId == -1`)
+- A plane design that meets this expectation can be obtained from `Helper::getHardcodedDesignerPlaneEco()`
+
+DIFF_ATFS09:
+- Target: Highest company value after 45 days
+- Computer gets kerosene tanks
+- Kerosene price manipulations (entire mission)
+
+DIFF_ATFS10:
+- Target: Highest company value after 60 days
+- Computer gets kerosene tanks
+- Kerosene price manipulations (days 3–10 and 35–55)
+- No flight premiums between days 20 - 30.
+- No freight premiums between days 25 - 35.
+- Stock price drops 80% on day 18.
+- Image drops by 20% on day 55.
+- Random plane lost on day 40.
+- All planes damaged by 40% on day 35.
+- All workers made unhappy by 45% on day 20 and day 45.
+- No used planes between days 40 and 50.
 
 Notes regarding code base
 =========================

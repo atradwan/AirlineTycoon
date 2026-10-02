@@ -122,6 +122,7 @@ DWORD AtGetTickCount(void);
 CString getCurrentDayString();
 SLONG strchrcount(CString Text, char chr);
 SLONG strchrcount(char *str, const char delimiters[]);
+void printPostGameInfo();
 //--------------------------------------------------------------------------------------------
 // Zählt die Häufigkeit des Auftretens von Enumerationswerten in einem Zeichenfolgenwert,
 // basierend auf einer gegebenen Zuordnung von Zeichenfolgen zu Enumerationswerten.
@@ -194,6 +195,10 @@ void PlayUniversalFx(const CString &Filename, SLONG Volume);
 void PlayFanfare(void);
 SLONG Prozent2Dezibel(SLONG Prozent);
 BOOL IsMidiAvailable(void);
+void ScanMusicTracks(void);
+SLONG GetNumMusicTracks(void);
+SLONG GetSelectedMusicTrack(void);
+CString GetMusicTrackName(SLONG Index);
 void NextMidi(void);
 void PlayMidi(const CString &Filename);
 void PlayMidiFrom(const CString &Filename, SLONG StartPosition);

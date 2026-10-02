@@ -721,6 +721,15 @@ void PumpNetwork() {
                 Message >> Sim.Players.Players[PlayerNum].Koffein;
             } break;
 
+            case ATNET_ELECTROSHOCK: {
+                SLONG PlayerNum = 0;
+
+                Message >> PlayerNum;
+                PlayerNum = NetCheckPlayerNum(PlayerNum, MessageType);
+
+                Sim.Players.Players[PlayerNum].ElectroShock();
+            } break;
+
             case ATNET_GIMMICK: {
                 SLONG PlayerNum = 0;
                 SLONG Mode = 0;
@@ -943,14 +952,32 @@ void PumpNetwork() {
                     PLAYER &qPlayer = Sim.Players.Players[PlayerNum];
                     SLONG d = 0;
 
-                    Message >> qPlayer.Image >> qPlayer.ImageGotWorse;
+                    /* The airline's and the routes' images change with every flight. Taken only if
+                       both have booked the same flights of the player today, as the route usage
+                       (ATNET_SYNC_ROUTES); the owner sends them again within the hour. */
+                    SLONG Stamp = 0;
+                    SLONG Image = 0;
+                    BOOL ImageGotWorse = 0;
+                    Message >> Stamp >> Image >> ImageGotWorse;
+                    const bool bApply = (Stamp == qPlayer.NetTankStamp());
+                    if (bApply) {
+                        qPlayer.Image = Image;
+                        qPlayer.ImageGotWorse = ImageGotWorse;
+                    } else {
+                        NetTraceEvent("SKIP what=image player=%ld theirs=%ld mine=%ld", static_cast<long>(PlayerNum), static_cast<long>(Stamp),
+                                      static_cast<long>(qPlayer.NetTankStamp()));
+                    }
 
                     for (d = 0; d < 4; d++) {
                         Message >> qPlayer.Sympathie[d];
                     }
 
                     for (d = Routen.AnzEntries() - 1; d >= 0; d--) {
-                        Message >> qPlayer.RentRouten.RentRouten[d].Image;
+                        UBYTE RouteImage = 0;
+                        Message >> RouteImage;
+                        if (bApply) {
+                            qPlayer.RentRouten.RentRouten[d].Image = RouteImage;
+                        }
                     }
                     for (d = Cities.AnzEntries() - 1; d >= 0; d--) {
                         Message >> qPlayer.RentCities.RentCities[d].Image;
@@ -998,6 +1025,7 @@ void PumpNetwork() {
                 struct PendingRoutes {
                     SLONG PlayerNum{};
                     std::vector<CRentRoute> Routes;
+                    bool bApplyUsage{true};
                 };
                 std::deque<PendingRoutes> Pending;
 
@@ -1025,10 +1053,26 @@ void PumpNetwork() {
                                                static_cast<long>(qPlayer.RentRouten.RentRouten.AnzEntries()), static_cast<long>(NumRoutes));
                         }
 
+                        /* What the flights change - the day a route was last flown, its image and its
+                           usage - is taken from the owner only if both have booked the same flights
+                           of the player today: a state from before a flight we have booked already
+                           would undo it, one from after a flight we have still to book would count
+                           it twice. The owner sends it again every half hour. */
+                        Stage = "stamp";
+                        StageStart = Message.MemPointer;
+                        SLONG Stamp = 0;
+                        Message >> Stamp;
+                        const bool bApplyUsage = (Stamp == qPlayer.NetTankStamp());
+                        if (!bApplyUsage) {
+                            NetTraceEvent("SKIP what=routeusage player=%ld theirs=%ld mine=%ld", static_cast<long>(PlayerNum), static_cast<long>(Stamp),
+                                          static_cast<long>(qPlayer.NetTankStamp()));
+                        }
+
                         /* Start from the current values: the message does not carry every field. */
                         Pending.emplace_back();
                         PendingRoutes &qPending = Pending.back();
                         qPending.PlayerNum = PlayerNum;
+                        qPending.bApplyUsage = bApplyUsage;
                         qPending.Routes.reserve(NumRoutes);
                         for (SLONG d = 0; d < NumRoutes; d++) {
                             qPending.Routes.push_back(qPlayer.RentRouten.RentRouten[d]);
@@ -1098,7 +1142,19 @@ void PumpNetwork() {
                 for (auto &qPending : Pending) {
                     PLAYER &qPlayer = Sim.Players.Players[qPending.PlayerNum];
                     for (SLONG d = 0; d < static_cast<SLONG>(qPending.Routes.size()); d++) {
-                        qPlayer.RentRouten.RentRouten[d] = qPending.Routes[d];
+                        CRentRoute &qRoute = qPlayer.RentRouten.RentRouten[d];
+                        if (qPending.bApplyUsage) {
+                            qRoute = qPending.Routes[d];
+                        } else {
+                            /* Only the fields the flights do not change. */
+                            const CRentRoute &qNew = qPending.Routes[d];
+                            qRoute.Rang = qNew.Rang;
+                            qRoute.Miete = qNew.Miete;
+                            qRoute.Ticketpreis = qNew.Ticketpreis;
+                            qRoute.TicketpreisFC = qNew.TicketpreisFC;
+                            qRoute.TageMitVerlust = qNew.TageMitVerlust;
+                            qRoute.TageMitGering = qNew.TageMitGering;
+                        }
                     }
                 }
             } break;

@@ -221,7 +221,11 @@ void CTakeOffApp::CLI(int argc, char *argv[]) {
             gShowAllPools = TRUE;
         }
         if (stricmp(Argument, "/load") == 0) {
-            gLoadGameNumber = atoi(strtok(nullptr, " "));
+            /* The slot is the next argument. It used to be read with strtok(nullptr, ...) without a
+               string to continue from, which crashed before anything was loaded. */
+            if (i + 1 < argc) {
+                gLoadGameNumber = atoi(argv[++i]);
+            }
         }
         if (stricmp(Argument, "/savegamelocal") == 0) {
             SavegamePath = "d:\\Savegame\\%s";
@@ -284,6 +288,8 @@ void CTakeOffApp::CLI(int argc, char *argv[]) {
 
             if (gQuickTestRun == 1) {
                 gAutoQuitOnDay = 59; /* auto-quit in freegame */
+            } else {
+                gAutoQuitOnDay = 500; /* hard cut-off for batch mode */
             }
         }
         if (stricmp(Argument, "/quicker") == 0) {
@@ -1117,6 +1123,12 @@ void CTakeOffApp::GameLoop(void * /*unused*/) {
 
                 if (gLoadGameNumber > -1) {
                     Sim.LoadGame(gLoadGameNumber - 1);
+
+                    /* An unattended run ("/quick ... /load N") fast-forwards a loaded game just like
+                       a new one (below); otherwise it plays at the speed the savegame was left at. */
+                    if (CheatAutoSkip == 1 && Sim.bNetwork == 0) {
+                        Sim.Players.Players[Sim.localPlayer].GameSpeed = 5;
+                    }
                 }
 
                 if (gLoadGameNumber == -1) {
@@ -1876,8 +1888,23 @@ void CTakeOffApp::GameLoop(void * /*unused*/) {
                                                 }
 
                                                 qPlayer.Locations[d] = 0;
-                                                if (d > 0) {
+                                                if (d > 0 && qPlayer.Locations[d - 1] != 0) {
                                                     qPlayer.Locations[d - 1] = UWORD((qPlayer.Locations[d - 1] & (~ROOM_LEAVING)) | ROOM_ENTERING);
+                                                } else {
+                                                    /* Nothing underneath the room that was left. That happens when the
+                                                       airport entry is missing, e.g. when the room was entered into an
+                                                       empty array, and without a location CalcRoom() keeps reporting the
+                                                       room that was left: the robot stood in it for the rest of the day.
+                                                       A robot only ever leaves a room for the airport, so go back there. */
+                                                    BOOL bAnyLocation = FALSE;
+                                                    for (SLONG l = 0; l < 10; l++) {
+                                                        if (qPlayer.Locations[l] != 0) {
+                                                            bAnyLocation = TRUE;
+                                                        }
+                                                    }
+                                                    if (bAnyLocation == 0) {
+                                                        qPlayer.Locations[0] = UWORD(ROOM_AIRPORT | ROOM_ENTERING);
+                                                    }
                                                 }
                                                 qPlayer.CalcRoom();
 

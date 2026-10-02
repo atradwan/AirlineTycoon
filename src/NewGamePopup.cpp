@@ -784,6 +784,35 @@ SLONG NewGamePopup::MaxBotLevel() const {
 }
 
 //--------------------------------------------------------------------------------------------
+// Bot level shown at position 'index' of the menu. The menu order (BotDifficultyLevels) differs
+// from the level values, which the bots keep.
+//--------------------------------------------------------------------------------------------
+SLONG NewGamePopup::GetBotLevelByIndex(SLONG index) const {
+    const SLONG Count = SLONG(BotDifficultyLevels.size());
+    return BotDifficultyLevels[((index % Count) + Count) % Count];
+}
+
+//--------------------------------------------------------------------------------------------
+// Next (dir=1) or previous (dir=-1) bot level in menu order, skipping levels above MaxLevel
+//--------------------------------------------------------------------------------------------
+static SLONG StepBotLevel(SLONG level, SLONG dir, SLONG MaxLevel) {
+    const SLONG Count = SLONG(BotDifficultyLevels.size());
+    SLONG index = 0;
+    for (SLONG i = 0; i < Count; i++) {
+        if (BotDifficultyLevels[i] == level) {
+            index = i;
+        }
+    }
+    for (SLONG i = 0; i < Count; i++) {
+        index = (index + dir + Count) % Count;
+        if (BotDifficultyLevels[index] <= MaxLevel) {
+            return BotDifficultyLevels[index];
+        }
+    }
+    return BotDifficultyClassic;
+}
+
+//--------------------------------------------------------------------------------------------
 // Überprüft ob die Namen von Spielern & Fluggesellschaften eindeutig sind:
 //--------------------------------------------------------------------------------------------
 void NewGamePopup::CheckNames() {
@@ -1727,10 +1756,7 @@ void NewGamePopup::OnLButtonDown(UINT nFlags, CPoint point) {
                     if (point.x >= 128 && point.x <= 128 + 16 * 24 && point.y >= c * 22 * 3 + 129 && point.y <= c * 22 * 3 + 129 + 44) {
                         auto &qPlayer = Sim.Players.Players[c];
                         if (qPlayer.Owner == 1) {
-                            qPlayer.BotLevel += 1;
-                            if (qPlayer.BotLevel > MaxBotLevel()) {
-                                qPlayer.BotLevel = 0;
-                            }
+                            qPlayer.BotLevel = StepBotLevel(qPlayer.BotLevel, 1, MaxBotLevel());
                             SIM::SendSimpleMessage(ATNET_BOTSELECT, 0, c, qPlayer.BotLevel);
                         }
 
@@ -1898,7 +1924,7 @@ void NewGamePopup::OnLButtonDown(UINT nFlags, CPoint point) {
                     TEAKFILE Message;
 
                     Message.Announce(30);
-                    Message << ATNET_WANNAJOIN << gNetwork.GetLocalPlayerID() << Sim.Options.OptionLastPlayer << CString(VersionString);
+                    Message << ATNET_WANNAJOIN << gNetwork.GetLocalPlayerID() << Sim.Options.OptionLastPlayer << CString(NetVersionString);
 
                     SIM::SendMemFile(Message);
 
@@ -2079,10 +2105,7 @@ void NewGamePopup::OnRButtonDown(UINT /*nFlags*/, CPoint point) {
             if (point.x >= 128 && point.x <= 128 + 16 * 24 && point.y >= c * 22 * 3 + 129 && point.y <= c * 22 * 3 + 129 + 44) {
                 auto &qPlayer = Sim.Players.Players[c];
                 if (qPlayer.Owner == 1) {
-                    qPlayer.BotLevel -= 1;
-                    if (qPlayer.BotLevel < 0) {
-                        qPlayer.BotLevel = MaxBotLevel();
-                    }
+                    qPlayer.BotLevel = StepBotLevel(qPlayer.BotLevel, -1, MaxBotLevel());
                     SIM::SendSimpleMessage(ATNET_BOTSELECT, 0, c, qPlayer.BotLevel);
                 }
 
@@ -2170,7 +2193,7 @@ void NewGamePopup::CheckNetEvents() {
                                    version of a client rejoining a saved game, so a client has to check its host itself.
                                    Older clients read the first two fields only and ignore the rest. */
                                 Message << ATNET_SAVGEGAMECHECK << gNetworkSavegameLoading << Sim.GetSavegameUniqueGameId(gNetworkSavegameLoading, true)
-                                        << CString(VersionString);
+                                        << CString(NetVersionString);
 
                                 gNetwork.Send(Message.MemBuffer, Message.MemBufferUsed, SenderID, false);
                             } else {
@@ -2188,7 +2211,7 @@ void NewGamePopup::CheckNetEvents() {
                                     Message >> Version;
                                 }
 
-                                if (Version.Compare(VersionString) != 0) {
+                                if (Version.Compare(NetVersionString) != 0) {
                                     TEAKFILE Message;
 
                                     Message.Announce(30);
@@ -2240,7 +2263,7 @@ void NewGamePopup::CheckNetEvents() {
                             Message >> HostVersion;
                         }
 
-                        if (HostVersion.Compare(VersionString) != 0) {
+                        if (HostVersion.Compare(NetVersionString) != 0) {
                             PageNum = PAGE_TYPE::MULTIPLAYER_SELECT_SESSION;
                             if (pNetworkConnections == nullptr) {
                                 pNetworkConnections = gNetwork.GetConnectionList();
@@ -2258,7 +2281,7 @@ void NewGamePopup::CheckNetEvents() {
                             TEAKFILE JoinMessage;
                             JoinMessage.Announce(128);
                             JoinMessage << ATNET_WANNAJOIN2 << gNetwork.GetLocalPlayerID() << Sim.GetSavegameLocalPlayer(SavegameIndex)
-                                        << CString(VersionString);
+                                        << CString(NetVersionString);
                             SIM::SendMemFile(JoinMessage);
 
                             Sim.bNetwork = bOld;
@@ -2673,7 +2696,7 @@ void NewGamePopup::AutoLobbyPump() {
         {
             TEAKFILE Message;
             Message.Announce(30);
-            Message << ATNET_WANNAJOIN << gNetwork.GetLocalPlayerID() << SLONG(gAutoLobbySlot) << CString(VersionString);
+            Message << ATNET_WANNAJOIN << gNetwork.GetLocalPlayerID() << SLONG(gAutoLobbySlot) << CString(NetVersionString);
             SIM::SendMemFile(Message);
         }
 
@@ -2862,7 +2885,7 @@ void NewGamePopup::PumpLobbyNetwork() {
                     TEAKFILE Message;
 
                     Message.Announce(30);
-                    Message << ATNET_WANNAJOIN << gNetwork.GetLocalPlayerID() << Sim.Options.OptionLastPlayer << CString(VersionString);
+                    Message << ATNET_WANNAJOIN << gNetwork.GetLocalPlayerID() << Sim.Options.OptionLastPlayer << CString(NetVersionString);
 
                     SIM::SendMemFile(Message);
 

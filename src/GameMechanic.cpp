@@ -770,6 +770,10 @@ std::vector<SLONG> GameMechanic::buyXPlane(PLAYER &qPlayer, const CString &filen
 
     CXPlane plane;
     plane.Load(filename);
+    if (!plane.IsBuildable()) {
+        AT_Error("GameMechanic::buyXPlane(%s): Plane is not buildable.", qPlayer.AirlineX.c_str());
+        return planeIds;
+    }
 
     __int64 price = plane.CalcCost();
     if (qPlayer.Money - price * amount < DEBT_LIMIT) {
@@ -817,8 +821,14 @@ std::pair<bool, __int64> GameMechanic::buyStock(PLAYER &qPlayer, SLONG airlineNu
         freeAmount -= Sim.Players.Players[c].OwnsAktien[qPlayerBuyFrom.PlayerNum];
     }
     if (amount > freeAmount) {
-        AT_Error("GameMechanic::buyStock(%s): Limiting amount bought to %ld (was %ld).", qPlayer.AirlineX.c_str(), freeAmount, amount);
+        /* Only for a real purchase: the bank's preview asks on every repaint (commit == false). */
+        if (commit) {
+            AT_Error("GameMechanic::buyStock(%s): Limiting amount bought to %ld (was %ld).", qPlayer.AirlineX.c_str(), freeAmount, amount);
+        }
         amount = freeAmount;
+    }
+    if (amount <= 0) {
+        return {false, qPlayer.Money}; /* nothing left to buy - and no fee for buying nothing */
     }
 
     /* Gesamtpreis berechnen */
@@ -840,7 +850,9 @@ std::pair<bool, __int64> GameMechanic::buyStock(PLAYER &qPlayer, SLONG airlineNu
 
     __int64 totalPrice = stockValue + stockValue / 10 + 100;
     if (qPlayer.Money - totalPrice < DEBT_LIMIT) {
-        AT_Error("GameMechanic::buyStock(%s): Player cannot afford to buy this amount (%ld).", qPlayer.AirlineX.c_str(), amount);
+        if (commit) {
+            AT_Error("GameMechanic::buyStock(%s): Player cannot afford to buy this amount (%ld).", qPlayer.AirlineX.c_str(), amount);
+        }
         return {false, qPlayer.Money};
     }
 
@@ -886,12 +898,14 @@ std::pair<bool, __int64> GameMechanic::sellStock(PLAYER &qPlayer, SLONG airlineN
         AT_Error("GameMechanic::sellStock(%s): Negative amount (%ld).", qPlayer.AirlineX.c_str(), amount);
         return {false, qPlayer.Money};
     }
-    if (amount == 0) {
-        return {false, qPlayer.Money};
-    }
     if (amount > qPlayer.OwnsAktien[airlineNum]) {
-        AT_Error("GameMechanic::sellStock(%s): Limiting amount sold to %ld (was %ld).", qPlayer.AirlineX.c_str(), qPlayer.OwnsAktien[airlineNum], amount);
+        if (commit) {
+            AT_Error("GameMechanic::sellStock(%s): Limiting amount sold to %ld (was %ld).", qPlayer.AirlineX.c_str(), qPlayer.OwnsAktien[airlineNum], amount);
+        }
         amount = qPlayer.OwnsAktien[airlineNum];
+    }
+    if (amount <= 0) {
+        return {false, qPlayer.Money};
     }
 
     auto &qPlayerSellFrom = Sim.Players.Players[airlineNum];
@@ -978,7 +992,7 @@ bool GameMechanic::overtakeAirline(PLAYER &qPlayer, SLONG targetAirline, bool li
 }
 
 GameMechanic::EmitStockResult GameMechanic::canEmitStock(PLAYER &qPlayer, SLONG *outHowMany) {
-    SLONG num = 100 * (qPlayer.MaxAktien - qPlayer.AnzAktien) / 100;
+    SLONG num = (qPlayer.MaxAktien - qPlayer.AnzAktien);
     if (outHowMany) {
         *outHowMany = num;
     }
@@ -1541,7 +1555,11 @@ GameMechanic::BuyItemResult GameMechanic::buyDutyFreeItem(PLAYER &qPlayer, UBYTE
 }
 
 GameMechanic::PickUpItemResult GameMechanic::pickUpItem(PLAYER &qPlayer, SLONG item) {
-    if ((qPlayer.HasItem(item) != 0) || (qPlayer.HasSpaceForItem() == 0)) {
+    if (qPlayer.HasItem(item) != 0) {
+        AT_Error("GameMechanic::pickUpItem(%s): Already have item (%ld).", qPlayer.AirlineX.c_str(), item);
+        return PickUpItemResult::ConditionsNotMet;
+    }
+    if ((item != ITEM_REDBULL) && (qPlayer.HasSpaceForItem() == 0)) {
         AT_Error("GameMechanic::pickUpItem(%s): No space for item (%ld).", qPlayer.AirlineX.c_str(), item);
         return PickUpItemResult::NoSpace;
     }
@@ -1685,6 +1703,10 @@ GameMechanic::PickUpItemResult GameMechanic::pickUpItem(PLAYER &qPlayer, SLONG i
         for (SLONG c = 0; c < 6; c++) {
             if (qPlayer.Items[c] == ITEM_GLOVE) {
                 qPlayer.Items[c] = ITEM_REDBULL;
+                qPlayer.ReformIcons();
+                if (Sim.bNetwork != 0) {
+                    PLAYER::NetSynchronizeItems();
+                }
                 return PickUpItemResult::PickedUp;
             }
         }
@@ -1695,7 +1717,9 @@ GameMechanic::PickUpItemResult GameMechanic::pickUpItem(PLAYER &qPlayer, SLONG i
         }
         if (qPlayer.KioskTrust == 1) {
             qPlayer.BuyItem(ITEM_STINKBOMBE);
-            qPlayer.KioskTrust = 0;
+            if (qPlayer.HasItem(ITEM_STINKBOMBE)) {
+                qPlayer.KioskTrust = 0;
+            }
             return PickUpItemResult::PickedUp;
         }
         return PickUpItemResult::NotAllowed;
@@ -1762,8 +1786,9 @@ bool GameMechanic::removeItem(PLAYER &qPlayer, SLONG item) {
         qPlayer.SecurityFlags &= ~(1 << 1);
         PLAYER::NetSynchronizeFlags();
     }
-    PLAYER::NetSynchronizeItems();
-    AT_Log("GameMechanic::removeItem(%s): Removed item (%ld).", qPlayer.AirlineX.c_str(), item);
+    if (Sim.bNetwork != 0) {
+        PLAYER::NetSynchronizeItems();
+    }
     return true;
 }
 
@@ -1805,8 +1830,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_MG:
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_ARAB_AIR) || isRobot) {
             qPlayer.ArabTrust = max(1, qPlayer.ArabTrust);
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_MG);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_ARAB, MEDIUM_AIR, 1);
             }
@@ -1819,9 +1843,8 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_BIER:
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_WERKSTATT) || isRobot) {
             qPlayer.MechTrust = max(1, qPlayer.MechTrust);
-            qPlayer.Items[itemIndex] = 0xff;
             qPlayer.MechAngry = 0;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_BIER);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_MECHANIKER, MEDIUM_AIR, 2);
             }
@@ -1837,8 +1860,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_OEL:
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_GLOBE) || isRobot) {
             qPlayer.GlobeOiled = TRUE;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_OEL);
         } else if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_OEL);
         }
@@ -1847,8 +1869,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_TABLETTEN:
         if (qPlayer.SickTokay != 0) {
             qPlayer.SickTokay = 0;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_TABLETTEN);
         } else if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_TABLETTEN);
         }
@@ -1857,8 +1878,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_POSTKARTE:
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_PERSONAL_A + qPlayer.PlayerNum * 10) || isRobot) {
             qPlayer.SeligTrust = TRUE;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_POSTKARTE);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_PERSONAL1a + qPlayer.PlayerNum * 2, MEDIUM_AIR, 300);
             }
@@ -1871,8 +1891,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_SABOTAGE) || isRobot) {
             if (qPlayer.ArabTrust != 0) {
                 qPlayer.SpiderTrust = TRUE;
-                qPlayer.Items[itemIndex] = 0xff;
-                qPlayer.ReformIcons();
+                qPlayer.DropItem(ITEM_SPINNE);
             }
             if (pRoom) {
                 pRoom->StartDialog(TALKER_SABOTAGE, MEDIUM_AIR, 3000);
@@ -1885,8 +1904,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_DART:
         if (((bNoMenuOpen && qPlayer.GetRoom() == ROOM_WERBUNG) || isRobot) && (Sim.Difficulty >= DIFF_NORMAL || Sim.Difficulty == DIFF_FREEGAME)) {
             qPlayer.WerbungTrust = TRUE;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_DART);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_WERBUNG, MEDIUM_AIR, 8001);
             }
@@ -1902,8 +1920,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
             }
 
             qPlayer.LaptopVirus = 0;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_DISKETTE);
         } else if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_DISKETTE);
         }
@@ -1912,11 +1929,10 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_BH:
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_SHOP1) || isRobot) {
             qPlayer.DutyTrust = TRUE;
-            qPlayer.Items[itemIndex] = 0xff;
+            qPlayer.DropItem(ITEM_BH);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_DUTYFREE, MEDIUM_AIR, 801);
             }
-            qPlayer.ReformIcons();
         } else if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_BH);
         }
@@ -1925,11 +1941,10 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_HUFEISEN:
         if ((bNoMenuOpen && qPlayer.GetRoom() == ROOM_RICKS) || isRobot) {
             qPlayer.TrinkerTrust = TRUE;
-            qPlayer.Items[itemIndex] = 0xff;
+            qPlayer.DropItem(ITEM_HUFEISEN);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_TRINKER, MEDIUM_AIR, 800);
             }
-            qPlayer.ReformIcons();
         } else if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_HUFEISEN);
         }
@@ -1939,9 +1954,8 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
         if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_PRALINEN);
         } else {
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
             PlayUniversalFx("eating.raw", Sim.Options.OptionEffekte);
+            qPlayer.DropItem(ITEM_PRALINEN);
         }
         break;
 
@@ -1951,8 +1965,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
         } else {
             PlayUniversalFx("eating.raw", Sim.Options.OptionEffekte);
             qPlayer.IsDrunk += 400;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_PRALINEN_A);
         }
         break;
 
@@ -2002,8 +2015,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_REDBULL:
         if (qPlayer.GetRoom() == ROOM_KIOSK || isRobot) {
             qPlayer.KioskTrust = 1;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
+            qPlayer.DropItem(ITEM_REDBULL);
             if (pRoom) {
                 pRoom->StartDialog(TALKER_KIOSK, MEDIUM_AIR, 1010);
             }
@@ -2012,9 +2024,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
         } else {
             PlayUniversalFx("gulps.raw", Sim.Options.OptionEffekte);
             qPlayer.Koffein += 20 * 120;
-            qPlayer.Items[itemIndex] = 0xff;
-            qPlayer.ReformIcons();
-            PLAYER::NetSynchronizeFlags();
+            qPlayer.DropItem(ITEM_REDBULL);
             SIM::SendSimpleMessage(ATNET_CAFFEINE, 0, qPlayer.PlayerNum, qPlayer.Koffein);
         }
         break;
@@ -2097,6 +2107,7 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     case ITEM_PARFUEM:
         if ((qPlayer.GetRoom() == ROOM_WERKSTATT || isRobot) && Sim.Slimed != -1) {
             qPlayer.Items[itemIndex] = ITEM_XPARFUEM;
+            qPlayer.ReformIcons();
         } else if (pRoom && dialogPartner != TALKER_NONE) {
             pRoom->StartDialog(dialogPartner, MEDIUM_AIR, 10000 + ITEM_PARFUEM);
         }
@@ -2104,9 +2115,10 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
 
     case ITEM_XPARFUEM:
         if (qPlayer.GetRoom() == ROOM_AIRPORT) {
+            /* No NetSynchronizeFlags() here: PlayerStinking reaches the other peers through the
+               ATNET_SYNC_FLAGS sent at the end of this function, like every other branch. */
             qPlayer.PlayerStinking = 2000;
             qPlayer.DropItem(ITEM_XPARFUEM);
-            PLAYER::NetSynchronizeFlags();
         }
         break;
 
@@ -2128,6 +2140,16 @@ bool GameMechanic::useItem(PLAYER &qPlayer, SLONG item) {
     }
 
     return true;
+}
+
+SLONG GameMechanic::numFreeSlots(PLAYER &qPlayer) {
+    SLONG numFree = 0;
+    for (SLONG d = 0; d < 6; d++) {
+        if (qPlayer.Items[d] == 0xff) {
+            numFree++;
+        }
+    }
+    return numFree;
 }
 
 bool GameMechanic::takeFlightJob(PLAYER &qPlayer, SLONG jobId, SLONG &outObjectId) {
@@ -2208,7 +2230,7 @@ bool GameMechanic::takeFreightJob(PLAYER &qPlayer, SLONG jobId, SLONG &outObject
         return false;
     }
     if (qPlayer.Frachten.GetNumFree() < 3) {
-        qPlayer.Frachten.ReSize(qPlayer.Auftraege.AnzEntries() + 10);
+        qPlayer.Frachten.ReSize(qPlayer.Frachten.AnzEntries() + 10);
     }
 
     outObjectId = (qPlayer.Frachten += qAuftrag);
@@ -2837,6 +2859,39 @@ BUFFER_V<BOOL> GameMechanic::getBuyableRoutes(PLAYER &qPlayer) {
     return IsBuyable;
 }
 
+SLONG GameMechanic::getAnyPlaneOnRoute(PLAYER &qPlayer, SLONG routeA) {
+    routeA = Routen.find(routeA);
+    if (routeA < 0 || routeA >= qPlayer.RentRouten.RentRouten.size()) {
+        AT_Error("GameMechanic::getAnyPlaneOnRoute(%s): Invalid routeA (%ld).", qPlayer.AirlineX.c_str(), routeA);
+        return false;
+    }
+
+    /* find route in reverse direction */
+    SLONG routeB = findRouteInReverse(qPlayer, routeA);
+    if (-1 == routeB) {
+        AT_Error("GameMechanic::getAnyPlaneOnRoute(%s): Unable to find route in reverse direction.", qPlayer.AirlineX.c_str());
+        return -1;
+    }
+
+    /* check if planes still fly this route */
+    for (SLONG c = qPlayer.Planes.AnzEntries() - 1; c >= 0; c--) {
+        if (qPlayer.Planes.IsInAlbum(c) == 0) {
+            continue;
+        }
+        const auto &qPlane = qPlayer.Planes[c];
+        for (SLONG d = qPlane.Flugplan.Flug.AnzEntries() - 1; d >= 0; d--) {
+            const auto &qFPE = qPlane.Flugplan.Flug[d];
+            if (qFPE.ObjectType == 1) {
+                SLONG idx = Routen(qFPE.ObjectId);
+                if (idx == routeA || idx == routeB) {
+                    return c;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
 bool GameMechanic::killRoute(PLAYER &qPlayer, SLONG routeA) {
     routeA = Routen.find(routeA);
     if (routeA < 0 || routeA >= qPlayer.RentRouten.RentRouten.size()) {
@@ -2850,6 +2905,11 @@ bool GameMechanic::killRoute(PLAYER &qPlayer, SLONG routeA) {
     SLONG routeB = findRouteInReverse(qPlayer, routeA);
     if (-1 == routeB) {
         AT_Error("GameMechanic::killRoute(%s): Unable to find route in reverse direction.", qPlayer.AirlineX.c_str());
+        return false;
+    }
+
+    if (-1 != GameMechanic::getAnyPlaneOnRoute(qPlayer, routeA)) {
+        AT_Error("GameMechanic::killRoute(%s): Route is still in use.", qPlayer.AirlineX.c_str());
         return false;
     }
 

@@ -589,10 +589,10 @@ ScheduleInfo calculateScheduleInfo(const PLAYER &qPlayer, SLONG planeId) {
 
         if (qFPE.ObjectType != 3) {
             info.hoursFlights += 24 * (qFPE.Landedate - qFPE.Startdate) + (qFPE.Landezeit + 1 - qFPE.Startzeit);
-            info.keroseneFlights = CalculateFlightKerosin(qFPE.VonCity, qFPE.NachCity, qPlane.ptVerbrauch, qPlane.ptGeschwindigkeit);
+            info.keroseneFlights += CalculateFlightKerosin(qFPE.VonCity, qFPE.NachCity, qPlane.ptVerbrauch, qPlane.ptGeschwindigkeit);
         } else {
             info.hoursAutoFlights += 24 * (qFPE.Landedate - qFPE.Startdate) + (qFPE.Landezeit + 1 - qFPE.Startzeit);
-            info.keroseneAutoFlights = CalculateFlightKerosin(qFPE.VonCity, qFPE.NachCity, qPlane.ptVerbrauch, qPlane.ptGeschwindigkeit);
+            info.keroseneAutoFlights += CalculateFlightKerosin(qFPE.VonCity, qFPE.NachCity, qPlane.ptVerbrauch, qPlane.ptGeschwindigkeit);
         }
 
         info.miles += Cities.CalcDistance(qFPE.VonCity, qFPE.NachCity) / 1609;
@@ -844,24 +844,41 @@ SLONG getRoomFromAction(SLONG PlayerNum, SLONG actionId) {
         [[fallthrough]];
     case ACTION_STARTDAY_LAPTOP:
         return 0; /* no need to walk anywhere */
+    case ACTION_ENERGY_DRINK:
+        return ROOM_ELECTRO;
+    case ACTION_VISIT_OFFICE_A:
+        return ROOM_BURO_A;
+    case ACTION_VISIT_OFFICE_B:
+        return ROOM_BURO_B;
+    case ACTION_VISIT_OFFICE_C:
+        return ROOM_BURO_C;
+    case ACTION_VISIT_OFFICE_D:
+        return ROOM_BURO_D;
     default:
         DebugBreak();
     }
     return -1;
 }
 
-SLONG getWalkDistance(int playerNum, SLONG roomId) {
-    auto primaryTarget = Airport.GetRandomTypedRune(RUNE_2SHOP, roomId);
-    const PERSON &qPerson = Sim.Persons[Sim.Persons.GetPlayerIndex(playerNum)];
-
-    SLONG speedCount = std::abs(qPerson.Position.x - primaryTarget.x);
-    speedCount += std::abs(qPerson.Position.y - primaryTarget.y);
-
-    if (std::abs(qPerson.Position.y - primaryTarget.y) > 4600) {
-        speedCount -= 4600;
+SLONG getDistance(XY origin, XY target) {
+    SLONG distX = std::abs(origin.x - target.x);
+    SLONG distY = std::abs(origin.y - target.y);
+    if (distY > 4600) {
+        distY -= 4600;
     }
-    speedCount = std::max(1, speedCount);
+    SLONG speedCount = std::max(1, distX + distY);
     return speedCount;
+}
+
+SLONG getWalkDistancePlayerToRoom(SLONG playerNum, SLONG roomId) {
+    const PERSON &qPerson = Sim.Persons[Sim.Persons.GetPlayerIndex(playerNum)];
+    auto target = Airport.GetRandomTypedRune(RUNE_2SHOP, roomId);
+    return getDistance(qPerson.Position, target);
+}
+
+SLONG getWalkDistanceToRoom(XY origin, SLONG roomB) {
+    auto target = Airport.GetRandomTypedRune(RUNE_2SHOP, roomB);
+    return getDistance(origin, target);
 }
 
 const char *getItemName(SLONG item) {
@@ -959,7 +976,7 @@ void printStatisticsLine(const PLAYER &qPlayer, const CString &prefix, bool prin
     std::vector<__int64> values;
     auto balanceAvg = qPlayer.BilanzWoche.Hole();
     auto balance = qPlayer.BilanzGesamt;
-    auto moneyAvailable = 0;
+    __int64 moneyAvailable = 0;
     if (qPlayer.IsMertenBot()) {
         moneyAvailable = qPlayer.mBot->getMoneyAvailable();
     } else if (qPlayer.IsClaudeBot()) {
@@ -1009,6 +1026,120 @@ void printStatisticsLineForAllPlayers(const CString &prefix, bool printHeader) {
         auto &qPlayer = Sim.Players.Players[c];
         printStatisticsLine(qPlayer, prefix, printHeader);
     }
+}
+
+CXPlane getHardcodedDesignerPlaneLarge() {
+    CXPlane designerPlane;
+    designerPlane.Name = "Bot Beluga";
+    designerPlane.Parts.ReSize(7);
+    designerPlane.Parts.FillAlbum();
+    designerPlane.Parts[0].Pos2d.x = -35;
+    designerPlane.Parts[0].Pos2d.y = -95;
+    designerPlane.Parts[0].Pos3d.x = 308;
+    designerPlane.Parts[0].Pos3d.y = 69;
+    designerPlane.Parts[0].Shortname = "M7";
+    designerPlane.Parts[0].ParentShortname = "R6";
+    designerPlane.Parts[0].ParentRelationId = 298;
+    designerPlane.Parts[1].Pos2d.x = -90;
+    designerPlane.Parts[1].Pos2d.y = -103;
+    designerPlane.Parts[1].Pos3d.x = 216;
+    designerPlane.Parts[1].Pos3d.y = 55;
+    designerPlane.Parts[1].Shortname = "L6";
+    designerPlane.Parts[1].ParentShortname = "B2";
+    designerPlane.Parts[1].ParentRelationId = 92;
+    designerPlane.Parts[2].Pos2d.x = 107;
+    designerPlane.Parts[2].Pos2d.y = -152;
+    designerPlane.Parts[2].Pos3d.x = 62;
+    designerPlane.Parts[2].Pos3d.y = 9;
+    designerPlane.Parts[2].Shortname = "H3";
+    designerPlane.Parts[2].ParentShortname = "B2";
+    designerPlane.Parts[2].ParentRelationId = 39;
+    designerPlane.Parts[3].Pos2d.x = -107;
+    designerPlane.Parts[3].Pos2d.y = -120;
+    designerPlane.Parts[3].Pos3d.x = 174;
+    designerPlane.Parts[3].Pos3d.y = 99;
+    designerPlane.Parts[3].Shortname = "B2";
+    designerPlane.Parts[3].ParentShortname.clear();
+    designerPlane.Parts[3].ParentRelationId = 1;
+    designerPlane.Parts[4].Pos2d.x = -171;
+    designerPlane.Parts[4].Pos2d.y = -83;
+    designerPlane.Parts[4].Pos3d.x = 424;
+    designerPlane.Parts[4].Pos3d.y = 204;
+    designerPlane.Parts[4].Shortname = "C2";
+    designerPlane.Parts[4].ParentShortname = "B2";
+    designerPlane.Parts[4].ParentRelationId = 11;
+    designerPlane.Parts[5].Pos2d.x = -50;
+    designerPlane.Parts[5].Pos2d.y = -30;
+    designerPlane.Parts[5].Pos3d.x = 126;
+    designerPlane.Parts[5].Pos3d.y = 243;
+    designerPlane.Parts[5].Shortname = "M7";
+    designerPlane.Parts[5].ParentShortname = "R6";
+    designerPlane.Parts[5].ParentRelationId = 297;
+    designerPlane.Parts[6].Pos2d.x = -90;
+    designerPlane.Parts[6].Pos2d.y = -78;
+    designerPlane.Parts[6].Pos3d.x = 92;
+    designerPlane.Parts[6].Pos3d.y = 169;
+    designerPlane.Parts[6].Shortname = "R6";
+    designerPlane.Parts[6].ParentShortname = "B2";
+    designerPlane.Parts[6].ParentRelationId = 91;
+    return designerPlane;
+}
+
+CXPlane getHardcodedDesignerPlaneEco() {
+    CXPlane designerPlane;
+    designerPlane.Name = "Bot Ecomaster";
+    designerPlane.Parts.ReSize(7);
+    designerPlane.Parts.FillAlbum();
+    designerPlane.Parts[0].Pos2d.x = -67;
+    designerPlane.Parts[0].Pos2d.y = -61;
+    designerPlane.Parts[0].Pos3d.x = 376;
+    designerPlane.Parts[0].Pos3d.y = 123;
+    designerPlane.Parts[0].Shortname = "M2";
+    designerPlane.Parts[0].ParentShortname = "R5";
+    designerPlane.Parts[0].ParentRelationId = 258;
+    designerPlane.Parts[1].Pos2d.x = -44;
+    designerPlane.Parts[1].Pos2d.y = -82;
+    designerPlane.Parts[1].Pos3d.x = 284;
+    designerPlane.Parts[1].Pos3d.y = 84;
+    designerPlane.Parts[1].Shortname = "L5";
+    designerPlane.Parts[1].ParentShortname = "B1";
+    designerPlane.Parts[1].ParentRelationId = 68;
+    designerPlane.Parts[2].Pos2d.x = 45;
+    designerPlane.Parts[2].Pos2d.y = -118;
+    designerPlane.Parts[2].Pos3d.x = 135;
+    designerPlane.Parts[2].Pos3d.y = 47;
+    designerPlane.Parts[2].Shortname = "H3";
+    designerPlane.Parts[2].ParentShortname = "B1";
+    designerPlane.Parts[2].ParentRelationId = 32;
+    designerPlane.Parts[3].Pos2d.x = -44;
+    designerPlane.Parts[3].Pos2d.y = -75;
+    designerPlane.Parts[3].Pos3d.x = 247;
+    designerPlane.Parts[3].Pos3d.y = 137;
+    designerPlane.Parts[3].Shortname = "B1";
+    designerPlane.Parts[3].ParentShortname.clear();
+    designerPlane.Parts[3].ParentRelationId = 0;
+    designerPlane.Parts[4].Pos2d.x = -120;
+    designerPlane.Parts[4].Pos2d.y = -75;
+    designerPlane.Parts[4].Pos3d.x = 351;
+    designerPlane.Parts[4].Pos3d.y = 167;
+    designerPlane.Parts[4].Shortname = "C3";
+    designerPlane.Parts[4].ParentShortname = "B1";
+    designerPlane.Parts[4].ParentRelationId = 7;
+    designerPlane.Parts[5].Pos2d.x = -67;
+    designerPlane.Parts[5].Pos2d.y = -28;
+    designerPlane.Parts[5].Pos3d.x = 248;
+    designerPlane.Parts[5].Pos3d.y = 245;
+    designerPlane.Parts[5].Shortname = "M2";
+    designerPlane.Parts[5].ParentShortname = "R5";
+    designerPlane.Parts[5].ParentRelationId = 257;
+    designerPlane.Parts[6].Pos2d.x = -44;
+    designerPlane.Parts[6].Pos2d.y = -40;
+    designerPlane.Parts[6].Pos3d.x = 181;
+    designerPlane.Parts[6].Pos3d.y = 195;
+    designerPlane.Parts[6].Shortname = "R5";
+    designerPlane.Parts[6].ParentShortname = "B1";
+    designerPlane.Parts[6].ParentRelationId = 67;
+    return designerPlane;
 }
 
 } // namespace Helper

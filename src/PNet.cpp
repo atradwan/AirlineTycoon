@@ -56,7 +56,9 @@ void PLAYER::NetSynchronizeImage() {
         if (needToSyncPlayer(qPlayer, false)) {
             SLONG d = 0;
 
-            Message << c << qPlayer.Image << qPlayer.ImageGotWorse;
+            /* The images change with every flight of the player (passengers, route image), so the
+               state carries the flight it was taken after, see ATNET_SYNC_IMAGE. */
+            Message << c << qPlayer.NetTankStamp() << qPlayer.Image << qPlayer.ImageGotWorse;
 
             for (d = 0; d < 4; d++) {
                 Message << qPlayer.Sympathie[d];
@@ -125,7 +127,12 @@ void PLAYER::NetSynchronizeRoutes() {
         PLAYER &qPlayer = Sim.Players.Players[c];
 
         if (needToSyncPlayer(qPlayer, false)) {
-            Message << c;
+            /* Which of the player's flights of the day this is after (the count the tank state
+               uses, see NetTankStamp()). Every flight changes a route's image, the day it was last
+               flown and its usage, and a flight booked in the same minute as this message would
+               otherwise be undone on a peer that has booked it already, or counted twice on one
+               that is behind. */
+            Message << c << qPlayer.NetTankStamp();
 
             for (SLONG d = Routen.AnzEntries() - 1; d >= 0; d--) {
                 Message << qPlayer.RentRouten.RentRouten[d].Rang << qPlayer.RentRouten.RentRouten[d].LastFlown << qPlayer.RentRouten.RentRouten[d].Image

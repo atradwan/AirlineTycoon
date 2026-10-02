@@ -8,14 +8,32 @@ Therefore, you need an existing installation of the game. You can purchase the g
 
 ## Major Additions
 
-- Native Linux support
-- Dedicated server browser and NAT-punchthrough multiplayer (open source server at: https://github.com/WizzardMaker/ATDMasterServer)
-- New computer player that plays well without cheating
+- Many new computer players 
+    - you can choose from many different play styles
+    - from an easier laid-back competitor to brutal rival
+    - from "fair play" to cruel nemesis who will target you specifically
+- Massive multiplayer overhaul to reduce desyncs and improve stability
+- Native Linux and MacOS support
+
+### Since last release
+
+MertenBot got a lot tougher - update and see if you can still keep up.
+
+The computer opponent that plays by the rules has been rebuilt from the ground up. In our test games it now earns seven times as much in the first 60 days as it did in 1.9.0 and ends with a fleet of around 74 planes instead of 12.
+
+What you'll notice:
+
+* It expands fast. It opens routes early, borrows to grow and buys several planes a day once the money flows.
+* It runs a tight airline. Smarter flight planning, better ticket prices, and advertising that is bought when it pays off.
+* It plans ahead. It hires crews before it needs them, so it doesn't stall when its fleet explodes late in the game.
+* It plays dirty when allowed. On the harder levels it sabotages, and it will buy up your shares and take you over if you leave the door open.
+* It still plays fair. No cheating: Same rules, acts only on same information available to you.
+
+**If 1.9.0's bot felt like a sparring partner, this one is a rival. Good luck.**
 
 ## License
 
-The code in the repository is licensed under the terms included in the GOG release. As such the code can
-only be used for non-commercial purposes and remains property of BFG.
+The code in the repository is licensed under the terms included in the GOG release. As such the code can only be used for non-commercial purposes and remains property of BFG.
 
 It is therefore *not* open-source in the free software sense, for more information refer to the License.txt.
 
@@ -40,12 +58,26 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
 
 ### General
 * Now runnable on Linux (including support for FLC animations found in some versions)
+* Can run on MacOS as well
 * Game can be configured for windowed / borderless / fullscreen display
 
 ### New computer player
-* Respects the rules of the game
 
-| Rules | Existing computer player | New computer player |
+When starting a new game, you can pick a play style for each computer-controlled airline. I tried to make each one feels different to play against:
+
+* **Classic**: The original computer player you know from the base game. It is cheating (see the table below), but it is not a particularly clever manager. Pick it for the nostalgia.
+* **Laid-Back**: The nicest of the new competitors. It plays by the rules and builds a proper airline, but it strolls through the airport instead of running, is not picky about which jobs it takes, charges modest ticket prices and does not bother with buying kerosene in bulk. A good first opponent if you want to learn the game or just have a relaxed round.
+* **Freight Baron**: A bit tougher competitor with a passion for cargo. It heads for the freight office first and fills its fleet with freight jobs. A fair opponent with a noticeably different rhythm than the others.
+* **Route Tycoon**: A pure profit machine, fair but relentless. It never uses sabotage. Instead it starts building a huge route network almost immediately, trades kerosene cleverly and keeps an eye on the stock market, where it will happily buy up a struggling rival. Keep hold of your own shares if you want to see the end of the game.
+* **Challenger**: The best strategist. Picks only lucrative jobs to then bootstrap a route network, pushes ticket prices as far as the passengers tolerate and stocks up on cheap kerosene. Compared to the *Route Tycoon*, it expands its route network slower and will always fully operate the most profitable routes. It never plays dirty, so expect a tough but honest race for the top spot.
+* **Saboteur**: Runs its airline just as well as the *Challenger*, but is also a regular customer of the saboteur. Expect trouble with your aeroplanes and your office whenever you pull ahead, so a visit to the security office is money well spent.
+* **Nemesis**: Everything the *Saboteur* does, and it is personal. The Nemesis singles out the human player with extra dirty tricks that no other level uses. Pick it if you want an opponent who is out to ruin your day, not just to win.
+
+All new computer players have one thing in common:
+
+**They always respect the rules of the game**
+
+| Rules | Old computer player | New computer players |
 | -------- | ------- | ------- |
 | Plane constraints | ❌ Ignores maximum range | ✅ Respects maximum range |
 | | ❌ Ignores number of seats | ✅ Respects number of seats |
@@ -61,22 +93,6 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
 | Illness | ❌ No action taken | ✅ Uses medicine |
 | Missions | ❌ Uses various cheats | ✅ No cheating |
 | Info | ❌ Accesses game state directly | ✅ Only acts on information that would be available to human player |
-
-* Improved core aspects of the computer player
-
-| Features | Existing computer player | New computer player |
-| -------- | ------- | ------- |
-| Flight planning | ❌ Simple greedy heuristic | ✅ 'Simulated annealing' heuristic minimizing empty flights |
-| Plane repairs | ❌ Usually high repair costs | ✅ Low repair cost by putting planes with repair deficit temporarily out of service |
-| Delays | ❌ Does not fix schedule if flight was bumped to next day | ✅ Tries to reorganize to avoid delays |
-| Route ticket pricing | ❌ Only based on competitor prices | ✅ Sophisticated strategy to improve route utilization and optimize income |
-| Kerosene | ❌ Does not buy kerosene at ArabAir | ✅ Buys tanks and kerosene to save money when price is low |
-| Bankruptcy avoidance | ❌ Frequently goes bankrupt, especially in last mission | ✅ Able to forecast high future expenses, acts accordingly |
-| Missions | ❌ Only small strategy adaptations | ✅ Intricate strategies for several missions |
-| Overtake | ❌ Will not overtake competitors | ✅ Overtakes competitors if given the chance |
-| Items | ❌ Only uses pliers | ✅ Uses more items |
-| Sabotage | ❌ No strategy, sabotages very often and mostly randomly | ✅ Uses sabotage only in specific missions for particular goals |
-| Planes | Buys only used planes | Buys only new planes |
 
 ### Statistics screen
 * Showing far more categories where money was spent
@@ -113,13 +129,22 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
 ### Employees
 * More pilots/attendants available for hire
 * Slightly increase competence of randomly generated employees
-* Generate randomized advisors as well
+* Generate more and also randomized advisors
+* Advisors are now drawn per type with weights depending on usefulness
 * Regenerate unemployed employees if not hired within 7 days (prevents buildup of low-skill candidates in long games)
 * List automatically sorted by skill
 * Update worker happiness based on salary
     * Chance to increase/decrease happiness each day based on how much salary is higher/lower than original salary
 * The 10% change when increasing/decreasing salary now always refers to the original salary
 * Regularly increase worker happiness if company image is great
+
+### Planes
+* Reduce (~ half) cost of plane security upgrades
+* Game now supports modded plane types with build years after 1998 (#13).
+    * Plane build years now count from 2026 instead of 2002
+    * Old saves are compatible, plane build years are shifted on load
+* First-class seating changes now take effect when the plane is on the ground.
+* Plane maintenance costs reset daily. Old value showed total cost per plane which makes it impossible to compare repair costs unless planes where bought on the exact same day.
 
 ### Kerosene
 * Adjust impact of bad kerosene:
@@ -129,6 +154,17 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
 * Kerosene advisor gives hints on how to save money in new kerosene advisor report
 * ArabAir offers much larger kerosene tanks
 * Do not remember selected kerosene quality for auto purchase (was an undocumented and convoluted 'feature')
+
+### Music
+* New sound options (OGG/MIDI)
+* Patched stuttering glitch when switching music on Windows 11
+* Add your own music: Game will play all OGG and all MIDI files found in the game directory
+
+### Multiplayer
+* Massive sync overhaul covering staff, salaries, strikes, items, kerosene, flight plans, gate/city bids, plane problems, the game clock and bankruptcy.
+* Hardening against malformed messages, a use-after-free fix and several crash fixes.
+* The game calendar uses UTC in network games, and the version is also checked when rejoining a saved game.
+* The game version is now checked when rejoining a saved game.
 
 ### Bug fixes
 * Fixed frozen windows on laptop
@@ -151,7 +187,6 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
     * Correctly calculate plane's balance over past 7 days
 * Consider also number of first class passengers for statistics
 * Do not show route utilization for defeated players
-* New sound options (OGG/MIDI) + patched stuttering glitch when switching music on Windows 11
 * Patched Space station mission prices and texts in stats
 * Patched various text scrambling on UI
 * Bug fixed in calculation in maximum amount of stock that can be emitted
@@ -166,13 +201,19 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
 * Fixed bug where player can 'survive' being overtaken by skipping dialog at the right moment
 * Classic mission 04 now uses correct route utilization
     * Previously, even though boss said that routes must be 20% utilized, game would check for 20% plane utilization
+* Addon mission 05: Formula for luxury score changed
+* Addon mission 09: Uhrig flights are now all in the region of the home airport
 * Addon mission 09: Fixed counting of Uhrig flights
     * Note that computer players always have and still are cheating in this mission
 * First class mission 07: Only need to have two repaired planes, not all of them in case more than two were bought
 * Evolution mission 02: Only need to have five planes with full safety upgrades, not all of them in case more than five were bought
+* Fixed crash when quickly clicking through dialog options
+* Stocks are traded in chunks of 2000 with the price updated after each chunk (exploit fix)
 * Fixed many random crashes
 
 ### Default computer player
+* Max. range of a plane now also has to be considered by the computer player
+* Max. number of seats now also has to be considered by the computer player
 * Uses now same credit limit
 * Uses now same rules for trading stock
     * Trading fee (100 + 10% of volume) now also for computer players (fee existed only for player)
@@ -191,7 +232,6 @@ You can see the instructions to build and run the project in [BUILDING.md](BUILD
 * Fixed bug where computer player buys or sells more stock than available
 
 ### Misc
-* Reduce (~ half) cost of plane security upgrades
 * Spy reports enemy activity based on skill
 * ArabAir opens one hour earlier
 * Calculate route utilization as average of previous 7 days

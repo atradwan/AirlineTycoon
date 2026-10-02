@@ -11,6 +11,9 @@
 #include "global.h"
 #include "Proto.h"
 
+#include <cstdio>
+#include <cstdlib>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -718,7 +721,23 @@ void CAufsicht::OnPaint() {
 
     CStdRaum::PumpToolTips();
 
-    if (Sim.Date == gAutoQuitOnDay) {
+    bool giveUp = false;
+    if (gQuickTestRun > 0) {
+        bool anyBotSlot = false;
+        bool anyBotAlive = false;
+        for (const auto &qPlayer : Sim.Players.Players) {
+            if (qPlayer.Owner != 1) {
+                continue;
+            }
+            anyBotSlot = true;
+            if (qPlayer.IsOut == 0) {
+                anyBotAlive = true;
+                break;
+            }
+        }
+        giveUp = anyBotSlot && !anyBotAlive;
+    }
+    if (giveUp || (gAutoQuitOnDay >= 0 && Sim.Date >= gAutoQuitOnDay)) {
         if (AutoLobbyActive()) {
             /* Only once the briefing barrier has passed, so that the morning money sync of the
                last day - and the "briefing" fingerprint that checks it - have happened on
@@ -731,7 +750,18 @@ void CAufsicht::OnPaint() {
                 AutoLobbyScheduleQuit(2000);
             }
         } else {
-            exit(0);
+            /* std::_Exit rather than exit, as in AutoLobbyPollQuit(): exit() runs the static
+               destructors from inside this paint, and ~SBPRIMARYBM then destroys the renderer
+               while the GL driver is being torn down - a segfault and a core dump at the end of
+               every other harness game. The statistics are all written by now. */
+            if (giveUp) {
+                printf("Triggering cutoff: All CPU players are dead.\n");
+            } else {
+                printf("Triggering cutoff: Timelimit reached.\n");
+            }
+            printPostGameInfo();
+            fflush(nullptr);
+            std::_Exit(0);
         }
     }
     if (CheatAutoSkip != 0 && (gQuickTestRun > 0 || (Sim.Date % 100) != 99)) {

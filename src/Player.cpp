@@ -140,7 +140,7 @@ void PLAYER::Add5UhrigFlights() {
     for (SLONG c = 0; c < 5; c++) {
         CAuftrag a;
 
-        a.RefillForUhrig((c + 0) / 2, &Auftraege.Random);
+        a.RefillForUhrig(4, &Auftraege.Random);
 
         Auftraege += a;
     }
@@ -195,7 +195,9 @@ ULONG PLAYER::BuyPlane(CXPlane &plane, TEAKRAND *pRnd) {
     CPlane &p = Planes[Id];
 
     p.MaxPassagiere = plane.CalcPassagiere() * 6 / 8;
+    p.MaxPassagiereTarget = p.MaxPassagiere;
     p.MaxPassagiereFC = plane.CalcPassagiere() * 1 / 8;
+    p.MaxPassagiereTargetFC = p.MaxPassagiereFC;
     p.MaxBegleiter = plane.CalcBegleiter();
 
     p.ptHersteller = "";
@@ -718,7 +720,9 @@ void PLAYER::LeaveAllRooms() {
     SLONG c = 0;
 
     for (c = 9; c >= 0; c--) {
-        if ((Locations[c] != 0U) && Locations[c] != ROOM_AIRPORT) {
+        /* Without the flags: right after a room was left, the airport entry reads
+           ROOM_AIRPORT | ROOM_ENTERING and would be left as well. */
+        if ((Locations[c] != 0U) && (Locations[c] & ~(ROOM_ENTERING | ROOM_LEAVING)) != ROOM_AIRPORT) {
             Locations[c] = UWORD(Locations[c] | ROOM_LEAVING);
         }
     }
@@ -3205,6 +3209,19 @@ class RobotFlightplanWatch {
     const bool bActive;
     std::map<SLONG, unsigned long long> Before;
 };
+
+//--------------------------------------------------------------------------------------------
+// The classic bot sizes a share purchase by today's share price. GameMechanic::buyStock() prices
+// it in chunks of 2000 shares at a rising price, so a large order costs more than that estimate
+// and was refused as a whole. Shrinks the order to what can be afforded instead; an order that
+// fits is left as it is.
+//--------------------------------------------------------------------------------------------
+SLONG AffordableStockAmount(PLAYER &qPlayer, SLONG Airline, SLONG Amount) {
+    while (Amount > 0 && !GameMechanic::buyStock(qPlayer, Airline, Amount, false).first) {
+        Amount = Amount * 9 / 10 / 100 * 100;
+    }
+    return Amount;
+}
 } // namespace
 
 void PLAYER::RobotPump() {
@@ -4139,6 +4156,13 @@ void PLAYER::RobotExecuteAction() {
         return;
     }
 
+    /* The action is carried out now, so its fast-forward countdown is used up. At walking pace
+       nothing counts SpeedCount down: an action executed on arrival or by WaitWorkTill left it
+       behind (1 for an action without a room, like ACTION_CALL_INTER_HANDY). When the players
+       then called it a day, PERSONS::DoOneStep() counted the stale value down and executed the
+       queue a second time - by then empty, so the bot executed ACTION_NONE. */
+    SpeedCount = 0;
+
     RobotPlanePropsWatch PlaneWatch(*this);
     RobotFlightplanWatch FlightplanWatch(*this);
 
@@ -4538,9 +4562,12 @@ void PLAYER::RobotExecuteAction() {
 
                                     SLONG ObjectId = -1;
                                     GameMechanic::takeInternationalFreightJob(*this, n, e, ObjectId);
+                                    if (ObjectId < 0) {
+                                        continue;
+                                    }
 
                                     SLONG bailout = 10;
-                                    while (Frachten[ObjectId].TonsOpen > 0 && (bailout-- > 0)) {
+                                    while ((Frachten[ObjectId].TonsOpen > 0) && (bailout-- > 0)) {
                                         if (!GameMechanic::planFreightJob(*this, c, ObjectId, Sim.Date + VonZeit / 24, VonZeit % 24)) {
                                             break;
                                         }
@@ -4603,9 +4630,12 @@ void PLAYER::RobotExecuteAction() {
 
                                         SLONG ObjectId = -1;
                                         GameMechanic::takeInternationalFreightJob(*this, n, e, ObjectId);
+                                        if (ObjectId < 0) {
+                                            continue;
+                                        }
 
                                         SLONG bailout = 10;
-                                        while (Frachten[ObjectId].TonsOpen > 0 && (bailout-- > 0)) {
+                                        while ((Frachten[ObjectId].TonsOpen > 0) && (bailout-- > 0)) {
                                             if (!GameMechanic::planFreightJob(*this, c, ObjectId, Sim.Date + VonZeit / 24, VonZeit % 24)) {
                                                 break;
                                             }
@@ -5022,6 +5052,7 @@ void PLAYER::RobotExecuteAction() {
                     Anz = min(Anz, SLONG((Money - 3000000) / Sim.Players.Players[dislike].Kurse[0] / 100 * 100));
                 }
 
+                Anz = AffordableStockAmount(*this, dislike, Anz);
                 if (Anz != 0) {
                     GameMechanic::buyStock(*this, dislike, Anz, true);
                 }
@@ -5042,6 +5073,7 @@ void PLAYER::RobotExecuteAction() {
                     Anz = min(Anz, SLONG((Money - 3000000) / Kurse[0] / 100 * 100));
                 }
 
+                Anz = AffordableStockAmount(*this, PlayerNum, Anz);
                 if (Anz != 0) {
                     GameMechanic::buyStock(*this, PlayerNum, Anz, true);
                 }
@@ -5531,9 +5563,12 @@ void PLAYER::RobotExecuteAction() {
 
                             SLONG ObjectId = -1;
                             GameMechanic::takeFreightJob(*this, e, ObjectId);
+                            if (ObjectId < 0) {
+                                continue;
+                            }
 
                             SLONG bailout = 10;
-                            while (Frachten[ObjectId].TonsOpen > 0 && (bailout-- > 0)) {
+                            while ((Frachten[ObjectId].TonsOpen > 0) && (bailout-- > 0)) {
                                 if (!GameMechanic::planFreightJob(*this, c, ObjectId, Sim.Date + VonZeit / 24, VonZeit % 24)) {
                                     break;
                                 }
@@ -5596,9 +5631,12 @@ void PLAYER::RobotExecuteAction() {
 
                                 SLONG ObjectId = -1;
                                 GameMechanic::takeFreightJob(*this, e, ObjectId);
+                                if (ObjectId < 0) {
+                                    continue;
+                                }
 
                                 SLONG bailout = 10;
-                                while (Frachten[ObjectId].TonsOpen > 0 && (bailout-- > 0)) {
+                                while ((Frachten[ObjectId].TonsOpen > 0) && (bailout-- > 0)) {
                                     if (!GameMechanic::planFreightJob(*this, c, ObjectId, Sim.Date + VonZeit / 24, VonZeit % 24)) {
                                         break;
                                     }
@@ -6283,6 +6321,9 @@ void PLAYER::BuyItem(UBYTE Item) {
         }
 
         ReformIcons();
+        if (Sim.bNetwork != 0) {
+            PLAYER::NetSynchronizeItems();
+        }
     }
 }
 
@@ -6303,6 +6344,31 @@ void PLAYER::DisplayAsTelefoning() const {
 
     qPerson.Phase = UBYTE(Dir + 4);
     qPerson.LookDir = 8;
+}
+
+//--------------------------------------------------------------------------------------------
+// The player touched the vending machine without the glove. Runs on the peer that owns the
+// player (Person.cpp) and, through ATNET_ELECTROSHOCK, on every other peer:
+//--------------------------------------------------------------------------------------------
+void PLAYER::ElectroShock() {
+    PERSON &qPerson = Sim.Persons[static_cast<SLONG>(Sim.Persons.GetPlayerIndex(PlayerNum))];
+
+    BUILD *pBuild = Airport.GetBuildNear(qPerson.ScreenPos, XY(180, 160), Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO));
+    if (pBuild != nullptr) {
+        Airport.Triggers[static_cast<SLONG>(pBuild->Par)].Winkel = Sim.TickerTime;
+    }
+
+    Sim.DontDisplayPlayer = PlayerNum;
+    qPerson.LookDir = 2;
+    qPerson.Phase = 0;
+
+    DirectToRoom = 0;
+    IsDrunk = 0;
+
+    if ((Sim.Options.OptionEffekte != 0) && PlayerNum == Sim.localPlayer) {
+        gUniversalFx.ReInit("fused.raw");
+        gUniversalFx.Play(0, Sim.Options.OptionEffekte * 100 / 7 * AmbientManager.GlobalVolume / 100);
+    }
 }
 
 //--------------------------------------------------------------------------------------------
@@ -8302,7 +8368,7 @@ bool PLAYER::RobotUse(SLONG FeatureId) const {
                        "-X--------";
         break;
     case ROBOT_USE_NOCHITCHAT:
-        /* SuperBot: Job agencies (travel, last minute, freight, international) always have at least low priority */
+        /* SuperBot: Ignores this flag */
         pFeatureDesc = "------"
                        "."
                        "----------"

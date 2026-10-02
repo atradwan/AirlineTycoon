@@ -140,6 +140,10 @@ inline bool operator!=(const CPoint &lhs, const CPoint &rhs) { return !(lhs == r
 #define MALE 1
 
 constexpr char VersionString[] = FILE_VERSION_STRING;
+/* What peers compare before they play together. The preview builds of a release carry the same
+   VersionString as the release, but not its network protocol, so the suffix is raised whenever
+   the protocol changes within a version. */
+constexpr char NetVersionString[] = FILE_VERSION_STRING " / net 2";
 
 // Generelles
 #define CUSTOMERS_PER_PERSON 5   // Eine Person (Bildschirm) repräsentiert 10 Kunden
@@ -591,6 +595,11 @@ constexpr char VersionString[] = FILE_VERSION_STRING;
 #define ACTION_VISITADS 612
 #define ACTION_OVERTAKE_AIRLINE 613
 #define ACTION_VISITSABOTEUR 614
+#define ACTION_ENERGY_DRINK 615
+#define ACTION_VISIT_OFFICE_A 616
+#define ACTION_VISIT_OFFICE_B 617
+#define ACTION_VISIT_OFFICE_C 618
+#define ACTION_VISIT_OFFICE_D 619
 
 START_NAME_MAP(ACTION)
 DEFINE_NAME_ENTRY(ACTION_NONE, )
@@ -640,6 +649,11 @@ DEFINE_NAME_ENTRY(ACTION_STARTDAY_LAPTOP, )
 DEFINE_NAME_ENTRY(ACTION_VISITADS, )
 DEFINE_NAME_ENTRY(ACTION_OVERTAKE_AIRLINE, )
 DEFINE_NAME_ENTRY(ACTION_VISITSABOTEUR, )
+DEFINE_NAME_ENTRY(ACTION_ENERGY_DRINK, )
+DEFINE_NAME_ENTRY(ACTION_VISIT_OFFICE_A, )
+DEFINE_NAME_ENTRY(ACTION_VISIT_OFFICE_B, )
+DEFINE_NAME_ENTRY(ACTION_VISIT_OFFICE_C, )
+DEFINE_NAME_ENTRY(ACTION_VISIT_OFFICE_D, )
 END_NAME_MAP
 
 // Die Arten von Beratern:
@@ -1134,8 +1148,8 @@ constexpr int BotDifficultyNemesis = 5; // last MertenBot
 constexpr int BotDifficultyTycoon = 6;  // first ClaudeBot
 constexpr int BotDifficultyHurricane = 7;
 constexpr int BotDifficultyTBD = 8; // last ClaudeBot
-constexpr int BotDifficultyMaxFreegame = 7;
-constexpr int BotDifficultyMax = 5;
+constexpr int BotDifficultyMaxFreegame = 6;
+constexpr int BotDifficultyMax = 6;
 
 // Die Netzwerk-Medien
 #define NET_MEDIUM_UNKNOWN 0

@@ -2227,10 +2227,18 @@ void PERSON::DoOnePlayerStep() {
                     }
                 }
             } else if (c == ROOM_ELECTRO) {
-                if (qPlayer.Owner != 1 && qPlayer.DirectToRoom == c &&
-                    (qPlayer.Owner == 2 || (((*qPlayer.LocationWin).MenuIsOpen() == 0) && ((*qPlayer.LocationWin).IsDialogOpen() == 0)))) {
+                if ((qPlayer.Owner != 1 || qPlayer.IsSuperBot()) && qPlayer.DirectToRoom == c &&
+                    ((qPlayer.Owner != 0) || (((*qPlayer.LocationWin).MenuIsOpen() == 0) && ((*qPlayer.LocationWin).IsDialogOpen() == 0)))) {
                     if (c == qPlayer.DirectToRoom) {
-                        if (qPlayer.HasItem(ITEM_GLOVE) != 0) {
+                        /* Only the peer that owns the player decides, glove or shock. Every other peer
+                           would decide from its own copy of the inventory, and the owner's
+                           ATNET_SYNC_ITEMS (glove -> Red Bull) often arrives before that peer's copy of
+                           the figure reaches the machine - which then showed a shock, and reset
+                           IsDrunk, for a player who had used the glove. The others learn the outcome
+                           from ATNET_SYNC_ITEMS or ATNET_ELECTROSHOCK. */
+                        if ((Sim.bNetwork != 0) && !qPlayer.NetIsAuthoritative()) {
+                            qPlayer.DirectToRoom = 0;
+                        } else if (qPlayer.HasItem(ITEM_GLOVE) != 0) {
                             qPlayer.DirectToRoom = 0;
 
                             if ((Sim.Options.OptionEffekte != 0) && State == Sim.localPlayer) {
@@ -2238,28 +2246,12 @@ void PERSON::DoOnePlayerStep() {
                                 gUniversalFx.Play(0, Sim.Options.OptionEffekte * 100 / 7 * AmbientManager.GlobalVolume / 100);
                             }
 
-                            if (State == Sim.localPlayer) {
-                                GameMechanic::pickUpItem(qPlayer, ITEM_REDBULL);
-                            }
+                            GameMechanic::pickUpItem(qPlayer, ITEM_REDBULL);
                         } else {
-                            BUILD *pBuild = Airport.GetBuildNear(ScreenPos, XY(180, 160), Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO));
-                            if (pBuild != nullptr) {
-                                Airport.Triggers[static_cast<SLONG>(pBuild->Par)].Winkel = Sim.TickerTime;
-                            }
-
-                            Sim.DontDisplayPlayer = qPlayer.PlayerNum;
-                            LookDir = 2;
-                            Phase = 0;
-
-                            qPlayer.DirectToRoom = 0;
-                            qPlayer.IsDrunk = 0;
+                            qPlayer.ElectroShock();
+                            SIM::SendSimpleMessage(ATNET_ELECTROSHOCK, 0, qPlayer.PlayerNum);
 
                             bDoBroadcastPosition = true;
-
-                            if ((Sim.Options.OptionEffekte != 0) && State == Sim.localPlayer) {
-                                gUniversalFx.ReInit("fused.raw");
-                                gUniversalFx.Play(0, Sim.Options.OptionEffekte * 100 / 7 * AmbientManager.GlobalVolume / 100);
-                            }
                         }
                     }
                 }
@@ -2291,26 +2283,28 @@ void PERSON::DoOnePlayerStep() {
                             Sim.RoomBusy[StatePar]--;
                         }
 
+                        auto &qTarget = Sim.Players.Players[StatePar / 10 - 1];
                         if ((qPlayer.LocationWin != nullptr) && ((*qPlayer.LocationWin).IsDialogOpen() == 0) && ((*qPlayer.LocationWin).MenuIsOpen() == 0)) {
                             qPlayer.ThrownOutOfRoom = UWORD(StatePar % 10 + State * 10 + 10);
 
                             bgWarp = FALSE;
-                            if (Sim.Players.Players[StatePar / 10 - 1].IsOut != 0) {
+                            if (qTarget.IsOut != 0) {
                                 (*qPlayer.LocationWin).MenuStart(MENU_REQUEST, MENU_REQUEST_WRONGROOM2);
                             } else {
                                 (*qPlayer.LocationWin).MenuStart(MENU_REQUEST, MENU_REQUEST_WRONGROOM);
-
-                                if ((qPlayer.HasItem(ITEM_ZANGE) != 0) && Sim.Players.Players[StatePar / 10 - 1].OfficeState == 0 &&
-                                    (StatePar == ROOM_BURO_A || StatePar == ROOM_BURO_B || StatePar == ROOM_BURO_C || StatePar == ROOM_BURO_D)) {
-                                    qPlayer.DropItem(ITEM_ZANGE);
-                                    PLAYER::NetSynchronizeItems();
-                                    Sim.Players.Players[StatePar / 10 - 1].OfficeState = 3;
-
-                                    SIM::SendSimpleMessage(ATNET_SYNC_OFFICEFLAG, 0, StatePar / 10 - 1, 3);
-                                }
                             }
 
                             (*qPlayer.LocationWin).MenuSetZoomStuff(XY(ScreenPos.x, ScreenPos.y - 20), 0, TRUE);
+                        }
+
+                        const bool inAnyOffice = (StatePar == ROOM_BURO_A || StatePar == ROOM_BURO_B || StatePar == ROOM_BURO_C || StatePar == ROOM_BURO_D);
+                        if (qTarget.IsOut == 0 && qTarget.OfficeState == 0 && qPlayer.HasItem(ITEM_ZANGE) != 0 && inAnyOffice) {
+                            if (Sim.bNetwork == 0 || qPlayer.NetIsAuthoritative()) {
+                                qPlayer.DropItem(ITEM_ZANGE);
+                                qTarget.OfficeState = 3;
+                                SIM::SendSimpleMessage(ATNET_SYNC_OFFICEFLAG, 0, StatePar / 10 - 1, 3);
+                                AT_Log_Generic("Person.cpp: %s sabotages office of %s using item pliers", (LPCTSTR)qPlayer.AirlineX, (LPCTSTR)qTarget.AirlineX);
+                            }
                         }
 
                         Dir = 4;
