@@ -231,13 +231,8 @@ void Options::RefreshKlackerField() {
                 KlackerTafel.PrintAt(1, 3, StandardTexte.GetS(TOKEN_MISC, 4121));
                 KlackerTafel.PrintVolumeAt(15, 3, 8, Sim.Options.OptionMusik);
             }
-            const SLONG track = GetSelectedMusicTrack();
-            if (track == 0) {
-                KlackerTafel.PrintAt(1, 4 + musicShift, StandardTexte.GetS(TOKEN_MISC, 4150));
-            } else {
-                KlackerTafel.PrintAt(1, 4 + musicShift, CString("# ") + GetMusicTrackName(track));
-            }
-            if (track == 0) {
+            KlackerTafel.PrintAt(1, 4 + musicShift, StandardTexte.GetS(TOKEN_MISC, 4150 + Sim.Options.OptionLoopMusik));
+            if (Sim.Options.OptionLoopMusik == 0) {
                 KlackerTafel.PrintAt(1, 5 + musicShift, StandardTexte.GetS(TOKEN_MISC, 4140));
             }
         }
@@ -457,7 +452,7 @@ void Options::OnPaint() {
             if (Line == 2 || (Line == 4 + musicShift && usesMusic) || Line == 15) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
-            if (Line == 5 + musicShift && GetSelectedMusicTrack() == 0 && usesMusic) {
+            if (Line == 5 + musicShift && Sim.Options.OptionLoopMusik == 0 && usesMusic) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;
@@ -732,14 +727,14 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
             }
 
             if (Line == 4 + musicShift && usesMusic) {
-                Sim.Options.OptionLoopMusik = (GetSelectedMusicTrack() + 1) % (GetNumMusicTracks() + 1);
+                Sim.Options.OptionLoopMusik = (Sim.Options.OptionLoopMusik + 1) % (9);
                 if (Sim.Options.OptionLoopMusik != 0) {
                     NextMidi();
                 }
                 RefreshKlackerField();
             }
             if (Line == 5 + musicShift && usesMusic) {
-                if (GetSelectedMusicTrack() == 0) {
+                if (Sim.Options.OptionLoopMusik == 0) {
                     NextMidi();
                 }
             } // Skip
