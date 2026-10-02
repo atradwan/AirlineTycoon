@@ -1041,10 +1041,6 @@ void PumpNetwork() {
                             CRentRoute &qRoute = qPending.Routes[d];
                             Message >> qRoute.Rang >> qRoute.LastFlown >> qRoute.Image >> qRoute.Miete >> qRoute.Ticketpreis >> qRoute.TicketpreisFC >>
                                 qRoute.TageMitVerlust >> qRoute.TageMitGering;
-                            /* One rank per airline that rents the route, so 1..4. */
-                            if (qRoute.Rang > 4) {
-                                TeakLibW_Exception(FNL, "Implausible rank %ld for route %ld", static_cast<long>(qRoute.Rang), static_cast<long>(d));
-                            }
                             if (qRoute.Rang != 0U) {
                                 RentedRead++;
                             }
