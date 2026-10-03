@@ -139,11 +139,17 @@ inline bool operator!=(const CPoint &lhs, const CPoint &rhs) { return !(lhs == r
 #define FEMALE 0
 #define MALE 1
 
-constexpr char VersionString[] = FILE_VERSION_STRING;
+#ifdef AT_BUILD_LABEL
+#define AT_VERSION_TEXT FILE_VERSION_STRING " " AT_BUILD_LABEL
+#else
+#define AT_VERSION_TEXT FILE_VERSION_STRING
+#endif
+constexpr char VersionString[] = AT_VERSION_TEXT;
 /* What peers compare before they play together. The preview builds of a release carry the same
    VersionString as the release, but not its network protocol, so the suffix is raised whenever
-   the protocol changes within a version. */
-constexpr char NetVersionString[] = FILE_VERSION_STRING " / net 2";
+   the protocol changes within a version. The build label (if any) is included, so only identical
+   builds play together. */
+constexpr char NetVersionString[] = AT_VERSION_TEXT " / net 2";
 
 // Generelles
 #define CUSTOMERS_PER_PERSON 5   // Eine Person (Bildschirm) repräsentiert 10 Kunden

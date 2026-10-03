@@ -4,6 +4,11 @@ project (AirlineTycoon)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Build name set by the workflow (e.g. preview-dev-031026); shown in game, logged and part of the net handshake
+if(AT_BUILD_LABEL)
+    add_compile_definitions(AT_BUILD_LABEL="${AT_BUILD_LABEL}")
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Tidy")
