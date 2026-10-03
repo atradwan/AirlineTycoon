@@ -6810,8 +6810,13 @@ TEAKFILE &operator>>(TEAKFILE &File, ClaudeBot &bot) {
     File >> bot.mUpgradedToday;
     File >> bot.mAgencyEmptyToday;
     File >> bot.mAgencyVisitsToday;
-    File >> bot.mLastMinuteVisitsToday;
-    File >> bot.mVisitedNasaToday;
+    if (savegameVersion >= 111) {
+        File >> bot.mLastMinuteVisitsToday;
+        File >> bot.mVisitedNasaToday;
+    } else {
+        bot.mLastMinuteVisitsToday = 0;
+        bot.mVisitedNasaToday = false;
+    }
     File >> bot.mFreightVisitsToday;
     File >> bot.mVisitedTanksToday;
     File >> bot.mVisitedKerosinToday;
