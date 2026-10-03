@@ -750,7 +750,7 @@ SLONG Bot::getNextMood() {
 }
 
 TEAKFILE &operator<<(TEAKFILE &File, const Bot &bot) {
-    SLONG savegameVersion = 103;
+    SLONG savegameVersion = 104;
     File << savegameVersion;
 
     File << bot.LocalRandom;
@@ -898,7 +898,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
     SLONG savegameVersion;
     File >> savegameVersion;
 
-    if (savegameVersion >= 103) {
+    if (savegameVersion >= 104) {
         File >> bot.LocalRandom;
     }
 
@@ -965,9 +965,13 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
         bot.mBestUsedPlanePilots = 0;
         bot.mBestUsedPlaneCrew = 0;
         bot.mBestUsedPlanePrice = 0;
+    } else {
+        File >> bot.mBestUsedPlanePilots >> bot.mBestUsedPlaneCrew >> bot.mBestUsedPlanePrice;
+    }
+    if (savegameVersion < 104) {
         bot.mBestUsedPlaneName = "";
     } else {
-        File >> bot.mBestUsedPlanePilots >> bot.mBestUsedPlaneCrew >> bot.mBestUsedPlanePrice >> bot.mBestUsedPlaneName;
+        File >> bot.mBestUsedPlaneName;
     }
     File >> bot.mBuyPlaneForRouteId >> bot.mPlaneTypeForNewRoute;
 
@@ -995,7 +999,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
     File >> bot.mMoneyReservedForRepairs >> bot.mMoneyReservedForUpgrades;
     File >> bot.mMoneyReservedForAuctions >> bot.mMoneyReservedForFines;
     File >> bot.mNemesis >> bot.mNemesisScore >> bot.mNeedToShutdownSecurity;
-    if (savegameVersion < 103) {
+    if (savegameVersion < 104) {
         bot.mCardWasTaken = false;
         bot.mPliersWereTaken = false;
         bot.mGlovesWereTaken = false;
@@ -1018,7 +1022,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
 
     File >> bot.mBossNumCitiesAvailable;
     File >> bot.mBossGateAvailable;
-    if (savegameVersion < 103) {
+    if (savegameVersion < 104) {
         bot.mBossCanExpandAirport = 0;
     } else {
         File >> bot.mBossCanExpandAirport;
@@ -1108,7 +1112,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
         File >> solution.totalPremium;
         File >> solution.planeId;
         File >> solution.scheduleFromTime;
-        if (savegameVersion < 103) {
+        if (savegameVersion < 104) {
             solution.dummySolution = (solution.scheduleFromTime == PlaneTime{});
         } else {
             File >> solution.dummySolution;
@@ -1134,7 +1138,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
     File >> bot.mOptions.kSchedulingMinScoreRatio >> bot.mOptions.kSchedulingMinScoreRatioLastMinute;
     File >> bot.mOptions.kSwitchToRoutesNumPlanesMin >> bot.mOptions.kSwitchToRoutesNumPlanesMax;
     File >> bot.mOptions.kMaximumRouteUtilization;
-    if (savegameVersion < 103) {
+    if (savegameVersion < 104) {
         File >> bot.mOptions.kMaxTicketPriceFactor.target;
         bot.mOptions.kMaxTicketPriceFactor.target = std::min(1.9, bot.mOptions.kMaxTicketPriceFactor.target / 3.0);
         bot.mOptions.kMaxTicketPriceFactor.lowerLimit = bot.mOptions.kMaxTicketPriceFactor.target - 0.3;
@@ -1150,7 +1154,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
         File >> bot.mOptions.kFirstClassTicketSurcharge;
     }
     File >> bot.mOptions.kMaxKerosinQualiZiel >> bot.mOptions.kOwnStockPosessionRatio;
-    if (savegameVersion < 103) {
+    if (savegameVersion < 104) {
         bot.mOptions.kRepairBudgetPercent = Bot::ConfigurableOptions{}.kRepairBudgetPercent;
         bot.mOptions.kStockWarfarce = Bot::ConfigurableOptions{}.kStockWarfarce;
     } else {
@@ -1163,9 +1167,13 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
         bot.mImageDecayPerDay = 0;
         bot.mImageAfterAds = 0;
         bot.mImageAdsDay = -1;
+    } else {
+        File >> bot.mTicketsYesterday >> bot.mImageDecayPerDay >> bot.mImageAfterAds >> bot.mImageAdsDay;
+    }
+    if (savegameVersion < 104) {
         bot.mImagePreservationMode = -1;
     } else {
-        File >> bot.mTicketsYesterday >> bot.mImageDecayPerDay >> bot.mImageAfterAds >> bot.mImageAdsDay >> bot.mImagePreservationMode;
+        File >> bot.mImagePreservationMode;
     }
 
     SLONG magicnumber = 0;
