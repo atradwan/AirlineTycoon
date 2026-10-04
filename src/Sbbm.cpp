@@ -605,10 +605,11 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
     // TextOut (0, 20, RGB(0,0,255), RGB(255,255,0), bprintf ("%f FPS", GetFrameRate()));
     // TextOut (0, 32, RGB(0,0,255), RGB(255,255,0), bprintf ("%li Personen", Sim.Persons.GetNumUsed()));
     // Widescreen: clear the strip right of the 640 area when the airport did not draw it (rooms, menus)
-    if (gScreenW > 640 && !gWideStripDrawn) {
+    if (gScreenW > 640) {
         SB_CBitmapKey StripKey(PrimaryBm);
         if (StripKey.Bitmap != nullptr) {
-            for (SLONG y = 0; y < 480; y++) {
+            // airport drew the strip down to y=440 (status bar band below stays black)
+            for (SLONG y = gWideStripDrawn ? 440 : 0; y < 480; y++) {
                 memset(static_cast<char *>(StripKey.Bitmap) + y * StripKey.lPitch + 640 * 2, 0, (gScreenW - 640) * 2);
             }
         }

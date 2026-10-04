@@ -3126,6 +3126,10 @@ BOOL SIM::LoadGame(SLONG Number) {
     InputFile >> Airport;
     InputFile.ReadTrap(100);
 
+    if (gScreenMaxW > 640) {
+        Airport.DoHashBuilds(); // wide buckets (c+5) are not in saves made with the option off
+    }
+
     InputFile >> LastAnzPeopleOnScreen;
     InputFile.ReadTrap(100);
 
