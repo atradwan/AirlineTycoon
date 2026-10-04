@@ -23,7 +23,6 @@ BOOL gWideStripDrawn = FALSE;
 SLONG gPresentW = 640;
 SLONG gBlendFromW = 640;
 SLONG gUiOffsetX = 0;
-BOOL gMouseUiLatched = FALSE;
 BOOL gMouseUiSpace = FALSE;
 
 //--------------------------------------------------------------------------------------------

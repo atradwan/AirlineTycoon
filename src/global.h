@@ -39,7 +39,6 @@ extern BOOL gWideStripDrawn;
 extern SLONG gPresentW;
 extern SLONG gBlendFromW;
 extern SLONG gUiOffsetX;
-extern BOOL gMouseUiLatched;
 extern BOOL gMouseUiSpace;
 
 //--------------------------------------------------------------------------------------------
@@ -89,6 +88,8 @@ extern SB_CCursor *pCursor;
 extern SLONG gRepairPrice[];
 extern SLONG gWerbePrice[];
 extern SLONG RightAirportClip;
+// Right culling edge of the airport view: the full screen width unless a dialog narrowed it (378).
+inline SLONG AirportRightClip() { return RightAirportClip == 640 ? gScreenW : RightAirportClip; }
 extern SB_CBitmapMain *bitmapMain;
 extern GfxMain *pGfxMain;
 extern GfxLib *pGLibStd;

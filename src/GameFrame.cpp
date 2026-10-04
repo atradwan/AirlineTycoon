@@ -496,7 +496,6 @@ static bool WideUiSpaceAt(const CPoint &pos) {
 static bool MapWideMouse(CPoint *pos, int kind, int b) {
     sCursorFullX = -1;
     if (gPresentW <= 640) {
-        gMouseUiLatched = FALSE;
         gMouseUiSpace = FALSE;
         sBtnDown[0] = sBtnDown[1] = false;
         sBtnDropped[0] = sBtnDropped[1] = false;
@@ -542,7 +541,6 @@ static bool MapWideMouse(CPoint *pos, int kind, int b) {
             sBtnDropped[b] = false;
         }
     }
-    gMouseUiLatched = (sBtnDown[0] || sBtnDown[1]) ? TRUE : FALSE;
     gMouseUiSpace = ui ? TRUE : FALSE;
     return keep;
 }
