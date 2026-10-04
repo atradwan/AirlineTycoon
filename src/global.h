@@ -27,6 +27,15 @@ extern SLONG gBlendState;
 extern SLONG gFramesToDrawBeforeFirstBlend;
 
 //--------------------------------------------------------------------------------------------
+// Widescreen airport: gScreenW = visible width of the primary bitmap (640 unless OptionWideAirport),
+// gScreenMaxW = allocated width (640 or WIDE_MAX_W, fixed at startup), gWideStripDrawn = airport drew x>=640 this frame
+//--------------------------------------------------------------------------------------------
+constexpr SLONG WIDE_MAX_W = 1120;
+extern SLONG gScreenW;
+extern SLONG gScreenMaxW;
+extern BOOL gWideStripDrawn;
+
+//--------------------------------------------------------------------------------------------
 // Flags für Cheats:
 //--------------------------------------------------------------------------------------------
 extern BOOL CheatRunningman;

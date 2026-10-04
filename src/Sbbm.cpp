@@ -497,7 +497,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                     }
 
                     // if (((CStdRaum*)Sim.Players.Players[Sim.localPlayer].LocationWin)->PicBitmap.Size.y==480)
-                    PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
+                    PrimaryBm.SetClipRect(CRect(0, 0, gScreenW, 480));
                     /*else
                       PrimaryBm.SetClipRect(CRect(0,0,640,440)); */
 
@@ -512,7 +512,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                                 if (SrcKey.Bitmap != nullptr) {
                                     for (SLONG y = 0; y < 480; y++) {
                                         memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch,
-                                               640 * 2);
+                                               gScreenW * 2);
                                     }
                                 }
                             }
@@ -521,7 +521,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                     } else if (gBlendState != 0) {
                         ColorFX.ApplyOn2(gBlendState, gBlendBm.pBitmap, 8 - gBlendState, gBlendBm2.pBitmap, &PrimaryBm);
                     }
-                    PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
+                    PrimaryBm.SetClipRect(CRect(0, 0, gScreenW, 480));
 
                     gBlendState--;
                 }
@@ -604,6 +604,17 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
 
     // TextOut (0, 20, RGB(0,0,255), RGB(255,255,0), bprintf ("%f FPS", GetFrameRate()));
     // TextOut (0, 32, RGB(0,0,255), RGB(255,255,0), bprintf ("%li Personen", Sim.Persons.GetNumUsed()));
+    // Widescreen: clear the strip right of the 640 area when the airport did not draw it (rooms, menus)
+    if (gScreenW > 640 && !gWideStripDrawn) {
+        SB_CBitmapKey StripKey(PrimaryBm);
+        if (StripKey.Bitmap != nullptr) {
+            for (SLONG y = 0; y < 480; y++) {
+                memset(static_cast<char *>(StripKey.Bitmap) + y * StripKey.lPitch + 640 * 2, 0, (gScreenW - 640) * 2);
+            }
+        }
+    }
+    gWideStripDrawn = FALSE;
+
     Bench.FlipTime.Start();
     PrimaryBm.Flip();
     Bench.FlipTime.Stop();

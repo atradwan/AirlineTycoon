@@ -23,10 +23,13 @@
 #include "StdRaum.h"
 #include "Synthese.h"
 
+#include <algorithm>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_hints.h>
 
 extern SBNetwork gNetwork;
+extern CString MakeVideoPath;
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -205,11 +208,25 @@ void GameFrame::UpdateWindow() const {
     UpdateFrameSize();
 }
 
-constexpr SLONG getAspectWidth(SLONG height) { return static_cast<SLONG>(static_cast<float>(height) * (640.0f / 480.0f)); }
+static float getAspectWidthRatio() { return static_cast<float>(gScreenW) / 480.0f; }
+
+static SLONG getAspectWidth(SLONG height) { return static_cast<SLONG>(static_cast<float>(height) * getAspectWidthRatio()); }
+
+// Visible width of the primary bitmap for a window of size w x h. Only wider than 640 if the
+// widescreen airport was enabled at startup (gScreenMaxW > 640); never exceeds the allocated width.
+static SLONG computeScreenW(SLONG w, SLONG h) {
+    if (gScreenMaxW <= 640 || w <= 0 || h <= 0) {
+        return 640;
+    }
+    const SLONG sw = static_cast<SLONG>(std::lround(480.0 * static_cast<double>(w) / static_cast<double>(h)));
+    return std::min(std::max(sw, static_cast<SLONG>(640)), gScreenMaxW);
+}
 
 void GameFrame::UpdateFrameSize() const {
     SLONG screenW = 0, screenH = 0;
     SDL_GetWindowSize(m_hWnd, &screenW, &screenH);
+    gScreenW = computeScreenW(screenW, screenH);
+    PrimaryBm.PrimaryBm.SetSourceWidth(gScreenW);
     SDL_RenderSetLogicalSize(lpDD, screenW, screenH);
     // update setting file
     Sim.Options.OptionScreenWindowedWidth = screenW;
@@ -240,7 +257,7 @@ void GameFrame::TranslatePointToGameSpace(CPoint *p) const {
     }
 
     x /= static_cast<FLOAT>(screenW);
-    x *= 640;
+    x *= static_cast<FLOAT>(gScreenW);
     y /= static_cast<FLOAT>(screenH);
     y *= 480;
 
@@ -261,7 +278,7 @@ void GameFrame::TranslatePointToScreenSpace(SLONG &x, SLONG &y) const {
 
     FLOAT _x = static_cast<FLOAT>(x);
     FLOAT _y = static_cast<FLOAT>(y);
-    _x /= 640;
+    _x /= static_cast<FLOAT>(gScreenW);
     _x *= static_cast<FLOAT>(screenW);
     _y /= 480;
     _y *= static_cast<FLOAT>(screenH);
@@ -327,8 +344,10 @@ GameFrame::GameFrame() {
 
     pGfxMain = new GfxMain(lpDD);
 
-    PrimaryBm.ReSize(h, bFullscreen, XY(640, 480));
-    PrimaryBm.ReSizePartB(h, bFullscreen, XY(640, 480));
+    // Widescreen airport: allocate the wide bitmap once (restart to toggle); never when recording video
+    gScreenMaxW = (Sim.Options.OptionWideAirport != 0 && MakeVideoPath.GetLength() == 0) ? WIDE_MAX_W : 640;
+    PrimaryBm.ReSize(h, bFullscreen, XY(gScreenMaxW, 480));
+    PrimaryBm.ReSizePartB(h, bFullscreen, XY(gScreenMaxW, 480));
     pCursor = new SB_CCursor(&PrimaryBm.PrimaryBm);
     PrimaryBm.PrimaryBm.AssignCursor(pCursor);
 
@@ -621,7 +640,7 @@ void GameFrame::PrepareFade() {
 
         if (SrcKey.Bitmap != nullptr) {
             for (SLONG y = 0; y < 480; y++) {
-                memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, 640 * 2);
+                memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, gScreenW * 2);
             }
         }
     }
@@ -754,7 +773,7 @@ void GameFrame::OnPaint() {
                     py = gMousePosition.y + 32;
                 } else {
                     py = gMousePosition.y;
-                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < 630) {
+                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < gScreenW - 10) {
                         px = gMousePosition.x + 32;
                     } else {
                         px = gMousePosition.x - 5 - gToolTipBm.Size.x;
@@ -856,7 +875,7 @@ void GameFrame::OnPaint() {
                 SB_CBitmapKey TgtKey(*gBlendBm.pBitmap);
 
                 for (SLONG y = 0; y < 480; y++) {
-                    memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, 640 * 2);
+                    memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, gScreenW * 2);
                 }
             }
 

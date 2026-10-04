@@ -298,7 +298,7 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *DestBitmap, SLONG Step2, 
     UWORD *Table = BlendTables.getData() + (Step << 9);
     UWORD *Table2 = BlendTables.getData() + (Step2 << 9);
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
+    BUFFER_V<UWORD> PixelBuffer(gScreenMaxW);
 
     SB_CBitmapKey Key(*DestBitmap);
     SB_CBitmapKey Key2(*SrcBitmap2);
@@ -494,7 +494,7 @@ void SB_CColorFX::BlitWhiteTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtB
     static UWORD *Table1 = BlendTables.getData() + (2 << 9);
     static UWORD *Table2 = BlendTables.getData() + (6 << 9);
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
+    BUFFER_V<UWORD> PixelBuffer(gScreenMaxW);
 
     IsPaintingTextBubble = TRUE;
 
@@ -726,7 +726,7 @@ void SB_CColorFX::BlitTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     UWORD *Table1 = BlendTables.getData() + ((AnzSteps / 2) << 9);
     UWORD *Table2 = BlendTables.getData() + ((AnzSteps / 2) << 9);
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
+    BUFFER_V<UWORD> PixelBuffer(gScreenMaxW);
 
     CRect ClipRect = TgtBitmap->GetClipRect();
 
@@ -926,7 +926,7 @@ void SB_CColorFX::BlitAlpha(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     if (SrcBitmap == nullptr) {
         return;
     }
-    if (TargetPos.x >= 640 || TargetPos.x + SrcBitmap->GetXSize() < 0) {
+    if (TargetPos.x >= gScreenW || TargetPos.x + SrcBitmap->GetXSize() < 0) {
         return;
     }
 
@@ -935,7 +935,7 @@ void SB_CColorFX::BlitAlpha(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     UWORD *p = nullptr;
     UWORD *pp = nullptr;
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
+    BUFFER_V<UWORD> PixelBuffer(gScreenMaxW);
 
     XY t = TargetPos;
 
@@ -1049,7 +1049,7 @@ void SB_CColorFX::BlitAlpha(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
 // Blitten mit Glow-Effekt fürs Tutorial:
 //--------------------------------------------------------------------------------------------
 void SB_CColorFX::BlitGlow(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap, const XY &TargetPos) {
-    if (TargetPos.x >= 640 || TargetPos.x + SrcBitmap->GetXSize() < 0) {
+    if (TargetPos.x >= gScreenW || TargetPos.x + SrcBitmap->GetXSize() < 0) {
         return;
     }
 
@@ -1058,7 +1058,7 @@ void SB_CColorFX::BlitGlow(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap,
     UWORD *p = nullptr;
     UWORD *pp = nullptr;
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
+    BUFFER_V<UWORD> PixelBuffer(gScreenMaxW);
 
     XY t = TargetPos;
 

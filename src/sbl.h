@@ -211,6 +211,8 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
     SLONG Flip(void);
     SLONG Present(void);
     void SetTarget(XY offset, XY size);
+    // Visible source width (<= Size.x). 0 or Size.x = whole bitmap.
+    void SetSourceWidth(SLONG w) { SourceW = w; }
     void SetVSync(BOOL toggle) { SDL_RenderSetVSync(lpDD, toggle); }
 
     void AssignCursor(SB_CCursor *c) { Cursor = c; }
@@ -222,6 +224,7 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
 
     XY TargetSize{640, 480};
     XY TargetOffset{0, 0};
+    SLONG SourceW{0};
 
     SDL_Window *Window{};
     SB_CCursor *Cursor{};

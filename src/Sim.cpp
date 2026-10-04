@@ -3979,6 +3979,9 @@ void COptions::ReadOptions() {
         if (!reg.ReadRegistryKey_b(OptionKeepAspectRatio)) {
             OptionKeepAspectRatio = 1;
         }
+        if (!reg.ReadRegistryKey_b(OptionWideAirport)) {
+            OptionWideAirport = 0;
+        }
         if (!reg.ReadRegistryKey_u(OptionTicketPriceIncrement)) {
             OptionTicketPriceIncrement = 10;
         }
@@ -4258,6 +4261,7 @@ void COptions::WriteOptions() {
     reg.WriteRegistryKeyEx_l(gLanguage, "OptionLanguage");
     reg.WriteRegistryKey_l(OptionFullscreen);
     reg.WriteRegistryKey_b(OptionKeepAspectRatio);
+    reg.WriteRegistryKey_b(OptionWideAirport);
     reg.WriteRegistryKey_u(OptionTicketPriceIncrement);
     reg.WriteRegistryKey_u(OptionRentOfficeTriggerPercent);
     reg.WriteRegistryKey_u(OptionRentOfficeMinAvailable);
