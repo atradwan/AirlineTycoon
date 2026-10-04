@@ -938,7 +938,7 @@ void AirportView::OnPaint() {
                     Index = min(max(Index, SLONG(0)), hash.AnzEntries() - 1);
                 }
 
-                if (Index < 0 || Index >= hash.AnzEntries()) {
+                if (gHallMargin == 0 && (Index < 0 || Index >= hash.AnzEntries())) {
                     AtDebugBreak();
                 }
 
