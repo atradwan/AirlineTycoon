@@ -477,6 +477,72 @@ GameFrame::~GameFrame() {
     hprintf("logging ends..");
 }
 
+// Widescreen airport frames: the UI (status bar, menus, dialogs) is drawn centred through an alias, so mouse events that
+// belong to the UI are shifted into 640 space; clicks beside the UI area are dropped. The space is locked on button down.
+static bool sMouseDropped = false;       // the latched press started outside the UI area
+static SLONG sCursorFullX = -1;          // unshifted mouse x (full coords) of the last mouse event if it was in UI space, for drawing the cursor; else -1
+
+static bool WideUiSpaceAt(const CPoint &pos) {
+    if (Sim.localPlayer == -1 || Sim.localPlayer >= Sim.Players.Players.AnzEntries()) {
+        return pos.y >= 440;
+    }
+    const CStdRaum *w = Sim.Players.Players[Sim.localPlayer].LocationWin;
+    return pos.y >= 440 || (w != nullptr && (w->MenuIsOpen() != 0 || w->IsDialogOpen() != 0));
+}
+
+// Returns false if the event must be dropped. kind: 0 = move, 1 = button down, 2 = button up.
+static bool MapWideMouse(CPoint *pos, int kind) {
+    sCursorFullX = -1;
+    if (gPresentW <= 640) {
+        gMouseUiLatched = FALSE;
+        gMouseUiSpace = FALSE;
+        sMouseDropped = false;
+        return true;
+    }
+
+    bool ui = false;
+    if (gMouseUiLatched) {
+        ui = gMouseUiSpace != FALSE;
+    } else {
+        ui = WideUiSpaceAt(*pos);
+    }
+
+    if (kind == 1 && !gMouseUiLatched) {
+        gMouseUiLatched = TRUE;
+        sMouseDropped = false;
+    }
+    gMouseUiSpace = ui ? TRUE : FALSE;
+
+    bool keep = true;
+    if (ui) {
+        sCursorFullX = pos->x;
+        pos->x -= gUiOffsetX;
+        if (pos->x < 0 || pos->x > 639) {
+            if (kind == 0) {
+                if (pos->x < 0) {
+                    pos->x = 0; // hover only
+                } else {
+                    pos->x = 639;
+                }
+            } else {
+                keep = false;
+            }
+        }
+    }
+
+    if (kind == 1 && !keep) {
+        sMouseDropped = true;
+    }
+    if (kind == 2) {
+        if (gMouseUiLatched && sMouseDropped) {
+            keep = false;
+        }
+        gMouseUiLatched = FALSE;
+        sMouseDropped = false;
+    }
+    return keep;
+}
+
 void GameFrame::ProcessEvent(const SDL_Event &event) const {
     switch (event.type) {
     case SDL_WINDOWEVENT: {
@@ -531,6 +597,7 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEMOTION: {
         CPoint pos = CPoint(event.motion.x, event.motion.y);
         TranslatePointToGameSpace(&pos);
+        MapWideMouse(&pos, 0);
         FrameWnd->OnMouseMove(0, pos);
     } break;
     case SDL_TEXTINPUT:
@@ -545,6 +612,9 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEBUTTONDOWN: {
         CPoint pos = CPoint(event.button.x, event.button.y);
         TranslatePointToGameSpace(&pos);
+        if (!MapWideMouse(&pos, 1)) {
+            break;
+        }
         if (event.button.button == SDL_BUTTON_LEFT) {
             if (event.button.clicks == 2) {
                 FrameWnd->OnLButtonDblClk(WM_LBUTTONDBLCLK, pos);
@@ -561,6 +631,9 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEBUTTONUP: {
         CPoint pos = CPoint(event.button.x, event.button.y);
         TranslatePointToGameSpace(&pos);
+        if (!MapWideMouse(&pos, 2)) {
+            break;
+        }
         if (event.button.button == SDL_BUTTON_LEFT) {
             FrameWnd->OnLButtonUp(WM_LBUTTONUP, pos);
         } else if (event.button.button == SDL_BUTTON_RIGHT) {
@@ -633,6 +706,8 @@ void GameFrame::OnSysKeyUp(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/) {}
 //--------------------------------------------------------------------------------------------
 void GameFrame::PrepareFade() {
     gBlendFromW = gPresentW;
+    const SLONG oldViewOffset = PrimaryBm.PrimaryBm.GetViewOffset();
+    PrimaryBm.PrimaryBm.SetViewOffset(0); // copies gScreenW columns of the real surface
     gBlendBm.ReSize(PrimaryBm.Size);
 
     // Erklärung, bei der Kopie dieses Code-Fragments...
@@ -646,6 +721,7 @@ void GameFrame::PrepareFade() {
             }
         }
     }
+    PrimaryBm.PrimaryBm.SetViewOffset(oldViewOffset);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -687,6 +763,7 @@ void GameFrame::OnPaint() {
         TXY<SLONG> rcWindow;
 
         if (bCursorCaptured != 0) {
+            const SLONG tipW = gMouseUiSpace ? 640 : gPresentW; // tooltip clamp width (UI space is the centred 640 area)
             // Administrate ToolTip
             if (::ToolTipId != ToolTipNewId) {
                 ::ToolTipId = ToolTipNewId;
@@ -752,7 +829,7 @@ void GameFrame::OnPaint() {
                     gToolTipBm.BlitFrom(gToolTipBms[2], SizeX - 28, 0);
 
                     gToolTipBm.PrintAt(str, FontBigGrey, TEC_FONT_CENTERED, 0, 2, SizeX, 28);
-                    Limit(SLONG(0), ToolTipPos.x, gPresentW - 1 - SizeX);
+                    Limit(SLONG(0), ToolTipPos.x, tipW - 1 - SizeX);
 
                     ToolTipState = TRUE;
                 }
@@ -762,20 +839,28 @@ void GameFrame::OnPaint() {
                 SLONG px = gMousePosition.x + 16 - gToolTipBm.Size.x / 2;
                 SLONG py = 0;
 
+                // Widescreen airport frame: tooltips in UI space go through the centred alias, world tooltips use full coords
+                const SLONG oldViewOffset = PrimaryBm.PrimaryBm.GetViewOffset();
+                if (gWideStripDrawn) {
+                    PrimaryBm.PrimaryBm.SetViewOffset(gUiOffsetX); // status bar is always centred
+                }
                 UpdateStatusBar();
+                if (gWideStripDrawn) {
+                    PrimaryBm.PrimaryBm.SetViewOffset(gMouseUiSpace ? gUiOffsetX : 0);
+                }
 
                 if (px < 2) {
                     px = 2;
                 }
-                if (px > gPresentW - 1 - gToolTipBm.Size.x) {
-                    px = gPresentW - 1 - gToolTipBm.Size.x;
+                if (px > tipW - 1 - gToolTipBm.Size.x) {
+                    px = tipW - 1 - gToolTipBm.Size.x;
                 }
 
                 if (gMousePosition.y < 439) {
                     py = gMousePosition.y + 32;
                 } else {
                     py = gMousePosition.y;
-                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < gPresentW - 10) {
+                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < tipW - 10) {
                         px = gMousePosition.x + 32;
                     } else {
                         px = gMousePosition.x - 5 - gToolTipBm.Size.x;
@@ -787,6 +872,7 @@ void GameFrame::OnPaint() {
                 }
 
                 ColorFX.BlitWhiteTrans(gToolTipBm.pBitmap, &PrimaryBm.PrimaryBm, XY(px, py));
+                PrimaryBm.PrimaryBm.SetViewOffset(oldViewOffset);
             }
 
             if (gUseWindowsMouse == 0) {
@@ -841,6 +927,9 @@ void GameFrame::OnPaint() {
                             MouseCursorOffset = XY(0, 16);
                         }
                         SLONG _x = gMousePosition.x;
+                        if (sCursorFullX >= 0 && gPresentW > 640) {
+                            _x = sCursorFullX + 2;
+                        }
                         SLONG _y = gMousePosition.y;
                         TranslatePointToScreenSpace(_x, _y);
                         pCursor->MoveImage(_x - MouseCursorOffset.x, _y - MouseCursorOffset.y);
@@ -864,6 +953,7 @@ void GameFrame::OnPaint() {
             if (Sim.localPlayer != -1 && (Sim.Players.Players[Sim.localPlayer].LocationWin != nullptr)) {
                 (Sim.Players.Players[Sim.localPlayer].LocationWin)->StatusCount = 32;
             }
+            PrimaryBm.PrimaryBm.SetViewOffset(0); // pause: whole real surface, no UI alias
             gBlendBm.ReSize(PrimaryBm.Size);
 
             // Definitiv extrem krank: Wenn man per FastBlt Daten aus der Grafikkarte
@@ -1007,6 +1097,9 @@ void GameFrame::OnMouseMove(UINT /*nFlags*/, CPoint point) {
     if (gUseWindowsMouse == 0) {
         if ((bActive != 0) && (pCursor != nullptr) && bNoQuickMouse == FALSE) {
             SLONG _x = gMousePosition.x;
+            if (sCursorFullX >= 0 && gPresentW > 640) {
+                _x = sCursorFullX + 2; // draw the cursor where the mouse really is (UI space is shifted)
+            }
             SLONG _y = gMousePosition.y;
             FrameWnd->TranslatePointToScreenSpace(_x, _y);
             pCursor->MoveImage(_x - MouseCursorOffset.x, _y - MouseCursorOffset.y);

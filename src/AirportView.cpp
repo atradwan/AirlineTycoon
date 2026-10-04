@@ -1404,6 +1404,10 @@ void AirportView::OnPaint() {
                 }
             }
 
+            // Widescreen: status bar, menus, dialogs and tooltips are drawn centred through a 640 wide alias of the primary
+            gUiOffsetX = (gScreenW - 640) / 2;
+            PrimaryBm.PrimaryBm.SetViewOffset(gUiOffsetX);
+
             PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
 
             // Die Statuszeile mit ihren Anzeigen...

@@ -489,6 +489,7 @@ bool SB_CPrimaryBitmap::FastClip(CRect clipRect, POINT *pPoint, RECT *pRect) {
 }
 
 SLONG SB_CPrimaryBitmap::Flip() {
+    SetViewOffset(0);
     if (lpDD != nullptr) {
         /*
          * None of the SDL renderers actually lock the GPU resource,
@@ -518,6 +519,33 @@ SLONG SB_CPrimaryBitmap::Flip() {
     }
 
     return Present();
+}
+
+void SB_CPrimaryBitmap::SetViewOffset(SLONG x) {
+    if (x == ViewOffset) {
+        return;
+    }
+    if (ViewOffset != 0) { // leave the alias
+        lpDDSurface = RealSurface;
+        Size.x = FullWidth;
+        SDL_FreeSurface(AliasSurface);
+        AliasSurface = nullptr;
+        RealSurface = nullptr;
+        ViewOffset = 0;
+    }
+    if (x > 0 && lpDDSurface != nullptr && x + 640 <= lpDDSurface->w) {
+        RealSurface = lpDDSurface;
+        FullWidth = Size.x;
+        AliasSurface = SDL_CreateRGBSurfaceWithFormatFrom(static_cast<Uint8 *>(RealSurface->pixels) + x * 2, 640, RealSurface->h, 16, RealSurface->pitch,
+                                                          SDL_PIXELFORMAT_RGB565);
+        if (AliasSurface == nullptr) {
+            RealSurface = nullptr;
+            return;
+        }
+        lpDDSurface = AliasSurface;
+        Size.x = 640;
+        ViewOffset = x;
+    }
 }
 
 SLONG SB_CPrimaryBitmap::Present() {
@@ -591,6 +619,7 @@ SLONG SB_CPrimaryBitmap::Create(SDL_Renderer **out, SDL_Window *Wnd, unsigned sh
 }
 
 ULONG SB_CPrimaryBitmap::Release() {
+    SetViewOffset(0);
     if (lpDD == nullptr) {
         if (lpDDSurface != nullptr) {
             SDL_FreeSurface(lpDDSurface);

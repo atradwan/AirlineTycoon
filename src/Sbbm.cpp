@@ -11,6 +11,7 @@
 #include "helper.h"
 #include "Proto.h"
 
+#include <algorithm>
 #include <SDL_ttf.h>
 
 extern SB_CColorFX ColorFX;
@@ -489,6 +490,7 @@ static bool BlendIsActive() {
 }
 
 void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
+    PrimaryBm.SetViewOffset(0); // blends, strip clear and present always work on the whole surface
     // Widescreen: a fade between frames of different presented width (wide airport vs 640 room) is skipped (hard cut)
     if (gScreenW > 640 && BlendIsActive() &&
         gBlendFromW != (gWideStripDrawn ? gScreenW : 640)) {
@@ -593,6 +595,12 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
         gFramesToDrawBeforeFirstBlend--;
     }
 
+    // Widescreen: the network overlay is centred in the airport (UI alias), unchanged in rooms
+    const bool uiAlias = gScreenW > 640 && gWideStripDrawn;
+    if (uiAlias) {
+        PrimaryBm.SetViewOffset(gUiOffsetX);
+    }
+
     if (gNetworkBms.AnzEntries() > 0 && (gNetworkBms[0].Size.y != 0) && (Sim.Players.Players[Sim.localPlayer].LocationWin != nullptr)) {
         BlitFrom(gNetworkBms[0], (640 - ((gNetworkBms[0].Size.x + 3) & 0xfffc)) / 2, (440 - gNetworkBms[0].Size.y) / 2);
 
@@ -617,14 +625,18 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
 
     // TextOut (0, 20, RGB(0,0,255), RGB(255,255,0), bprintf ("%f FPS", GetFrameRate()));
     // TextOut (0, 32, RGB(0,0,255), RGB(255,255,0), bprintf ("%li Personen", Sim.Persons.GetNumUsed()));
+    PrimaryBm.SetViewOffset(0);
+
     // Widescreen: latch the width of the frame being presented (airport = wide, rooms/menus = 640).
     const SLONG newPresentW = (gScreenW > 640 && gWideStripDrawn) ? gScreenW : 640;
     if (newPresentW > 640) {
-        // the airport drew the strip down to y=440; clear the status band below it
+        // the airport drew the world down to y=440 and a centred 640 status bar; clear the side parts of the status band
         SB_CBitmapKey StripKey(PrimaryBm);
         if (StripKey.Bitmap != nullptr) {
             for (SLONG y = 440; y < 480; y++) {
-                memset(static_cast<char *>(StripKey.Bitmap) + y * StripKey.lPitch + 640 * 2, 0, (gScreenW - 640) * 2);
+                char *row = static_cast<char *>(StripKey.Bitmap) + y * StripKey.lPitch;
+                memset(row, 0, gUiOffsetX * 2);
+                memset(row + (gUiOffsetX + 640) * 2, 0, std::max(static_cast<SLONG>(0), gScreenW - 640 - gUiOffsetX) * 2);
             }
         }
     }
