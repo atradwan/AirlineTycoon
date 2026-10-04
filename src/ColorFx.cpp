@@ -308,7 +308,10 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *DestBitmap, SLONG Step2, 
         return;
     }
 
-    sizex = std::min(DestBitmap->GetXSize(), SrcBitmap2->GetXSize()); // Src2 may be narrower (640 pause bitmap vs wide primary)
+    sizex = DestBitmap->GetXSize();
+    if (gScreenMaxW > 640) {
+        sizex = std::min(sizex, SrcBitmap2->GetXSize()); // widescreen: Src2 may be a 640 wide bitmap (pause)
+    }
 
     CRect ClipRect = DestBitmap->GetClipRect();
 
@@ -470,7 +473,10 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *SrcBitmap, SLONG Step2, S
                 pop   ebp
         }
 #else
-        sizex = std::min(SrcBitmap->GetXSize(), std::min(SrcBitmap2->GetXSize(), TgtBitmap->GetXSize()));
+        sizex = SrcBitmap->GetXSize();
+        if (gScreenMaxW > 640) {
+            sizex = std::min(sizex, std::min(SrcBitmap2->GetXSize(), TgtBitmap->GetXSize()));
+        }
 
         for (cx = sizex; cx > 0; cx--) {
             *ppp = Table[(reinterpret_cast<UBYTE *>(p))[0]] + Table[256 + (reinterpret_cast<UBYTE *>(p))[1]] + Table2[(reinterpret_cast<UBYTE *>(pp))[0]] +

@@ -479,7 +479,9 @@ GameFrame::~GameFrame() {
 
 // Widescreen airport frames: the UI (status bar, menus, dialogs) is drawn centred through an alias, so mouse events that
 // belong to the UI are shifted into 640 space; clicks beside the UI area are dropped. The space is locked on button down.
-static bool sMouseDropped = false;       // the latched press started outside the UI area
+static bool sBtnDown[2] = {false, false};    // per button (0 = left, 1 = right): press is latched
+static bool sBtnUi[2] = {false, false};      // the press started in UI space
+static bool sBtnDropped[2] = {false, false}; // the press started outside the UI area: ignore it and its release
 static SLONG sCursorFullX = -1;          // unshifted mouse x (full coords) of the last mouse event if it was in UI space, for drawing the cursor; else -1
 
 static bool WideUiSpaceAt(const CPoint &pos) {
@@ -490,28 +492,25 @@ static bool WideUiSpaceAt(const CPoint &pos) {
     return pos.y >= 440 || (w != nullptr && (w->MenuIsOpen() != 0 || w->IsDialogOpen() != 0));
 }
 
-// Returns false if the event must be dropped. kind: 0 = move, 1 = button down, 2 = button up.
-static bool MapWideMouse(CPoint *pos, int kind) {
+// Returns false if the event must be dropped. kind: 0 = move, 1 = button down, 2 = button up; b: 0 = left, 1 = right, -1 = other.
+static bool MapWideMouse(CPoint *pos, int kind, int b) {
     sCursorFullX = -1;
     if (gPresentW <= 640) {
         gMouseUiLatched = FALSE;
         gMouseUiSpace = FALSE;
-        sMouseDropped = false;
+        sBtnDown[0] = sBtnDown[1] = false;
+        sBtnDropped[0] = sBtnDropped[1] = false;
         return true;
     }
 
     bool ui = false;
-    if (gMouseUiLatched) {
-        ui = gMouseUiSpace != FALSE;
+    if (kind == 2 && b >= 0 && sBtnDown[b]) {
+        ui = sBtnUi[b]; // the release belongs to the space of its press
+    } else if (kind != 1 && (sBtnDown[0] || sBtnDown[1])) {
+        ui = sBtnDown[0] ? sBtnUi[0] : sBtnUi[1]; // moves while a button is held keep that press space
     } else {
         ui = WideUiSpaceAt(*pos);
     }
-
-    if (kind == 1 && !gMouseUiLatched) {
-        gMouseUiLatched = TRUE;
-        sMouseDropped = false;
-    }
-    gMouseUiSpace = ui ? TRUE : FALSE;
 
     bool keep = true;
     if (ui) {
@@ -530,18 +529,26 @@ static bool MapWideMouse(CPoint *pos, int kind) {
         }
     }
 
-    if (kind == 1 && !keep) {
-        sMouseDropped = true;
-    }
-    if (kind == 2) {
-        if (gMouseUiLatched && sMouseDropped) {
-            keep = false;
+    if (b >= 0) {
+        if (kind == 1) {
+            sBtnDown[b] = true;
+            sBtnUi[b] = ui;
+            sBtnDropped[b] = !keep;
+        } else if (kind == 2) {
+            if (sBtnDown[b] && sBtnDropped[b]) {
+                keep = false;
+            }
+            sBtnDown[b] = false;
+            sBtnDropped[b] = false;
         }
-        gMouseUiLatched = FALSE;
-        sMouseDropped = false;
     }
+    gMouseUiLatched = (sBtnDown[0] || sBtnDown[1]) ? TRUE : FALSE;
+    gMouseUiSpace = ui ? TRUE : FALSE;
     return keep;
 }
+
+// Maps an SDL mouse button to the latch index.
+static int WideButtonIndex(Uint8 button) { return button == SDL_BUTTON_LEFT ? 0 : (button == SDL_BUTTON_RIGHT ? 1 : -1); }
 
 void GameFrame::ProcessEvent(const SDL_Event &event) const {
     switch (event.type) {
@@ -597,7 +604,7 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEMOTION: {
         CPoint pos = CPoint(event.motion.x, event.motion.y);
         TranslatePointToGameSpace(&pos);
-        MapWideMouse(&pos, 0);
+        MapWideMouse(&pos, 0, -1);
         FrameWnd->OnMouseMove(0, pos);
     } break;
     case SDL_TEXTINPUT:
@@ -612,7 +619,7 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEBUTTONDOWN: {
         CPoint pos = CPoint(event.button.x, event.button.y);
         TranslatePointToGameSpace(&pos);
-        if (!MapWideMouse(&pos, 1)) {
+        if (!MapWideMouse(&pos, 1, WideButtonIndex(event.button.button))) {
             break;
         }
         if (event.button.button == SDL_BUTTON_LEFT) {
@@ -631,7 +638,7 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEBUTTONUP: {
         CPoint pos = CPoint(event.button.x, event.button.y);
         TranslatePointToGameSpace(&pos);
-        if (!MapWideMouse(&pos, 2)) {
+        if (!MapWideMouse(&pos, 2, WideButtonIndex(event.button.button))) {
             break;
         }
         if (event.button.button == SDL_BUTTON_LEFT) {
@@ -841,9 +848,6 @@ void GameFrame::OnPaint() {
 
                 // Widescreen airport frame: tooltips in UI space go through the centred alias, world tooltips use full coords
                 const SLONG oldViewOffset = PrimaryBm.PrimaryBm.GetViewOffset();
-                if (gWideStripDrawn) {
-                    PrimaryBm.PrimaryBm.SetViewOffset(gUiOffsetX); // status bar is always centred
-                }
                 UpdateStatusBar();
                 if (gWideStripDrawn) {
                     PrimaryBm.PrimaryBm.SetViewOffset(gMouseUiSpace ? gUiOffsetX : 0);

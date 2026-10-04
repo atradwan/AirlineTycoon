@@ -527,6 +527,7 @@ void SB_CPrimaryBitmap::SetViewOffset(SLONG x) {
     }
     if (ViewOffset != 0) { // leave the alias
         lpDDSurface = RealSurface;
+        SDL_SetClipRect(lpDDSurface, nullptr); // full (0,0,Size.x,480) again; callers set their own clip
         Size.x = FullWidth;
         SDL_FreeSurface(AliasSurface);
         AliasSurface = nullptr;
@@ -543,6 +544,7 @@ void SB_CPrimaryBitmap::SetViewOffset(SLONG x) {
             return;
         }
         lpDDSurface = AliasSurface;
+        SDL_SetClipRect(lpDDSurface, nullptr); // (0,0,640,480)
         Size.x = 640;
         ViewOffset = x;
     }
