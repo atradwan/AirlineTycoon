@@ -3984,7 +3984,7 @@ void COptions::ReadOptions() {
             OptionKeepAspectRatio = 1;
         }
         if (!reg.ReadRegistryKey_b(OptionWideAirport)) {
-            OptionWideAirport = 0;
+            OptionWideAirport = 1;
         }
         if (!reg.ReadRegistryKey_u(OptionTicketPriceIncrement)) {
             OptionTicketPriceIncrement = 10;
