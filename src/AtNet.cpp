@@ -1287,6 +1287,14 @@ void PumpNetwork() {
                         StageStart = Message.MemPointer;
                         Message >> qPending.RentCities;
                     }
+
+                    /* A message that parses but does not end where the last player ends was read
+                       with a different layout than it was written with. */
+                    Stage = "end";
+                    StageStart = Message.MemPointer;
+                    if (Message.BytesRemaining() != 0) {
+                        TeakLibW_Exception(FNL, "%ld bytes left over", static_cast<long>(Message.BytesRemaining()));
+                    }
                     bParsed = true;
                 } catch (TeakLibException &ex) {
                     AT_Log("SYNC_PLANES rejected: %s", ex.what());
@@ -1481,7 +1489,7 @@ void PumpNetwork() {
                     break;
                 default:
                     hprintf("AtNet.cpp: Default case should not be reached.");
-                    DebugBreak();
+                    AtDebugBreak();
                 }
             } break;
 
@@ -1542,6 +1550,9 @@ void PumpNetwork() {
                     hprintf("Plane not in Album: %li, %li", PlayerNum, PlaneId);
                     NetTraceEvent("DROP name=%s reason=plane %ld of player %ld unknown", Translate_ATNET(MessageType), static_cast<long>(PlaneId),
                                   static_cast<long>(PlayerNum));
+
+                    /* Nothing was taken over, so the tail check below has nothing to say. */
+                    Message.MemPointer = static_cast<SLONG>(Message.MemBufferUsed);
                     break;
                 }
 
@@ -1791,7 +1802,7 @@ void PumpNetwork() {
                     break;
                 default:
                     hprintf("AtNet.cpp: Default case should not be reached.");
-                    DebugBreak();
+                    AtDebugBreak();
                 }
             } break;
 
@@ -3062,7 +3073,7 @@ void NetGenericSync(SLONG SyncId, SLONG Par) {
                 if (Sim.Players.Players[c].Owner != 1 && !Sim.Players.Players[c].IsOut && GenericSyncIdPars[c] != Par) {
                     DisplayBroadcastMessage(bprintf("NetGenericSync (%li): %li vs. %li\n", SyncId, Par, GenericSyncIdPars[c]));
                     AT_Log_I("AtNet", "Desync detected Id(%li): %li vs. %li\n", SyncId, Par, GenericSyncIdPars[c]);
-                    // DebugBreak();
+                    // AtDebugBreak();
                 }
             }
 
@@ -3144,7 +3155,7 @@ void NetGenericAsync(SLONG SyncId, SLONG Par, SLONG player) {
             if (Sim.Players.Players[c].Owner != 1 && !Sim.Players.Players[c].IsOut && GenericAsyncIdPars[d + c] != Par) {
                 DisplayBroadcastMessage(bprintf("NetGenericAsync (%li): %li vs. %li\n", SyncId, Par, GenericAsyncIdPars[d + c]));
                 AT_Log_I("AtNet", "Desync detected Id(%li): %li vs. %li\n", SyncId, Par, GenericSyncIdPars[d + c]);
-                // DebugBreak();
+                // AtDebugBreak();
             }
         }
 

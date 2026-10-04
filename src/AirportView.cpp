@@ -217,7 +217,7 @@ void AirportView::FocusCameraOnPos(XY Pos, BOOL Speed) {
         ViewPos.x += gMouseScrollSpeed;
         ClampViewX(ViewPos.x, 320);
         if (ViewPos.x < -1000) {
-            DebugBreak();
+            AtDebugBreak();
         }
     } else {
         gMouseScrollSpeed = 0;
@@ -245,7 +245,7 @@ void AirportView::FocusCameraOnPos(XY Pos, BOOL Speed) {
             ClampViewX(ViewPos.x, SizeX);
 
             if (ViewPos.x < -1000) {
-                DebugBreak();
+                AtDebugBreak();
             }
 
             // Spielfigur in Y-Richtung zentrieren:
@@ -283,7 +283,7 @@ void AirportView::FocusCameraOnPos(XY Pos, BOOL Speed) {
 
             ViewPos += CameraSpeed;
             if (ViewPos.x < -1000) {
-                DebugBreak();
+                AtDebugBreak();
             }
         } else // Scrolling:
         {
@@ -408,7 +408,7 @@ void AirportView::FocusCameraOnPos(XY Pos, BOOL Speed) {
     ClampViewX(ViewPos.x, SizeX);
 
     if (ViewPos.x < -1000) {
-        DebugBreak();
+        AtDebugBreak();
     }
 }
 
@@ -444,7 +444,7 @@ void AirportView::MoveCamera() {
                     MessagePump();
 
                     if (ViewPos.x < -1000) {
-                        DebugBreak();
+                        AtDebugBreak();
                     }
                 }
             }
@@ -499,7 +499,7 @@ void AirportView::CenterCameraOnPlayer() {
             ClampViewX(ViewPos.x, SizeX);
 
             if (ViewPos.x < -1000) {
-                DebugBreak();
+                AtDebugBreak();
             }
 
             if (Sim.Persons[PlayerIndex].ScreenPos.y < 155) {
@@ -525,7 +525,7 @@ void AirportView::OnPaint() {
     XY &ViewPos = Sim.Players.Players[PlayerNum].ViewPos;
 
     if (ViewPos.x < -1000) {
-        DebugBreak();
+        AtDebugBreak();
     }
 
     SLONG Fl1IndexMin = Bricks(static_cast<SLONG>(0x10000000) + 452);
@@ -743,7 +743,7 @@ void AirportView::OnPaint() {
                                 CRect(max(RangeDrawn - ViewPos.x, 0), 0, min(Airport.ClipMarkers[c].Position - ViewPos.x, RightClip), 440));
                             break;
                         default:
-                            DebugBreak();
+                            AtDebugBreak();
                         }
 
                         if (sizes[0] + sizes[1] > 0) {
@@ -878,7 +878,7 @@ void AirportView::OnPaint() {
                 SLONG Index = (ViewPos.x - Airport.LeftEnd) / BUILDHASHSIZE;
 
                 if (Index < 0 || Index >= Airport.HashBuilds.AnzEntries()) {
-                    DebugBreak();
+                    AtDebugBreak();
                 }
 
                 pBuilds = &Airport.HashBuilds[Index];
@@ -1917,7 +1917,7 @@ void AirportView::OnRButtonDown(UINT nFlags, CPoint point) {
             ViewPos.x = Pos.x;
 
             if (ViewPos.x < -1000) {
-                DebugBreak();
+                AtDebugBreak();
             }
 
             if (Sim.Options.OptionBlenden != 0) {
@@ -3073,7 +3073,7 @@ void AIRPORT::CalcPlates() {
 #define FUCK(a)                                                                                                                                                \
     {                                                                                                                                                          \
         if ((a) < 0 || (a) >= (PlateDimension.x - 20) * PlateDimension.y)                                                                                      \
-            DebugBreak();                                                                                                                                      \
+            AtDebugBreak();                                                                                                                                      \
     }
 
     LeftEnd = -99999;
@@ -3155,7 +3155,7 @@ void AIRPORT::CalcPlates() {
                     }
                     AnzDoors++;
                     if (AnzDoors >= Doors.AnzEntries()) {
-                        DebugBreak();
+                        AtDebugBreak();
                     }
                 } else if (Builds[c].BrickId == 0x10000000 + BRICK_KASTEN || Builds[c].BrickId == 0x10000000 + BRICK_ELECTRO) {
                     Builds[c].Par = UBYTE(AnzTriggers);
@@ -3166,7 +3166,7 @@ void AIRPORT::CalcPlates() {
 
                     AnzTriggers++;
                     if (AnzTriggers >= Triggers.AnzEntries()) {
-                        DebugBreak();
+                        AtDebugBreak();
                     }
                 }
                 break;
@@ -3707,7 +3707,7 @@ void AIRPORT::CalcPlates() {
                         ClipMarkers[AnzClipMarkers].Position = Builds[c].ScreenPos.x;
                         AnzClipMarkers++;
                         if (AnzClipMarkers >= ClipMarkers.AnzEntries()) {
-                            DebugBreak();
+                            AtDebugBreak();
                         }
                         break;
 
@@ -4047,7 +4047,7 @@ void AIRPORT::CalcCoordinates() {
                 }
 
                 if (Builds[c].Par == 0) {
-                    DebugBreak();
+                    AtDebugBreak();
                 }
             } else if (Builds[c].BrickId == 0x10000000 + RUNE_AREARU && Builds[c].Par == 0) {
                 for (d = 0; d < Builds.AnzEntries(); d++) {
@@ -4067,7 +4067,7 @@ void AIRPORT::CalcCoordinates() {
                     }
                 }
                 if (Builds[c].Par == 0) {
-                    DebugBreak();
+                    AtDebugBreak();
                 }
             }
         }
@@ -4294,7 +4294,7 @@ void AIRPORT::CalcSeats() {
                     y = CalcPlateYPosition(c, -10) - 5;
 
                     if (x < 0 || x >= SeatsTaken.AnzEntries() - 20) {
-                        DebugBreak();
+                        AtDebugBreak();
                     }
 
                     SeatsTaken[x] = UWORD(SeatsTaken[x] & (~(1 << (y * 2))));

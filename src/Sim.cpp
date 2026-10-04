@@ -65,9 +65,13 @@ extern SLONG gTimerCorrection;
 
 void CalcPlayerMaximums(bool bForce);
 
+// The format this build writes: version 1.9.1
+static const SLONG kCurrentSaveVersion = 1;
+static const SLONG kCurrentSaveVersionSub = 204;
+
 // Daten des aktuellen Savegames beim laden:
-SLONG SaveVersion = 1;
-SLONG SaveVersionSub = 204;
+SLONG SaveVersion = kCurrentSaveVersion;
+SLONG SaveVersionSub = kCurrentSaveVersionSub;
 
 // Öffnungszeiten:
 extern SLONG timeDutyOpen;
@@ -1860,7 +1864,7 @@ void SIM::DoTimeStep() {
                                         }
                                         break;
                                     case 2:
-                                        if (qPlane.Elektronik != 2) {
+                                        if (qPlane.Triebwerk != 2) {
                                             bCanHappenToThisPlane = true;
                                         }
                                         break;
@@ -1871,7 +1875,7 @@ void SIM::DoTimeStep() {
                                         break;
                                     default:
                                         hprintf("Sim.cpp: Default case should not be reached.");
-                                        DebugBreak();
+                                        AtDebugBreak();
                                     }
 
                                     if (bCanHappenToThisPlane) {
@@ -3299,6 +3303,14 @@ BOOL SIM::LoadGame(SLONG Number) {
         }
     }
 
+    /* The readers and writers that network messages share with the savegame look at these, so
+       they must describe the format this build writes, not the one just loaded. Otherwise a game
+       continued from an older savegame reads every message in the old layout until the next
+       save, and a peer that autosaves (an option each peer sets for itself) switches to the new
+       layout while the others keep the old one. */
+    SaveVersion = kCurrentSaveVersion;
+    SaveVersionSub = kCurrentSaveVersionSub;
+
     /* Every peer loads its own copy of the savegame, so this is the first chance to see whether
        they saved the same game. */
     NetTraceFingerprint("loaded");
@@ -3321,8 +3333,8 @@ void SIM::SaveGame(SLONG Number, const CString &Name) const {
     CString Filename = FullFilename((LPCTSTR)bprintf(pNamebaseStr, Number), SavegamePath);
     SLONG NumSaveGameCities = Cities.AnzEntries();
 
-    SaveVersion = 1;
-    SaveVersionSub = 204; // Version 1.9.1
+    SaveVersion = kCurrentSaveVersion;
+    SaveVersionSub = kCurrentSaveVersionSub;
 
     fs::path path{Filename.c_str()};
     fs::create_directory(path.parent_path());
@@ -3780,7 +3792,7 @@ void SIM::NetRefill(SLONG Type, SLONG City) const {
         break;
     default:
         hprintf("Sim.cpp: Default case should not be reached.");
-        DebugBreak();
+        AtDebugBreak();
     }
 
     Time = Time - Delta;
@@ -3885,19 +3897,19 @@ void SIM::SaveHighscores() {
                 k1 = k2 = k3 = k4 = k5 = 0;
             }
 
-            str = bprintf("%I64i;", k1);
+            str = bprintf("%lli;", k1);
             OutputFile.Write(reinterpret_cast<const UBYTE *>((LPCTSTR)str), str.GetLength());
 
-            str = bprintf("%I64i;", k2);
+            str = bprintf("%lli;", k2);
             OutputFile.Write(reinterpret_cast<const UBYTE *>((LPCTSTR)str), str.GetLength());
 
-            str = bprintf("%I64i;", k3);
+            str = bprintf("%lli;", k3);
             OutputFile.Write(reinterpret_cast<const UBYTE *>((LPCTSTR)str), str.GetLength());
 
-            str = bprintf("%I64i;", k4);
+            str = bprintf("%lli;", k4);
             OutputFile.Write(reinterpret_cast<const UBYTE *>((LPCTSTR)str), str.GetLength());
 
-            str = bprintf("%I64i\xd\xa", k5);
+            str = bprintf("%lli\xd\xa", k5);
             OutputFile.Write(reinterpret_cast<const UBYTE *>((LPCTSTR)str), str.GetLength());
         }
     } catch (TeakLibException &e) {
@@ -3956,7 +3968,7 @@ SLONG SIM::HoleKerosinPreis(SLONG typ) const {
         return Kerosin / 2;
     default:
         hprintf("Sim.cpp: Default case should not be reached.");
-        DebugBreak();
+        AtDebugBreak();
     }
     return 0;
 }

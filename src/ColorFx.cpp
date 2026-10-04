@@ -948,7 +948,7 @@ void SB_CColorFX::BlitAlpha(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     XY t = TargetPos;
 
     if (SrcBitmap->GetXSize() <= 0 || SrcBitmap->GetXSize() >= 640) {
-        DebugBreak();
+        AtDebugBreak();
     }
 
     CRect Rect;
@@ -1071,7 +1071,7 @@ void SB_CColorFX::BlitGlow(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap,
     XY t = TargetPos;
 
     if (SrcBitmap->GetXSize() <= 0 || SrcBitmap->GetXSize() >= 640) {
-        DebugBreak();
+        AtDebugBreak();
     }
 
     CRect Rect;
