@@ -9,6 +9,11 @@ if(AT_BUILD_LABEL)
     add_compile_definitions(AT_BUILD_LABEL="${AT_BUILD_LABEL}")
 endif()
 
+# HD-Rendering (Phase 2) braucht mehr als 4 GB Adressraum: nur 64-Bit-Builds
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "Airline Tycoon muss als 64-Bit-Programm gebaut werden (z. B. cmake -A x64).")
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Tidy")

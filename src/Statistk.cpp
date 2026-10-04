@@ -743,8 +743,7 @@ void CStatistik::OnPaint() {
 
     // Ein Patch: Die Exit-Bitmap nach der Statuszeile erneut zeichnen:
     if (ExitBm != nullptr) {
-        PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
-        PrimaryBm.BlitFrom(*ExitBm, ExitBmPos);
+        BlitIntoStatusBand(*ExitBm, ExitBmPos); // Breitbild (H17b): an der Position der breiten Statuszeile
     }
 
     CStdRaum::PumpToolTips();

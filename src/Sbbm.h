@@ -339,6 +339,11 @@ class SBPRIMARYBM {
     void Flip(XY WindowPos, BOOL ShowFPS = FALSE);
     BOOL IsFullscreen(void) { return (Fullscreen); }
     void SetVSync(BOOL toggle) { PrimaryBm.SetVSync(toggle); }
+    // Breitbild (H13): Bildbreite wechseln (640 = wie bisher), Size folgt
+    void SetFrameWidth(SLONG w) {
+        PrimaryBm.SetFrameWidth(w);
+        Size.x = PrimaryBm.GetXSize();
+    }
     dword Clear(dword color = 0);
 
     // Blit Services:

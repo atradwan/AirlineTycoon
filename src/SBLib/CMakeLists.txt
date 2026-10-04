@@ -40,5 +40,6 @@ target_link_libraries(SBLib
     PRIVATE
     common # interface that enables strict compiler warnings 
     SDL2::SDL2
+    SDL2::SDL2_image
     SDL2::SDL2_mixer
     SDL2::SDL2_ttf)

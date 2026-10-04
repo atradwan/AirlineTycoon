@@ -1,10 +1,122 @@
 #include "defines.h"
+#include "helper.h"
+#include "Proto.h"
 #include "sbl.h"
+
+#include <SDL_image.h>
+
+#include <cctype>
+#include <map>
+#include <string>
+#include <system_error>
+
+#define AT_Log(...) AT_Log_I("Font", __VA_ARGS__)
+
+extern CString AppPath;
+
+//--------------------------------------------------------------------------------------------
+// HD-Schrift (Phase 2, H7): Glyphenblatt hd/<ordner>/<datei>.png, z. B. hd/misc/norm_bl.mcf.png,
+// in genau s-facher Groesse des 1x-Blatts (tools/mcf_export.py). Alle Zeichen stehen untereinander.
+//--------------------------------------------------------------------------------------------
+static std::string FontHdPath(const char *path) {
+    std::string dir = fs::path{path}.parent_path().filename().string();
+    std::string file = fs::path{path}.filename().string();
+    for (auto *str : {&dir, &file}) {
+        for (auto &c : *str) {
+            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        }
+    }
+    return "hd/" + dir + "/" + file + ".png";
+}
+
+static SDL_Surface *LoadFontHd(const std::string &relPath, const SDL_Surface *sheet) {
+    const SLONG s = SB_GetRenderScale();
+    const fs::path file = fs::path{AppPath.c_str()} / relPath;
+    std::error_code ec;
+    if (s <= 1 || sheet == nullptr || !fs::is_regular_file(file, ec)) {
+        return nullptr;
+    }
+    SDL_Surface *hd = IMG_Load(file.string().c_str());
+    if (hd == nullptr) {
+        AT_Log("HD: %s nicht lesbar: %s", file.string().c_str(), IMG_GetError());
+        return nullptr;
+    }
+    if (hd->w != sheet->w * s || hd->h != sheet->h * s) {
+        AT_Log("HD: %s ignoriert, %dx%d statt %dx%d (%d-fach)", file.string().c_str(), hd->w, hd->h, sheet->w * s, sheet->h * s, s);
+        SDL_FreeSurface(hd);
+        return nullptr;
+    }
+    // Festes Format zum Umpacken; ARGB nur mit Alphakanal (sonst weiche Maske aus dem 1x-Colorkey)
+    const bool alpha = hd->format->Amask != 0 || (hd->format->palette != nullptr && SDL_HasColorKey(hd) == SDL_TRUE);
+    SDL_Surface *conv = SDL_ConvertSurfaceFormat(hd, alpha ? SDL_PIXELFORMAT_ARGB8888 : SDL_PIXELFORMAT_RGB888, 0);
+    SDL_FreeSurface(hd);
+    if (conv != nullptr) {
+        AT_Log("HD-Schrift: %s%s", file.string().c_str(), alpha ? " (mit Alphakanal)" : "");
+    }
+    return conv;
+}
+
+// Ordnet die untereinander stehenden Zeichen in einem Raster mit 16 Spalten und 1 Pixel Abstand an
+// (ein Blatt mit 224 Zeichen waere in 4-facher Groesse zu hoch fuer eine GPU-Textur).
+static const SLONG kFontCols = 16;
+static SDL_Surface *RepackGlyphs(SDL_Surface *tall, SLONG cellW, SLONG cellH, SLONG count, SLONG pad) {
+    if (tall == nullptr || count <= 0) {
+        return tall;
+    }
+    const SLONG rows = (count + kFontCols - 1) / kFontCols;
+    SDL_Surface *grid = SDL_CreateRGBSurfaceWithFormat(0, kFontCols * (cellW + pad), rows * (cellH + pad), tall->format->BitsPerPixel, tall->format->format);
+    if (grid == nullptr) {
+        return tall;
+    }
+    SDL_FillRect(grid, nullptr, 0);
+    Uint32 key = 0;
+    const bool hasKey = SDL_GetColorKey(tall, &key) == 0;
+    SDL_SetColorKey(tall, SDL_FALSE, 0);
+    SDL_SetSurfaceBlendMode(tall, SDL_BLENDMODE_NONE);
+    for (SLONG i = 0; i < count; i++) {
+        SDL_Rect src{0, i * cellH, cellW, cellH};
+        SDL_Rect dst{(i % kFontCols) * (cellW + pad), (i / kFontCols) * (cellH + pad), cellW, cellH};
+        SDL_BlitSurface(tall, &src, grid, &dst);
+    }
+    if (hasKey) {
+        SDL_SetColorKey(grid, SDL_TRUE, key);
+    }
+    SDL_FreeSurface(tall);
+    return grid;
+}
+
+// HD-Glyphenblaetter je Datei, einmal geladen und von allen Schrift-Objekten geteilt. Manche Schriften
+// werden bei jedem Zeichnen neu angelegt (z. B. Kontoauszug); ihre HD-Zeichen bleiben so gueltig.
+static std::map<std::string, SDL_Surface *> gFontHdCache;
+
+static SDL_Surface *SharedFontHd(const std::string &relPath, const SDL_Surface *sheet, SLONG cellW, SLONG cellH, SLONG count) {
+    auto it = gFontHdCache.find(relPath);
+    if (it != gFontHdCache.end()) {
+        return it->second;
+    }
+    const SLONG s = SB_GetRenderScale();
+    SDL_Surface *hd = RepackGlyphs(LoadFontHd(relPath, sheet), cellW * s, cellH * s, count, s);
+    if (s > 1) {
+        gFontHdCache[relPath] = hd; // auch nullptr: nicht bei jedem Laden erneut suchen
+    }
+    return hd;
+}
+
+void SB_CFont::ReleaseHd() {
+    // HD-Blatt und Textur gehoeren dem Cache; Eintraege mit dem 1x-Blatt als Quelle bekommen eine Kopie
+    if (Surface != nullptr) {
+        SB_KeepHdSource(Surface);
+    }
+    HdSurface = nullptr;
+    HdTexture = nullptr;
+    HdTried = false;
+}
 
 SB_CFont::SB_CFont()
     : Surface(nullptr), Texture(nullptr), VarWidth(nullptr), VarHeight(nullptr), Hidden(false), Tabulator(nullptr), LineSpace(1.5F), Bitmap(nullptr) {}
 
 SB_CFont::~SB_CFont() {
+    ReleaseHd();
     if (Texture != nullptr) {
         SDL_DestroyTexture(Texture);
     }
@@ -58,9 +170,16 @@ bool SB_CFont::Load(SDL_Renderer * /*renderer*/, const char *path, struct HPALET
         Swap(colors[i].r, colors[i].b); // Convert BGR to RGB
     }
     SDL_SetPaletteColors(surf->format->palette, colors, 0, Header.NumColors + 1);
+    ReleaseHd();
+    if (Surface != nullptr) {
+        SDL_FreeSurface(Surface);
+    }
     Surface = SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_RGB565, 0);
     SDL_SetColorKey(Surface, SDL_TRUE, 0);
     SDL_FreeSurface(surf);
+    HdPath = FontHdPath(path);
+    HdSurface = SharedFontHd(HdPath, Surface, Header.Width, Header.Height, chars);
+    Surface = RepackGlyphs(Surface, Header.Width, Header.Height, chars, 1);
     delete[] colors;
     delete[] pixels;
     SDL_RWclose(file);
@@ -337,12 +456,25 @@ bool SB_CFont::DrawChar(unsigned char ch, bool /*unused*/) {
     if (this->VarHeight != nullptr) {
         if (this->Bitmap != (SB_CBitmapCore *)nullptr) {
             SDL_Rect srcRect;
-            srcRect.x = 0;
-            srcRect.y = ((this->VarHeight[ch]) - this->Header.LoChar) * this->Header.Height;
+            const SLONG index = SLONG(this->VarHeight[ch]) - SLONG(this->Header.LoChar);
+            if (index < 0 || index > SLONG(this->Header.HiChar) - SLONG(this->Header.LoChar)) {
+                this->Pos.x = this->Pos.x + GetWidth(ch); // nicht im Blatt (auch frueher nichts gezeichnet)
+                return true;
+            }
+            srcRect.x = (index % kFontCols) * (this->Header.Width + 1);
+            srcRect.y = (index / kFontCols) * (this->Header.Height + 1);
             srcRect.w = this->Header.Width;
             srcRect.h = this->Header.Height;
             if (!this->Hidden) {
-                this->Bitmap->BlitChar(Surface, Pos.x, Pos.y, srcRect);
+                if (!HdTried) {
+                    // erst beim Zeichnen: Schriften werden teils vor dem Primaerpuffer geladen
+                    HdTried = SB_GetRenderScale() > 1;
+                    HdTexture = HdSurface != nullptr ? SB_GetHdTexture(HdSurface, Surface, true) : nullptr;
+                    if (HdTexture == nullptr && HdTried && SB_GetHdMissingLog()) {
+                        SB_ReportHdMissing(HdPath, Header.Width, Header.Height * (Header.HiChar - Header.LoChar + 1), " (Schrift)");
+                    }
+                }
+                this->Bitmap->BlitChar(Surface, Pos.x, Pos.y, srcRect, HdTexture);
             }
         }
         this->Pos.x = this->Pos.x + GetWidth(ch);

@@ -3,6 +3,14 @@ name: build and package
 
 on:
   workflow_dispatch:
+    inputs:
+      build-type:
+        description: 'CMake-Build-Typ bei manuellem Start'
+        type: choice
+        options:
+          - Release
+          - Debug
+        default: Release
   push:
     branches: [ "master", "develop", "feature/**" ]
   pull_request:
@@ -29,6 +37,9 @@ jobs:
     # Set global variables and variables based on the branch name
     - name: Compute env
       id: compute-env
+      env:
+        # nur bei workflow_dispatch gesetzt, sonst leer
+        MANUAL_BUILD_TYPE: ${{ inputs.build-type }}
       run: |
         VERSION=$(grep -oP 'FILE_VERSION\s+\K\d+(,\s+\d+){2}' src/Res/resource.h | sed -E 's/[, ]+/./g')
         BUILD_DATE=$(date -u +%d%m%y)
@@ -38,24 +49,30 @@ jobs:
 
         if [ "${{ github.ref }}" == "refs/heads/master" ]; then
             echo "Setting production environment variables..."
-            echo "build-type=Release" >> "$GITHUB_OUTPUT"
+            BUILD_TYPE=Release
             echo "release-name=ATD Version $VERSION Release" >> "$GITHUB_OUTPUT"
             echo "artifact-name=AT-$VERSION" >> "$GITHUB_OUTPUT"
             echo "release-tag=v$VERSION" >> "$GITHUB_OUTPUT"
         elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
             echo "Setting development environment variables..."
-            echo "build-type=Release" >> "$GITHUB_OUTPUT"
+            BUILD_TYPE=Release
             echo "release-name=ATD Version $VERSION Pre-Release dev-$BUILD_DATE" >> "$GITHUB_OUTPUT"
             echo "artifact-name=AT-$VERSION-preview-dev-$BUILD_DATE" >> "$GITHUB_OUTPUT"
             echo "release-tag=v$VERSION-preview-dev-$BUILD_DATE" >> "$GITHUB_OUTPUT"
             echo "build-label=preview-dev-$BUILD_DATE" >> "$GITHUB_OUTPUT"
         else
             echo "Setting branch environment variables..."
-            echo "build-type=Debug" >> "$GITHUB_OUTPUT"
+            BUILD_TYPE=Debug
             echo "release-name=ATD Version $VERSION Preview" >> "$GITHUB_OUTPUT"
             echo "artifact-name=AT-$VERSION-${{ github.sha }}" >> "$GITHUB_OUTPUT"
             echo "release-tag=v$VERSION-${{ github.sha }}" >> "$GITHUB_OUTPUT"
         fi
+
+        # Manueller Start: gewaehlter Build-Typ statt des Standards fuer den Zweig
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "$MANUAL_BUILD_TYPE" ]; then
+            BUILD_TYPE="$MANUAL_BUILD_TYPE"
+        fi
+        echo "build-type=$BUILD_TYPE" >> "$GITHUB_OUTPUT"
         cat $GITHUB_OUTPUT
 
   build:
@@ -70,7 +87,7 @@ jobs:
       # 1. <Windows, Release or Debug, latest MSVC compiler toolchain on the default runner image, default generator>
       # 2. <Linux, Release or Debug, latest GCC compiler toolchain on the default runner image, default generator>
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15-intel, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         name: ['linux', 'windows', 'macos']
         build_type:
           - ${{ needs.env.outputs.build-type }}
@@ -79,7 +96,6 @@ jobs:
         exclude: # exclude all by default
           - os: windows-latest
           - os: ubuntu-latest
-          - os: macos-15-intel
           - os: macos-latest
         include: # only include the configurations we want
           - os: windows-latest
@@ -104,12 +120,12 @@ jobs:
         sudo apt-get install libjansson-dev libsdl2-dev libsdl2-gfx-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev
 
     - name: Setup homebrew (macOS)
-      if: matrix.name == 'macos' || matrix.name == 'macos-x64'
+      if: matrix.name == 'macos'
       id: set-up-homebrew
       uses: Homebrew/actions/setup-homebrew@2026.09.13.1
 
     - name: Install macOS dependencies
-      if: matrix.name == 'macos' || matrix.name == 'macos-x64'
+      if: matrix.name == 'macos'
       run: |
          # Temporary fix, see https://github.com/actions/setup-python/issues/577
          rm /usr/local/bin/2to3-3.12 || true
@@ -173,7 +189,7 @@ jobs:
     # Package the build results (linux)
     - name: Package artifact
       id: artifact-linux
-      if: matrix.name == 'linux' || matrix.name == 'macos' || matrix.name == 'macos-x64'
+      if: matrix.name == 'linux' || matrix.name == 'macos'
       run: |
         echo "Building linux ${{ needs.env.outputs.artifact-name }}-${{ matrix.name }}.tar"
         ARTIFACT_NAME=${{ needs.env.outputs.artifact-name }}-${{ matrix.name }}.tar
@@ -213,7 +229,7 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: gh release delete "${{ needs.env.outputs.release-tag }}" --cleanup-tag --yes --repo "${{ github.repository }}" || true
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         target_commitish: ${{ github.sha }}
         name: ${{ needs.env.outputs.release-name }}

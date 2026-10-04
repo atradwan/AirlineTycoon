@@ -324,7 +324,7 @@ void CKiosk::OnPaint() {
                 DestRect.w = SLONG(Newspapers[c].Size.x * NewspaperZoom[c] / 100);
                 DestRect.h = SLONG(Newspapers[c].Size.y * NewspaperZoom[c] / 100);
 
-                SDL_BlitScaled(Newspapers[c].pBitmap->GetSurface(), &SrcRect, RoomBm.pBitmap->GetSurface(), &DestRect);
+                Newspapers[c].pBitmap->BlitScaled(RoomBm.pBitmap, SrcRect, DestRect);
             }
         }
     }

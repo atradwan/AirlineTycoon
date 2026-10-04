@@ -2382,6 +2382,7 @@ class AIRPORT {
   public:
     BUILDS Builds;
     BUFFER_V<BUILDS> HashBuilds;
+    BUFFER_V<BUILDS> HashBuildsWide; // Breitbild (H14c): Abschnitte 4 x 320 statt 3 x 320 breit
     SLONG LeftEnd{}, RightEnd{};
     BUFFER_V<SLONG> GateMapper;
     SLONG NumBeltSpots{}; // Zahl der Stehplätze beim Gepäckband
@@ -2429,6 +2430,7 @@ class AIRPORT {
     void CalcCoordinates(void);
     void CalcSeats(void);
     void DoHashBuilds(void);
+    void DoHashBuilds(bool wide);
     void PumpDoors(void);
     void TryDoor(XY ArrayPos, BOOL Player, SLONG PlayerNum);
     void RemoveRunes(void);
@@ -2456,6 +2458,12 @@ class COptions {
   public:
     SLONG OptionFullscreen{};
     BOOL OptionKeepAspectRatio{};
+    SLONG OptionRenderScale{}; // Render-Faktor s (1 = wie bisher), wirkt beim Neustart
+    SLONG OptionWidescreen{};  // Breitbild (H13): 1 = Leinwand nach Fenster-Seitenverhaeltnis (16:10 -> 768, 16:9 -> 854), 0 = aus
+    SLONG OptionWidescreenRoomBorder{}; // Breitbild (H16): Raender neben Raeumen 1 = weichgezeichnet aus dem Bild, 0 = schwarz
+    SLONG OptionHdOverlayFilter{}; // Filter fuer das 1x-Overlay ueber HD-Hintergruenden: 0 = nearest, 1 = linear
+    BOOL OptionHdMissingLog{};     // 1: jeder GLI-Chunk ohne HD-PNG einmal als "HD fehlt" im Log (mit Raum, Pfad, Groesse)
+    BOOL OptionHdDebugMask{};      // 1: alle 5 s hd_frame/hd_ref/hd_mask.png in den Ordner hd_debug neben der AT.exe
     SLONG OptionScreenWindowedWidth{};
     SLONG OptionScreenWindowedHeight{};
     BOOL OptionPlanes{};

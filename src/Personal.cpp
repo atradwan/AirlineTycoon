@@ -236,7 +236,7 @@ void CPersonal::OnPaint() {
             DestRect.w = SLONG(KugelBm.Size.x * Size / 100);
             DestRect.h = SLONG(KugelBm.Size.y * Size / 100);
 
-            SDL_BlitScaled(KugelBm.pBitmap->GetSurface(), &SrcRect, RoomBm.pBitmap->GetSurface(), &DestRect);
+            KugelBm.pBitmap->BlitScaled(RoomBm.pBitmap, SrcRect, DestRect);
         }
     }
 

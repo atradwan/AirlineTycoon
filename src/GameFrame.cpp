@@ -205,7 +205,54 @@ void GameFrame::UpdateWindow() const {
     UpdateFrameSize();
 }
 
-constexpr SLONG getAspectWidth(SLONG height) { return static_cast<SLONG>(static_cast<float>(height) * (640.0f / 480.0f)); }
+//--------------------------------------------------------------------------------------------
+// Breitbild (H15): Abbildung Spiel- <-> Bildkoordinaten (siehe global.h)
+//--------------------------------------------------------------------------------------------
+SLONG StatusSplitX() {
+    const SLONG capW = StatusLineBms.AnzEntries() > 6 && StatusLineBms[6].Size.x > 0 ? StatusLineBms[6].Size.x : 32;
+    return 640 - capW;
+}
+
+XY FrameToGame(XY f) {
+    const SLONG m = gHallMargin;
+    if (m == 0) {
+        return f;
+    }
+    if (f.y >= 440) {
+        const SLONG split = StatusSplitX();
+        if (f.x < split) {
+            return f;
+        }
+        if (f.x >= split + 2 * m) {
+            return XY(f.x - 2 * m, f.y);
+        }
+        return XY(640 + f.x - split, f.y);
+    }
+    return XY(f.x - m, f.y);
+}
+
+XY GameToFrame(XY g) {
+    const SLONG m = gHallMargin;
+    if (m == 0) {
+        return g;
+    }
+    if (g.y >= 440) {
+        const SLONG split = StatusSplitX();
+        if (g.x < split) {
+            return g;
+        }
+        if (g.x < 640) {
+            return XY(g.x + 2 * m, g.y);
+        }
+        return XY(g.x - 640 + split, g.y);
+    }
+    return XY(g.x + m, g.y);
+}
+
+static SLONG getAspectWidth(SLONG height) {
+    const XY logical = SB_GetLogicalSize();
+    return static_cast<SLONG>(static_cast<float>(height) * (static_cast<float>(logical.x) / static_cast<float>(logical.y)));
+}
 
 void GameFrame::UpdateFrameSize() const {
     SLONG screenW = 0, screenH = 0;
@@ -214,7 +261,20 @@ void GameFrame::UpdateFrameSize() const {
     // update setting file
     Sim.Options.OptionScreenWindowedWidth = screenW;
     Sim.Options.OptionScreenWindowedHeight = screenH;
-    if (Sim.Options.OptionKeepAspectRatio == 0) {
+    if (Sim.Options.OptionWidescreen != 0) {
+        // Breitbild (H13): Leinwand cw x 480 nach dem Seitenverhaeltnis des Fensters, das Bild mittig darin
+        const SLONG cw = SB_CanvasWidthForWindow(screenW, screenH);
+        if (cw != SB_GetCanvasWidth()) {
+            AT_Log_I("Rendering", "Breitbild: Fenster %dx%d, Leinwand %dx480", screenW, screenH, cw);
+        }
+        SB_SetCanvasWidth(cw);
+        if (Sim.Options.OptionKeepAspectRatio == 0) {
+            PrimaryBm.PrimaryBm.SetCanvasTarget(XY{0, 0}, XY{screenW, screenH}, cw);
+        } else {
+            const SLONG aspectWidth = static_cast<SLONG>(static_cast<float>(screenH) * (static_cast<float>(cw) / 480.0F));
+            PrimaryBm.PrimaryBm.SetCanvasTarget(XY{(screenW - aspectWidth) / 2, 0}, XY{aspectWidth, screenH}, cw);
+        }
+    } else if (Sim.Options.OptionKeepAspectRatio == 0) {
         PrimaryBm.PrimaryBm.SetTarget(XY{0, 0}, XY{screenW, screenH});
     } else {
         const SLONG aspectWidth = getAspectWidth(screenH);
@@ -225,6 +285,14 @@ void GameFrame::UpdateFrameSize() const {
 }
 
 void GameFrame::TranslatePointToGameSpace(CPoint *p) const {
+    if (Sim.Options.OptionWidescreen != 0) {
+        // Fenster (Renderer-Koordinaten) -> Bild; das Bild liegt mittig in der Leinwand
+        // Spiel-Koordinaten bleiben die des mittleren 640er-Ausschnitts (Halle: auch links davon negativ, Statuszeile s. o.)
+        const XY g = FrameToGame(PrimaryBm.PrimaryBm.WindowToGame(XY(p->x, p->y)));
+        p->x = g.x;
+        p->y = g.y;
+        return;
+    }
     SLONG screenW = 0;
     SLONG screenH = 0;
     SDL_GetRendererOutputSize(SDL_GetRenderer(m_hWnd), &screenW, &screenH);
@@ -239,16 +307,23 @@ void GameFrame::TranslatePointToGameSpace(CPoint *p) const {
         screenW = aspectWidth;
     }
 
+    const XY logical = SB_GetLogicalSize();
     x /= static_cast<FLOAT>(screenW);
-    x *= 640;
+    x *= static_cast<FLOAT>(logical.x);
     y /= static_cast<FLOAT>(screenH);
-    y *= 480;
+    y *= static_cast<FLOAT>(logical.y);
 
     p->x = static_cast<SLONG>(x);
     p->y = static_cast<SLONG>(y);
 }
 
 void GameFrame::TranslatePointToScreenSpace(SLONG &x, SLONG &y) const {
+    if (Sim.Options.OptionWidescreen != 0) {
+        const XY w = PrimaryBm.PrimaryBm.GameToWindow(GameToFrame(XY(x, y)));
+        x = w.x;
+        y = w.y;
+        return;
+    }
     SLONG screenW = 0;
     SLONG screenH = 0;
     SDL_GetRendererOutputSize(SDL_GetRenderer(m_hWnd), &screenW, &screenH);
@@ -261,9 +336,10 @@ void GameFrame::TranslatePointToScreenSpace(SLONG &x, SLONG &y) const {
 
     FLOAT _x = static_cast<FLOAT>(x);
     FLOAT _y = static_cast<FLOAT>(y);
-    _x /= 640;
+    const XY logical = SB_GetLogicalSize();
+    _x /= static_cast<FLOAT>(logical.x);
     _x *= static_cast<FLOAT>(screenW);
-    _y /= 480;
+    _y /= static_cast<FLOAT>(logical.y);
     _y *= static_cast<FLOAT>(screenH);
 
     if (Sim.Options.OptionKeepAspectRatio == 1) {
@@ -327,8 +403,18 @@ GameFrame::GameFrame() {
 
     pGfxMain = new GfxMain(lpDD);
 
-    PrimaryBm.ReSize(h, bFullscreen, XY(640, 480));
-    PrimaryBm.ReSizePartB(h, bFullscreen, XY(640, 480));
+    SB_SetRenderScale(Sim.Options.OptionRenderScale);
+    PrimaryBm.ReSize(h, bFullscreen, SB_GetLogicalSize());
+    PrimaryBm.ReSizePartB(h, bFullscreen, SB_GetLogicalSize());
+    PrimaryBm.PrimaryBm.SetOverlayLinear(Sim.Options.OptionHdOverlayFilter == 1);
+    PrimaryBm.PrimaryBm.SetRoomBorder(Sim.Options.OptionWidescreenRoomBorder != 0);
+    SB_SetHdMissingLog(Sim.Options.OptionHdMissingLog != 0 && SB_GetRenderScale() > 1);
+    if (Sim.Options.OptionHdDebugMask != 0) {
+        const fs::path debugDir = fs::path{AppPath.c_str()} / "hd_debug";
+        std::error_code ec;
+        fs::create_directories(debugDir, ec);
+        PrimaryBm.PrimaryBm.SetHdDebugDir(debugDir.string().c_str());
+    }
     pCursor = new SB_CCursor(&PrimaryBm.PrimaryBm);
     PrimaryBm.PrimaryBm.AssignCursor(pCursor);
 
@@ -519,6 +605,16 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
         FrameWnd->OnKeyDown(event.text.text[0], 0, InputFlags::FromTextInput);
         break;
     case SDL_KEYDOWN: {
+        // HD-Diagnose (Phase 2): F11 legt den naechsten Frame mit HD-Ebene, Maske und Bildschirm in hd_debug ab
+        if (event.key.keysym.sym == SDLK_F11 && SB_GetRenderScale() > 1 && Editor == EDITOR_NONE) {
+            if (event.key.repeat == 0) {
+                const fs::path debugDir = fs::path{AppPath.c_str()} / "hd_debug";
+                std::error_code ec;
+                fs::create_directories(debugDir, ec);
+                PrimaryBm.PrimaryBm.RequestHdDump(debugDir.string().c_str());
+            }
+            break;
+        }
         // UINT nFlags = event.key.keysym.scancode | ((SDL_GetModState() & KMOD_LALT) << 5);
         FrameWnd->OnKeyDown(KeycodeToUpper(event.key.keysym.sym), event.key.repeat, InputFlags::None);
     } break;
@@ -556,6 +652,60 @@ void GameFrame::Invalidate() {
     CStdRaum *w = nullptr;
     SLONG c = 0;
 
+    // Breitbild (H14): die Halle nutzt die ganze Leinwand, alle anderen Bildschirme bleiben 640 breit
+    if (Sim.Options.OptionWidescreen != 0) {
+        SLONG frameW = 640;
+        CStdRaum *loc = Sim.localPlayer >= 0 && Sim.localPlayer < 4 ? Sim.Players.Players[Sim.localPlayer].LocationWin : nullptr;
+        if (TopWin == nullptr && loc != nullptr && loc->WantsWideFrame() != 0) {
+            frameW = max(SLONG(640), SB_GetCanvasWidth());
+        }
+        if (frameW != PrimaryBm.Size.x) {
+            // H15b: vor dem Wechsel protokollieren, damit sich ein Fehler beim ersten Bild danach eingrenzen laesst
+            AT_Log_I("Rendering", "Breitbild: Wechsel auf Bildbreite %d (Halle %d..%d, Abschnitte schmal %d, breit %d, Ausschnitt x %d)", frameW,
+                     Airport.LeftEnd, Airport.RightEnd, Airport.HashBuilds.AnzEntries(), Airport.HashBuildsWide.AnzEntries(),
+                     Sim.localPlayer >= 0 && Sim.localPlayer < 4 ? Sim.Players.Players[Sim.localPlayer].ViewPos.x : 0);
+            PrimaryBm.SetFrameWidth(frameW);
+            if (loc != nullptr) {
+                loc->StatusCount = max(loc->StatusCount, SLONG(3)); // Statuszeile im neuen Bild neu zeichnen
+            }
+            if (gBlendState != -1 && gBlendBm.pBitmap != nullptr && gBlendBm.Size.x != frameW) {
+                // Ueberblendung zwischen verschieden breiten Bildern (H15): altes Bild mittig auf die neue Breite bringen
+                // (schmaler -> schwarze Raender, breiter -> mittlerer Ausschnitt)
+                const SLONG oldW = gBlendBm.Size.x;
+                const SLONG h = gBlendBm.Size.y;
+                std::vector<UWORD> rows(size_t(frameW) * size_t(h), 0);
+                {
+                    SB_CBitmapKey key(*gBlendBm.pBitmap);
+                    const SLONG dx = (frameW - oldW) / 2;
+                    for (SLONG y = 0; y < h && key.Bitmap != nullptr; y++) {
+                        const auto *src = reinterpret_cast<const UWORD *>(static_cast<const char *>(key.Bitmap) + y * key.lPitch);
+                        for (SLONG x = max(SLONG(0), dx); x < min(frameW, oldW + dx); x++) {
+                            rows[size_t(y) * frameW + x] = src[x - dx];
+                        }
+                    }
+                }
+                gBlendBm.ReSize(XY(frameW, h));
+                SB_CBitmapKey key(*gBlendBm.pBitmap);
+                for (SLONG y = 0; y < h && key.Bitmap != nullptr; y++) {
+                    memcpy(static_cast<char *>(key.Bitmap) + y * key.lPitch, &rows[size_t(y) * frameW], size_t(frameW) * 2);
+                }
+            }
+        }
+        gHallMargin = (PrimaryBm.Size.x - 640) / 2;
+        // H17: Raeume mit Statuszeile im breiten Bild: Raum im mittleren Ausschnitt, daneben (y < 440) der Rand der GPU
+        const bool roomWide = gHallMargin != 0 && loc != nullptr && loc->IsHallView() == 0;
+        gRightAnchor = roomWide ? 0 : gHallMargin;
+        PrimaryBm.PrimaryBm.SetSideBorder(roomWide ? gHallMargin : 0);
+        if (roomWide) {
+            // Streifen neben dem Raum leeren (z. B. Reste der Halle; ohne weichen Rand bleiben sie schwarz)
+            SDL_Surface *frame = PrimaryBm.PrimaryBm.GetSurface();
+            for (const SDL_Rect &r : {SDL_Rect{0, 0, gHallMargin, 440}, SDL_Rect{640 + gHallMargin, 0, gHallMargin, 440}}) {
+                SDL_FillRect(frame, &r, 0);
+                static_cast<SB_CBitmapCore &>(PrimaryBm.PrimaryBm).HdWritten(&r, true);
+            }
+        }
+    }
+
     if (TopWin != nullptr) {
         TopWin->OnPaint();
     } else {
@@ -564,7 +714,15 @@ void GameFrame::Invalidate() {
 
             if (w != nullptr) {
                 // if (XY(point).IfIsWithin (w->WinP1.x, w->WinP1.y, w->WinP2.x, w->WinP2.y))
+                // Breitbild (H17): Raeume zeichnen im mittleren 640er-Ausschnitt (die Halle verwaltet das selbst)
+                const bool roomView = gHallMargin != 0 && w->IsHallView() == 0;
+                if (roomView) {
+                    PrimaryBm.PrimaryBm.BeginView(gHallMargin, 640);
+                }
                 w->OnPaint();
+                if (roomView) {
+                    PrimaryBm.PrimaryBm.EndView();
+                }
             }
         }
     }
@@ -620,8 +778,9 @@ void GameFrame::PrepareFade() {
         SB_CBitmapKey TgtKey(*gBlendBm.pBitmap);
 
         if (SrcKey.Bitmap != nullptr) {
+            const SLONG w = min(PrimaryBm.PrimaryBm.GetXSize(), gBlendBm.Size.x); // Breitbild: ganze Bildbreite
             for (SLONG y = 0; y < 480; y++) {
-                memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, 640 * 2);
+                memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, w * 2);
             }
         }
     }
@@ -738,7 +897,10 @@ void GameFrame::OnPaint() {
             }
 
             if ((ToolTipState != 0) && (ToolTipId != 0)) {
-                SLONG px = gMousePosition.x + 16 - gToolTipBm.Size.x / 2;
+                // Gezeichnet wird im ganzen Bild (Breitbild: Mausposition in Bildkoordinaten, H15)
+                const XY mouse = GameToFrame(gMousePosition);
+                const SLONG frameW = PrimaryBm.PrimaryBm.GetXSize();
+                SLONG px = mouse.x + 16 - gToolTipBm.Size.x / 2;
                 SLONG py = 0;
 
                 UpdateStatusBar();
@@ -746,18 +908,18 @@ void GameFrame::OnPaint() {
                 if (px < 2) {
                     px = 2;
                 }
-                if (px > 639 - gToolTipBm.Size.x) {
-                    px = 639 - gToolTipBm.Size.x;
+                if (px > frameW - 1 - gToolTipBm.Size.x) {
+                    px = frameW - 1 - gToolTipBm.Size.x;
                 }
 
-                if (gMousePosition.y < 439) {
-                    py = gMousePosition.y + 32;
+                if (mouse.y < 439) {
+                    py = mouse.y + 32;
                 } else {
-                    py = gMousePosition.y;
-                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < 630) {
-                        px = gMousePosition.x + 32;
+                    py = mouse.y;
+                    if (mouse.x + 32 + gToolTipBm.Size.x < frameW - 10) {
+                        px = mouse.x + 32;
                     } else {
-                        px = gMousePosition.x - 5 - gToolTipBm.Size.x;
+                        px = mouse.x - 5 - gToolTipBm.Size.x;
                     }
 
                     if (py > 480 - 28) {
@@ -833,6 +995,15 @@ void GameFrame::OnPaint() {
     }
     if ((bActive != 0) && (Sim.bPause != 0)) {
         TXY<SLONG> rcWindow;
+
+        PrimaryBm.PrimaryBm.BeginView(gHallMargin); // Breitbild (H14): Pausenbild mittig, die Halle bleibt daneben stehen
+        if (gHallMargin != 0 && PauseFade < 8) {
+            // Breitbild: ohne Einblenden (die Mischung arbeitet auf dem ganzen Bild, das Pausenbild ist 640 breit)
+            if (Sim.localPlayer != -1 && (Sim.Players.Players[Sim.localPlayer].LocationWin != nullptr)) {
+                (Sim.Players.Players[Sim.localPlayer].LocationWin)->StatusCount = 32;
+            }
+            PauseFade = 8;
+        }
 
         if (pGLibPause == nullptr) {
             pGfxMain->LoadLib(const_cast<char *>((LPCTSTR)FullFilename("pause.gli", RoomPath)), &pGLibPause, L_LOCMEM);

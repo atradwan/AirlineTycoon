@@ -298,7 +298,7 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *DestBitmap, SLONG Step2, 
     UWORD *Table = BlendTables.getData() + (Step << 9);
     UWORD *Table2 = BlendTables.getData() + (Step2 << 9);
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
+    BUFFER_V<UWORD> PixelBuffer(max(SLONG(640), DestBitmap->GetXSize()));
 
     SB_CBitmapKey Key(*DestBitmap);
     SB_CBitmapKey Key2(*SrcBitmap2);
@@ -306,7 +306,7 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *DestBitmap, SLONG Step2, 
         return;
     }
 
-    sizex = DestBitmap->GetXSize();
+    sizex = min(DestBitmap->GetXSize(), SrcBitmap2->GetXSize()); // Breitbild: Bitmaps koennen verschieden breit sein
 
     CRect ClipRect = DestBitmap->GetClipRect();
 
@@ -412,6 +412,7 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *SrcBitmap, SLONG Step2, S
     }
 
     CRect ClipRect = TgtBitmap->GetClipRect();
+    ClipRect.bottom = min(ClipRect.bottom, min(SrcBitmap->GetYSize(), SrcBitmap2->GetYSize()));
 
     for (cy = ClipRect.top; cy < ClipRect.bottom; cy++) {
         p = reinterpret_cast<UWORD *>((static_cast<char *>(Key.Bitmap)) + cy * Key.lPitch);
@@ -468,7 +469,8 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *SrcBitmap, SLONG Step2, S
                 pop   ebp
         }
 #else
-        sizex = SrcBitmap->GetXSize();
+        // Breitbild: nie ueber die schmalste der drei Bitmaps hinaus (z. B. Ueberblendung Halle -> Raum)
+        sizex = min(min(SrcBitmap->GetXSize(), SrcBitmap2->GetXSize()), TgtBitmap->GetXSize());
 
         for (cx = sizex; cx > 0; cx--) {
             *ppp = Table[(reinterpret_cast<UBYTE *>(p))[0]] + Table[256 + (reinterpret_cast<UBYTE *>(p))[1]] + Table2[(reinterpret_cast<UBYTE *>(pp))[0]] +
@@ -487,44 +489,22 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *SrcBitmap, SLONG Step2, S
 //--------------------------------------------------------------------------------------------
 void SB_CColorFX::BlitWhiteTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap, const XY &TargetPos, const CRect *SrcRect,
                                  SLONG Grade) {
-    SLONG cx = 0;
-    SLONG cy = 0;
-    UWORD *p = nullptr;
-    UWORD *pp = nullptr;
-    static UWORD *Table1 = BlendTables.getData() + (2 << 9);
-    static UWORD *Table2 = BlendTables.getData() + (6 << 9);
-    static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
-
-    IsPaintingTextBubble = TRUE;
-
-    // DDSURFACEDESC DDSurfaceDesc;
-    BOOL bVgaRam = FALSE;
-
-    // ZeroMemory (&DDSurfaceDesc, sizeof (DDSurfaceDesc));
-
-    // DDSurfaceDesc.dwSize  = sizeof (DDSurfaceDesc);
-    // DDSurfaceDesc.dwFlags = DDSD_CAPS;
-
-    // TgtBitmap->GetSurface()->GetSurfaceDesc (&DDSurfaceDesc);
-
-    // bVgaRam = ((DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_VIDEOMEMORY)!=0);
+    // Mischtabellen bleiben wie frueher ueber Aufrufe hinweg erhalten (Grade -1: letzte Einstellung)
+    static SLONG Table1Index = 2;
+    static SLONG Table2Index = 6;
 
     if (Grade != -1) {
-        Table1 = BlendTables.getData() + (Grade << 9);
-        Table2 = BlendTables.getData() + ((AnzSteps - Grade - 1) << 9);
+        Table1Index = Grade;
+        Table2Index = AnzSteps - Grade - 1;
     }
 
-    XY t = TargetPos;
-
-    static UWORD White;
-    CRect Rect;
-
+    UWORD White = 0;
     {
         SB_CBitmapKey Key(*XBubbleBms[9].pBitmap);
         White = *static_cast<UWORD *>(Key.Bitmap);
     }
 
+    CRect Rect;
     if (SrcRect != nullptr) {
         Rect = *SrcRect;
     } else if (SrcBitmap != nullptr) {
@@ -533,87 +513,94 @@ void SB_CColorFX::BlitWhiteTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtB
         return;
     }
 
-    if (t.x < 0) {
-        Rect.left -= t.x;
-        t.x = 0;
-    }
-    if (t.y < 0) {
-        Rect.top -= t.y;
-        t.y = 0;
-    }
-    if (t.x + Rect.right - Rect.left + 1 >= TgtBitmap->GetXSize()) {
-        Rect.right -= (t.x + Rect.right - Rect.left + 1) - TgtBitmap->GetXSize();
-    }
-    if (t.y + Rect.bottom - Rect.top + 1 >= TgtBitmap->GetYSize()) {
-        Rect.bottom -= (t.y + Rect.bottom - Rect.top + 1) - TgtBitmap->GetYSize();
-    }
-
-    SB_CBitmapKey Key(*TgtBitmap);
-    SB_CBitmapKey Key2(*SrcBitmap);
-    if (Key.Bitmap == nullptr || Key2.Bitmap == nullptr) {
-        IsPaintingTextBubble = FALSE;
-        return;
-    }
-
-    sizex = Rect.right - Rect.left + 1;
-
-    if (sizex > 0 && sizex <= 640) {
+    IsPaintingTextBubble = TRUE;
+    // BlitWhiteTrans clippt an der Groesse des Ziels, nicht am Clip-Rechteck
+    const SDL_Rect clip{0, 0, TgtBitmap->GetXSize(), TgtBitmap->GetYSize()};
+    {
         /* No message pump in here any more. It used to run one every 16 lines while both bitmaps
            were locked. A click handled in there could close or rebuild the text bubble, which
            freed the bitmap being copied from, and the locks were then released on a surface that
            was gone - a segfault when quickly clicking through dialog options. The caller pumps
            right after painting (CStdRaum::PostPaint()), where nothing is locked. */
-        for (cy = 0; cy < Rect.bottom - Rect.top + 1; cy++) {
-            p =reinterpret_cast<UWORD *>((static_cast<char *>(Key.Bitmap)) + t.x * 2 + (cy + t.y) * Key.lPitch);
-            pp = reinterpret_cast<UWORD *>((static_cast<char *>(Key2.Bitmap)) + Rect.left * 2 + (cy + Rect.top) * Key2.lPitch);
-
-            if (bVgaRam != 0) {
-                memcpy(PixelBuffer.getData(), p, sizex * 2);
-                p = PixelBuffer.getData();
-            }
-
-            if (Table1 == Table2) {
-                for (cx = sizex; cx > 0; cx--) {
-                    if (*pp != 0U) {
-                        if (*pp == static_cast<UWORD>(static_cast<SLONG>(White))) {
-                            UWORD vga = *p;
-
-                            *p = UWORD(Table1[vga & 255] + Table1[256 + (vga >> 8)] + Table1[(reinterpret_cast<UBYTE *>(pp))[0]] +
-                                       Table1[256 + (reinterpret_cast<UBYTE *>(pp))[1]]);
-                        } else {
-                            *p = *pp;
-                        }
-                    }
-
-                    p++;
-                    pp++;
-                }
-            } else {
-                for (cx = sizex; cx > 0; cx--) {
-                    if (*pp != 0U) {
-                        if (*pp == static_cast<UWORD>(static_cast<SLONG>(White))) {
-                            *p = UWORD(Table1[(reinterpret_cast<UBYTE *>(p))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(p))[1]] +
-                                       Table2[(reinterpret_cast<UBYTE *>(pp))[0]] + Table2[256 + (reinterpret_cast<UBYTE *>(pp))[1]]);
-                        } else {
-                            *p = *pp;
-                        }
-                    }
-
-                    p++;
-                    pp++;
-                }
-            }
-
-            if (bVgaRam != 0) {
-                memcpy(((static_cast<char *>(Key.Bitmap)) + t.x * 2 + (cy + t.y) * Key.lPitch), PixelBuffer.getData(), sizex * 2);
-            }
+        SB_CBitmapKey Key(*TgtBitmap);
+        SB_CBitmapKey Key2(*SrcBitmap);
+        if (Key.Bitmap == nullptr || Key2.Bitmap == nullptr) {
+            IsPaintingTextBubble = FALSE;
+            return;
         }
+        WhiteRows(Key.Bitmap, Key.lPitch, clip, Key2.Bitmap, Key2.lPitch, Rect, TargetPos, Table1Index, Table2Index, White);
+    }
+    IsPaintingTextBubble = FALSE;
+
+    // HD (Phase 2, H8): Weiss mit Deckkraft Table2/(Schritte-1) mischen, den Rest (Rahmen, Text) deckend
+    const auto alpha = Uint8(std::min(SLONG(255), std::max(SLONG(0), Table2Index * 255 / std::max(SLONG(1), AnzSteps - 1))));
+    const SDL_Rect hdSrc{Rect.left, Rect.top, Rect.right - Rect.left + 1, Rect.bottom - Rect.top + 1};
+    const SLONG param = (Table1Index & 0xFF) | ((Table2Index & 0xFF) << 8) | (SLONG(White) << 16);
+    SB_RecordHdEffect(TgtBitmap, SrcBitmap, hdSrc, TargetPos, clip, 3, alpha, param, &SB_CColorFX::ReplayWhite, this);
+}
+
+//--------------------------------------------------------------------------------------------
+// Kern von BlitWhiteTrans: Quellpixel White werden gemischt (Ziel*Table1 + Quelle*Table2),
+// andere Quellpixel ausser 0 deckend kopiert. SrcRect rechts/unten inklusive.
+//--------------------------------------------------------------------------------------------
+void SB_CColorFX::WhiteRows(void *tgt, SLONG tgtPitch, const SDL_Rect &clip, const void *src, SLONG srcPitch, const CRect &SrcRect, const XY &TargetPos,
+                            SLONG Table1Index, SLONG Table2Index, UWORD White) const {
+    const UWORD *Table1 = BlendTables.getData() + (Table1Index << 9);
+    const UWORD *Table2 = BlendTables.getData() + (Table2Index << 9);
+
+    XY t = TargetPos;
+    CRect Rect = SrcRect;
+    const SLONG right = clip.x + clip.w;
+    const SLONG bottom = clip.y + clip.h;
+
+    if (t.x < clip.x) {
+        Rect.left += clip.x - t.x;
+        t.x = clip.x;
+    }
+    if (t.y < clip.y) {
+        Rect.top += clip.y - t.y;
+        t.y = clip.y;
+    }
+    if (t.x + Rect.right - Rect.left + 1 >= right) {
+        Rect.right -= (t.x + Rect.right - Rect.left + 1) - right;
+    }
+    if (t.y + Rect.bottom - Rect.top + 1 >= bottom) {
+        Rect.bottom -= (t.y + Rect.bottom - Rect.top + 1) - bottom;
     }
 
-    // delete Key;
-    // delete Key2;
+    const SLONG sizex = Rect.right - Rect.left + 1;
+    if (sizex <= 0 || sizex > 640) {
+        return;
+    }
+    for (SLONG cy = 0; cy < Rect.bottom - Rect.top + 1; cy++) {
+        auto *p = reinterpret_cast<UWORD *>(static_cast<char *>(tgt) + t.x * 2 + (cy + t.y) * tgtPitch);
+        const auto *pp = reinterpret_cast<const UWORD *>(static_cast<const char *>(src) + Rect.left * 2 + (cy + Rect.top) * srcPitch);
 
-    IsPaintingTextBubble = FALSE;
+        for (SLONG cx = sizex; cx > 0; cx--) {
+            if (*pp != 0U) {
+                if (*pp == White) {
+                    const UWORD vga = *p;
+                    *p = UWORD(Table1[vga & 255] + Table1[256 + (vga >> 8)] + Table2[(reinterpret_cast<const UBYTE *>(pp))[0]] +
+                               Table2[256 + (reinterpret_cast<const UBYTE *>(pp))[1]]);
+                } else {
+                    *p = *pp;
+                }
+            }
+            p++;
+            pp++;
+        }
+    }
+}
+
+void SB_CColorFX::ReplayWhite(SDL_Surface *target, const SDL_Rect &clip, SDL_Surface *src, const SDL_Rect &srcRect, XY pos, SLONG param,
+                              const void *ctx) {
+    const auto *fx = static_cast<const SB_CColorFX *>(ctx);
+    const CRect rect(srcRect.x, srcRect.y, srcRect.x + srcRect.w - 1, srcRect.y + srcRect.h - 1);
+    SDL_LockSurface(target);
+    SDL_LockSurface(src);
+    fx->WhiteRows(target->pixels, target->pitch, clip, src->pixels, src->pitch, rect, pos, param & 0xFF, (param >> 8) & 0xFF, UWORD((param >> 16) & 0xFFFF));
+    SDL_UnlockSurface(src);
+    SDL_UnlockSurface(target);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -719,23 +706,8 @@ void SB_CColorFX::BlitOutline(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitm
 // Blitten mit transparenz (=fester Alpha-Wert) und clipping:
 //--------------------------------------------------------------------------------------------
 void SB_CColorFX::BlitTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap, const XY &TargetPos, const CRect *SrcRect, SLONG Grade) {
-    SLONG cx = 0;
-    SLONG cy = 0;
-    UWORD *p = nullptr;
-    UWORD *pp = nullptr;
-    UWORD *Table1 = BlendTables.getData() + ((AnzSteps / 2) << 9);
-    UWORD *Table2 = BlendTables.getData() + ((AnzSteps / 2) << 9);
-    static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
-
-    CRect ClipRect = TgtBitmap->GetClipRect();
-
-    if (Grade != -1) {
-        Table1 = BlendTables.getData() + (Grade << 9);
-        Table2 = BlendTables.getData() + ((AnzSteps - Grade - 1) << 9);
-    }
-
-    XY t = TargetPos;
+    const CRect cr = TgtBitmap->GetClipRect();
+    const SDL_Rect clip{cr.left, cr.top, cr.right - cr.left, cr.bottom - cr.top};
 
     CRect Rect;
     if (SrcRect != nullptr) {
@@ -743,6 +715,39 @@ void SB_CColorFX::BlitTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     } else {
         Rect = CRect(0, 0, SrcBitmap->GetXSize() - 1, SrcBitmap->GetYSize() - 1);
     }
+
+    {
+        SB_CBitmapKey Key(*TgtBitmap);
+        SB_CBitmapKey Key2(*SrcBitmap);
+        if (Key.Bitmap == nullptr || Key2.Bitmap == nullptr) {
+            return;
+        }
+        TransRows(Key.Bitmap, Key.lPitch, clip, Key2.Bitmap, Key2.lPitch, Rect, TargetPos, Grade);
+    }
+
+    // HD (Phase 2, H6): Quelle mit Deckkraft (Schritte - Grade - 1) / (Schritte - 1) ueber HD-Inhalte legen
+    const SLONG srcSteps = Grade != -1 ? AnzSteps - Grade - 1 : AnzSteps / 2;
+    const auto alpha = Uint8(std::min(SLONG(255), std::max(SLONG(0), srcSteps * 255 / std::max(SLONG(1), AnzSteps - 1))));
+    const SDL_Rect hdSrc{Rect.left, Rect.top, Rect.right - Rect.left + 1, Rect.bottom - Rect.top + 1};
+    SB_RecordHdEffect(TgtBitmap, SrcBitmap, hdSrc, TargetPos, clip, 2, alpha, Grade, &SB_CColorFX::ReplayTrans, this);
+}
+
+//--------------------------------------------------------------------------------------------
+// Kern von BlitTrans: Ziel mit Grade/Schritte, Quelle mit dem Rest mischen; Quellpixel 0 bleiben frei.
+// SrcRect ist rechts/unten inklusive, clip wie das Clip-Rechteck des Ziels.
+//--------------------------------------------------------------------------------------------
+void SB_CColorFX::TransRows(void *tgt, SLONG tgtPitch, const SDL_Rect &clip, const void *src, SLONG srcPitch, const CRect &SrcRect, const XY &TargetPos,
+                            SLONG Grade) const {
+    const UWORD *Table1 = BlendTables.getData() + ((AnzSteps / 2) << 9);
+    const UWORD *Table2 = BlendTables.getData() + ((AnzSteps / 2) << 9);
+    if (Grade != -1) {
+        Table1 = BlendTables.getData() + (Grade << 9);
+        Table2 = BlendTables.getData() + ((AnzSteps - Grade - 1) << 9);
+    }
+
+    XY t = TargetPos;
+    CRect Rect = SrcRect;
+    const CRect ClipRect(clip.x, clip.y, clip.x + clip.w, clip.y + clip.h);
 
     if (t.x < ClipRect.left) {
         Rect.left += ClipRect.left - t.x;
@@ -758,83 +763,42 @@ void SB_CColorFX::BlitTrans(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     if (t.y + Rect.bottom - Rect.top + 1 >= ClipRect.bottom) {
         Rect.bottom -= (t.y + Rect.bottom - Rect.top + 1) - ClipRect.bottom;
     }
-    /*if (t.x<0)
-      {
-      Rect.left-=t.x;
-      t.x=0;
-      }
-      if (t.y<0)
-      {
-      Rect.top-=t.y;
-      t.y=0;
-      }
-      if (t.x+Rect.right-Rect.left+1>=TgtBitmap->GetXSize())
-      {
-      Rect.right-=(t.x+Rect.right-Rect.left+1)-TgtBitmap->GetXSize();
-      }
-      if (t.y+Rect.bottom-Rect.top+1>=TgtBitmap->GetYSize())
-      {
-      Rect.bottom-=(t.y+Rect.bottom-Rect.top+1)-TgtBitmap->GetYSize();
-      }*/
 
-    SB_CBitmapKey Key(*TgtBitmap);
-    SB_CBitmapKey Key2(*SrcBitmap);
-    if (Key.Bitmap == nullptr || Key2.Bitmap == nullptr) {
+    const SLONG sizex = Rect.right - Rect.left + 1;
+    if (sizex <= 0) {
         return;
     }
+    for (SLONG cy = 0; cy < Rect.bottom - Rect.top + 1; cy++) {
+        auto *p = reinterpret_cast<UWORD *>(static_cast<char *>(tgt) + t.x * 2 + (cy + t.y) * tgtPitch);
+        const auto *pp = reinterpret_cast<const UWORD *>(static_cast<const char *>(src) + Rect.left * 2 + (cy + Rect.top) * srcPitch);
 
-    sizex = Rect.right - Rect.left + 1;
-
-    if (sizex > 0) {
-        for (cy = 0; cy < Rect.bottom - Rect.top + 1; cy++) {
-            p = reinterpret_cast<UWORD *>((static_cast<char *>(Key.Bitmap)) + t.x * 2 + (cy + t.y) * Key.lPitch);
-            pp = reinterpret_cast<UWORD *>((static_cast<char *>(Key2.Bitmap)) + Rect.left * 2 + (cy + Rect.top) * Key2.lPitch);
-
-            memcpy(PixelBuffer.getData(), p, sizex * 2);
-            p = PixelBuffer.getData();
-
-            if (Table1 == Table2) {
-                for (cx = sizex; cx > 0; cx--) {
-                    if (*pp != 0U) {
-                        *p = UWORD(Table1[(reinterpret_cast<UBYTE *>(p))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(p))[1]] +
-                                   Table1[(reinterpret_cast<UBYTE *>(pp))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(pp))[1]]);
-                    }
-
-                    p++;
-                    pp++;
-                }
-            } else {
-                for (cx = sizex; cx > 0; cx--) {
-                    if (*pp != 0U) {
-                        *p = UWORD(Table1[(reinterpret_cast<UBYTE *>(p))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(p))[1]] +
-                                   Table2[(reinterpret_cast<UBYTE *>(pp))[0]] + Table2[256 + (reinterpret_cast<UBYTE *>(pp))[1]]);
-                    }
-
-                    p++;
-                    pp++;
-                }
+        for (SLONG cx = sizex; cx > 0; cx--) {
+            if (*pp != 0U) {
+                *p = UWORD(Table1[(reinterpret_cast<UBYTE *>(p))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(p))[1]] +
+                           Table2[(reinterpret_cast<const UBYTE *>(pp))[0]] + Table2[256 + (reinterpret_cast<const UBYTE *>(pp))[1]]);
             }
-
-            memcpy(((static_cast<char *>(Key.Bitmap)) + t.x * 2 + (cy + t.y) * Key.lPitch), PixelBuffer.getData(), sizex * 2);
+            p++;
+            pp++;
         }
     }
+}
+
+void SB_CColorFX::ReplayTrans(SDL_Surface *target, const SDL_Rect &clip, SDL_Surface *src, const SDL_Rect &srcRect, XY pos, SLONG param,
+                              const void *ctx) {
+    const auto *fx = static_cast<const SB_CColorFX *>(ctx);
+    const CRect rect(srcRect.x, srcRect.y, srcRect.x + srcRect.w - 1, srcRect.y + srcRect.h - 1);
+    SDL_LockSurface(target);
+    SDL_LockSurface(src);
+    fx->TransRows(target->pixels, target->pitch, clip, src->pixels, src->pitch, rect, pos, param);
+    SDL_UnlockSurface(src);
+    SDL_UnlockSurface(target);
 }
 
 //--------------------------------------------------------------------------------------------
 // Zeichnet einen transparenzen Highlight um einen Text:
 //--------------------------------------------------------------------------------------------
 void SB_CColorFX::HighlightText(SB_CBitmapCore *pBitmap, const CRect &HighRect, UWORD FontColor, ULONG HighlightColor) {
-    SLONG x = 0;
-    SLONG y = 0;
-    SLONG cx = 0;
-    SLONG cy = 0;
-    UWORD *p = nullptr;
-    UWORD *Table1 = BlendTables.getData() + (7 << 9);
     UWORD *Table2 = BlendTables.getData() + (1 << 9);
-    static SLONG sizex;
-    static SLONG sizey;
-
-    SLONG max = 3;
 
     // Calculate transparency color stuff:
     SB_Hardwarecolor color = pBitmap->GetHardwarecolor(HighlightColor);
@@ -858,19 +822,50 @@ void SB_CColorFX::HighlightText(SB_CBitmapCore *pBitmap, const CRect &HighRect, 
         ClipRect.bottom = HighRect.bottom;
     }
 
-    sizex = ClipRect.right - ClipRect.left + 1;
-    sizey = ClipRect.bottom - ClipRect.top + 1;
+    // HD (H12): vor der 1x-Rechnung melden (Leuchtrand aus dem noch unveraenderten Text)
+    if (ClipRect.right >= ClipRect.left && ClipRect.bottom >= ClipRect.top) {
+        const SDL_Rect r{ClipRect.left, ClipRect.top, ClipRect.right - ClipRect.left + 1, ClipRect.bottom - ClipRect.top + 1};
+        SB_RecordHdHighlight(pBitmap, r, FontColor, Uint32(HighlightColor & 0xFFFFFF), SLONG((ULONG(coloradd) << 16) | FontColor),
+                             &SB_CColorFX::ReplayHighlight, this);
+    }
 
     SB_CBitmapKey Key(*pBitmap);
     if (Key.Bitmap == nullptr) {
         return;
     }
+    HighlightRows(Key.Bitmap, Key.lPitch, ClipRect, FontColor, coloradd);
+}
 
-    SLONG Width = Key.lPitch / 2;
+void SB_CColorFX::ReplayHighlight(SDL_Surface *target, const SDL_Rect &clip, SDL_Surface *src, const SDL_Rect & /*srcRect*/, XY pos, SLONG param,
+                                  const void *ctx) {
+    const auto *fx = static_cast<const SB_CColorFX *>(ctx);
+    const SDL_Rect rect{pos.x, pos.y, src->w, src->h};
+    const SDL_Rect bounds{0, 0, target->w, target->h};
+    SDL_Rect r;
+    if (SDL_IntersectRect(&rect, &clip, &r) == SDL_FALSE || SDL_IntersectRect(&r, &bounds, &r) == SDL_FALSE) {
+        return;
+    }
+    SDL_LockSurface(target);
+    fx->HighlightRows(target->pixels, target->pitch, CRect(r.x, r.y, r.x + r.w - 1, r.y + r.h - 1), UWORD(ULONG(param) & 0xFFFF),
+                      UWORD(ULONG(param) >> 16));
+    SDL_UnlockSurface(target);
+}
+
+void SB_CColorFX::HighlightRows(void *pixels, SLONG pitch, const CRect &ClipRect, UWORD FontColor, UWORD coloradd) const {
+    SLONG x = 0;
+    SLONG y = 0;
+    SLONG cx = 0;
+    SLONG cy = 0;
+    UWORD *p = nullptr;
+    const UWORD *Table1 = BlendTables.getData() + (7 << 9);
+    const SLONG max = 3;
+    const SLONG sizex = ClipRect.right - ClipRect.left + 1;
+    const SLONG sizey = ClipRect.bottom - ClipRect.top + 1;
+    const SLONG Width = pitch / 2;
 
     if (sizex > 0) {
         for (cy = 0; cy < sizey; cy++) {
-            p = reinterpret_cast<UWORD *>((static_cast<char *>(Key.Bitmap)) + ClipRect.left * 2 + (cy + ClipRect.top) * Key.lPitch);
+            p = reinterpret_cast<UWORD *>((static_cast<char *>(pixels)) + ClipRect.left * 2 + (cy + ClipRect.top) * pitch);
 
             for (cx = sizex; cx > 0; cx--) {
                 if (*p == FontColor) {
@@ -926,130 +921,84 @@ void SB_CColorFX::BlitAlpha(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap
     if (SrcBitmap == nullptr) {
         return;
     }
-    if (TargetPos.x >= 640 || TargetPos.x + SrcBitmap->GetXSize() < 0) {
+    if (TargetPos.x >= max(SLONG(640), TgtBitmap->GetXSize()) || TargetPos.x + SrcBitmap->GetXSize() < 0) {
         return;
     }
-
-    SLONG cx = 0;
-    SLONG cy = 0;
-    UWORD *p = nullptr;
-    UWORD *pp = nullptr;
-    static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
-
-    XY t = TargetPos;
-
     if (SrcBitmap->GetXSize() <= 0 || SrcBitmap->GetXSize() >= 640) {
         AtDebugBreak();
     }
 
-    CRect Rect;
-    Rect = CRect(0, 0, SrcBitmap->GetXSize() - 1, SrcBitmap->GetYSize() - 1);
-
-    if (t.x < 0) {
-        Rect.left -= t.x;
-        t.x = 0;
-    }
-    if (t.y < 0) {
-        Rect.top -= t.y;
-        t.y = 0;
-    }
-    if (t.x + Rect.right - Rect.left + 1 >= TgtBitmap->GetXSize()) {
-        Rect.right -= (t.x + Rect.right - Rect.left + 1) - TgtBitmap->GetXSize();
-    }
-    if (t.y + Rect.bottom - Rect.top + 1 >= min(TgtBitmap->GetYSize(), 440)) {
-        Rect.bottom -= (t.y + Rect.bottom - Rect.top + 1) - min(TgtBitmap->GetYSize(), 440);
+    // BlitAlpha clippt nur an der Puffergroesse (Hoehe hoechstens 440), nicht am Clip-Rechteck
+    const SDL_Rect clip{0, 0, TgtBitmap->GetXSize(), min(TgtBitmap->GetYSize(), SLONG(440))};
+    {
+        SB_CBitmapKey Key(*TgtBitmap);
+        SB_CBitmapKey Key2(*SrcBitmap);
+        if (Key.Bitmap == nullptr || Key2.Bitmap == nullptr) {
+            return;
+        }
+        AlphaRows(Key.Bitmap, Key.lPitch, clip, Key2.Bitmap, Key2.lPitch, SrcBitmap->GetXSize(), SrcBitmap->GetYSize(), TargetPos);
     }
 
-    SB_CBitmapKey Key(*TgtBitmap);
-    SB_CBitmapKey Key2(*SrcBitmap);
-    if (Key.Bitmap == nullptr || Key2.Bitmap == nullptr) {
+    // HD (Phase 2, H5): Abdunkeln auch auf der GPU ueber HD-Inhalten zeichnen
+    const SDL_Rect shadeRect{0, 0, SrcBitmap->GetXSize(), SrcBitmap->GetYSize()};
+    SB_RecordHdEffect(TgtBitmap, SrcBitmap, shadeRect, TargetPos, clip, 1, 255, 0, &SB_CColorFX::ReplayAlpha, this);
+}
+
+//--------------------------------------------------------------------------------------------
+// Dunkelt tgt mit der Alpha-Bitmap src ab: jeder Pixel wird mit (src-Wert)/Schritte multipliziert
+//--------------------------------------------------------------------------------------------
+void SB_CColorFX::AlphaRows(void *tgt, SLONG tgtPitch, const SDL_Rect &clip, const void *src, SLONG srcPitch, SLONG srcW, SLONG srcH,
+                            const XY &TargetPos) const {
+    XY t = TargetPos;
+    CRect Rect(0, 0, srcW - 1, srcH - 1);
+
+    if (t.x < clip.x) {
+        Rect.left += clip.x - t.x;
+        t.x = clip.x;
+    }
+    if (t.y < clip.y) {
+        Rect.top += clip.y - t.y;
+        t.y = clip.y;
+    }
+    if (t.x + Rect.right - Rect.left + 1 >= clip.x + clip.w) {
+        Rect.right -= (t.x + Rect.right - Rect.left + 1) - (clip.x + clip.w);
+    }
+    if (t.y + Rect.bottom - Rect.top + 1 >= clip.y + clip.h) {
+        Rect.bottom -= (t.y + Rect.bottom - Rect.top + 1) - (clip.y + clip.h);
+    }
+
+    const SLONG sizex = Rect.right - Rect.left + 1;
+    if (sizex <= 0) {
         return;
     }
+    for (SLONG cy = 0; cy < Rect.bottom - Rect.top + 1; cy++) {
+        auto *p = reinterpret_cast<UWORD *>(static_cast<char *>(tgt) + t.x * 2 + (cy + t.y) * tgtPitch);
+        const auto *pp = reinterpret_cast<const UWORD *>(static_cast<const char *>(src) + Rect.left * 2 + (cy + Rect.top) * srcPitch);
 
-    sizex = Rect.right - Rect.left + 1;
-
-    if (sizex > 0) {
-        for (cy = 0; cy < Rect.bottom - Rect.top + 1; cy++) {
-            p = reinterpret_cast<UWORD *>((static_cast<char *>(Key.Bitmap)) + t.x * 2 + (cy + t.y) * Key.lPitch);
-            pp = reinterpret_cast<UWORD *>((static_cast<char *>(Key2.Bitmap)) + Rect.left * 2 + (cy + Rect.top) * Key2.lPitch);
-
-            memcpy(PixelBuffer.getData(), p, sizex * 2);
-            p = PixelBuffer.getData();
-
-#ifdef ENABLE_ASM
-            UWORD *Table = BlendTables;
-
-            __asm {
-                push  ebp
-                    push  esi
-                    push  edi
-                    mov   _ESP, esp
-
-                    mov   edi, p
-                    mov   esi, pp
-                    mov   eax, Table
-                    ;mov   esp, Table2
-                    xor   esp, esp
-                    xor   edx, edx
-                    mov   ebx, 256
-                    mov   ebp, sizex
-
-                    Looping:
-                    mov   sp, WORD PTR [esi]
-                    ;mov   dl, BYTE PTR [esi]
-                    ;mov   bl, BYTE PTR [esi+1]
-                    ;mov   cx, WORD PTR [esp+edx*2]
-                    ;add   cx, WORD PTR [esp+ebx*2]
-                    mov   dl, BYTE PTR [edi]
-                    shl   esp, 10
-                    mov   bl, BYTE PTR [edi+1]
-                    add   eax, esp
-                    mov   cx, WORD PTR [eax+edx*2]
-                    add   cx, WORD PTR [eax+ebx*2]
-                    mov   WORD PTR [edi], cx
-                    sub   eax, esp
-
-                    add   esi, 2
-                    add   edi, 2
-
-                    dec   ebp
-                    jnz   Looping
-
-                    mov   esp, _ESP
-                    pop   edi
-                    pop   esi
-                    pop   ebp
-            }
-#else
-            /*for (cx=sizex; cx>0; cx--)
-              {
-             *p = Table[((UBYTE*)p)[0]]+Table[256+((UBYTE*)p)[1]]+
-             Table2[((UBYTE*)pp)[0]]+Table2[256+((UBYTE*)pp)[1]];
-
-             p++;
-             pp++;
-             }*/
-
-            for (cx = sizex; cx > 0; cx--) {
-                UWORD *Table1 = BlendTables.getData() + (SLONG(*pp) << 9);
-
-                *p = UWORD(Table1[(reinterpret_cast<UBYTE *>(p))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(p))[1]]);
-
-                p++;
-                pp++;
-            }
-#endif
-            memcpy(((static_cast<char *>(Key.Bitmap)) + t.x * 2 + (cy + t.y) * Key.lPitch), PixelBuffer.getData(), sizex * 2);
+        for (SLONG cx = sizex; cx > 0; cx--) {
+            const UWORD *Table1 = BlendTables.getData() + (SLONG(*pp) << 9);
+            *p = UWORD(Table1[(reinterpret_cast<UBYTE *>(p))[0]] + Table1[256 + (reinterpret_cast<UBYTE *>(p))[1]]);
+            p++;
+            pp++;
         }
     }
+}
+
+void SB_CColorFX::ReplayAlpha(SDL_Surface *target, const SDL_Rect &clip, SDL_Surface *shade, const SDL_Rect &srcRect, XY pos, SLONG /*param*/,
+                              const void *ctx) {
+    const auto *fx = static_cast<const SB_CColorFX *>(ctx);
+    SDL_LockSurface(target);
+    SDL_LockSurface(shade);
+    fx->AlphaRows(target->pixels, target->pitch, clip, shade->pixels, shade->pitch, srcRect.w, srcRect.h, pos);
+    SDL_UnlockSurface(shade);
+    SDL_UnlockSurface(target);
 }
 
 //--------------------------------------------------------------------------------------------
 // Blitten mit Glow-Effekt fürs Tutorial:
 //--------------------------------------------------------------------------------------------
 void SB_CColorFX::BlitGlow(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap, const XY &TargetPos) {
-    if (TargetPos.x >= 640 || TargetPos.x + SrcBitmap->GetXSize() < 0) {
+    if (TargetPos.x >= max(SLONG(640), TgtBitmap->GetXSize()) || TargetPos.x + SrcBitmap->GetXSize() < 0) {
         return;
     }
 
@@ -1129,7 +1078,21 @@ void SB_CColorFX::BlitGlow(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap,
     }
 }
 
+static void RemapColorRaw(SB_CBitmapCore *pBitmap, const CRect &HighRect, UWORD OldFontColor, ULONG NewFontColor);
+
 void RemapColor(SB_CBitmapCore *pBitmap, const CRect &HighRect, UWORD OldFontColor, ULONG NewFontColor) {
+    // Schwarz -> (fast) Schwarz ueber die ganze Grafik (Stadtfotos): aendert nur, dass Schwarz nicht mehr durchsichtig ist.
+    // Fuer HD heisst das: dieselbe 4x-Grafik, nur deckend statt mit Colorkey.
+    const CRect clip = pBitmap->GetClipRect();
+    const bool hdOk = OldFontColor == 0 && NewFontColor == 1 && HighRect.left <= clip.left && HighRect.top <= clip.top && HighRect.right >= clip.right - 1 &&
+                      HighRect.bottom >= clip.bottom - 1 && pBitmap->HdIsValid();
+    RemapColorRaw(pBitmap, HighRect, OldFontColor, NewFontColor);
+    if (hdOk) {
+        pBitmap->HdKeyRemapped();
+    }
+}
+
+static void RemapColorRaw(SB_CBitmapCore *pBitmap, const CRect &HighRect, UWORD OldFontColor, ULONG NewFontColor) {
     SLONG cx = 0;
     SLONG cy = 0;
     UWORD *p = nullptr;

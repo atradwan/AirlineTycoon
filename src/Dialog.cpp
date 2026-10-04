@@ -55,15 +55,15 @@ BOOL CStdRaum::PreLButtonDown(CPoint point) {
     }
 
     if (!static_cast<bool>(nOptionsOpen) && qMessages.BeraterWalkState == 0 && qMessages.AktuellerBeraterTyp != -1 && qMessages.IsDialog == 0) {
-        if (XY(point).IfIsWithin(640 - 80, 440 - 120, 640, 440)) {
+        if (XY(point).IfIsWithin(UiRightEdge() - 80, 440 - 120, UiRightEdge(), 440)) { // Breitbild: Berater am rechten Bildrand
             qMessages.TalkCountdown = 1;
             return (TRUE);
         }
         if (qMessages.Messages[static_cast<SLONG>(0)].Message.GetLength() > 0 &&
-            XY(point).IfIsWithin(640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x -
+            XY(point).IfIsWithin(UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x -
                                      qMessages.SprechblaseBm.Size.x,
                                  qMessages.BeraterPosY + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].y,
-                                 640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x,
+                                 UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x,
                                  qMessages.BeraterPosY + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].y + qMessages.SprechblaseBm.Size.y)) {
             qMessages.TalkCountdown = 1;
             return (TRUE);

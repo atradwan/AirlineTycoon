@@ -342,6 +342,7 @@ CStdRaum::CStdRaum(BOOL handy, ULONG playerNum, const CString &GfxLibName, __int
         pRoomLibStatic = nullptr;
     } else {
         if (GfxLibName.GetLength() > 0) {
+            HdRoomName = static_cast<const char *>(GfxLibName);
             pGfxMain->LoadLib(const_cast<char *>((LPCTSTR)FullFilename(GfxLibName, RoomPath)), &pRoomLib, L_LOCMEM);
         } else {
             pRoomLib = nullptr;
@@ -363,6 +364,7 @@ CStdRaum::CStdRaum(BOOL handy, ULONG playerNum, const CString &GfxLibName, __int
     } else {
         PicBitmap.ReSize(pRoomLib, graficId, CREATE_SYSMEM);
     }
+    UpdateHdBackground(graficId);
 
     RoomBm.ReSize(PicBitmap.Size, CREATE_SYSMEM);
 
@@ -435,6 +437,7 @@ CStdRaum::~CStdRaum() {
 
     PlayerNum = -1;
 
+    ReleaseHdBackground();
     PicBitmap.Destroy();
 
     if (pRoomLibStatic == nullptr && (pRoomLib != nullptr) && (pGfxMain != nullptr)) {
@@ -518,6 +521,48 @@ void CStdRaum::ProcessEvent(const SDL_Event &event, const CPoint &position) {
 }
 
 //--------------------------------------------------------------------------------------------
+// HD-Hintergrund (Phase 2): gibt es zum Hintergrund eine HD-Datei in s-facher Groesse,
+// wird sie der Basiseintrag von PicBitmap (siehe SB_CPrimaryBitmap::SetHdBase). Alles, was ueber
+// RoomBm in den Frame gelangt, nimmt diesen Eintrag mit.
+//--------------------------------------------------------------------------------------------
+void CStdRaum::UpdateHdBackground(__int64 graficId) {
+    ReleaseHdBackground();
+    if (SB_GetRenderScale() <= 1 || pRoomLib == nullptr || graficId == 0 || !PrimaryBm.PrimaryBm.CanUseHd()) {
+        return;
+    }
+    SDL_Surface *hd = pRoomLib->GetHdSurface(graficId);
+    SDL_Surface *pic = PicBitmap.pBitmap != nullptr ? PicBitmap.pBitmap->GetSurface() : nullptr;
+    if (hd == nullptr || pic == nullptr) {
+        return;
+    }
+    // Referenz ist das Hintergrundbild so, wie es geladen wurde. Was ein Raum spaeter selbst in
+    // PicBitmap malt (z. B. der schlafende Kioskverkaeufer), fehlt in der HD-Textur und muss deshalb
+    // von der Differenzmaske als Unterschied erkannt werden und im Overlay erscheinen.
+    HdRefSurface = SDL_CreateRGBSurfaceWithFormat(0, pic->w, pic->h, 16, SDL_PIXELFORMAT_RGB565);
+    if (HdRefSurface == nullptr) {
+        return;
+    }
+    SDL_LockSurface(pic); // entpackt ggf. RLE
+    for (SLONG y = 0; y < pic->h; y++) {
+        memcpy(static_cast<Uint8 *>(HdRefSurface->pixels) + y * HdRefSurface->pitch, static_cast<const Uint8 *>(pic->pixels) + y * pic->pitch, pic->w * 2);
+    }
+    SDL_UnlockSurface(pic);
+    HdPicTexture = PrimaryBm.PrimaryBm.CreateHdTexture(hd);
+    PrimaryBm.PrimaryBm.SetHdBase(PicBitmap.pBitmap, HdPicTexture, HdRefSurface);
+}
+
+void CStdRaum::ReleaseHdBackground() {
+    if (HdPicTexture != nullptr) {
+        PrimaryBm.PrimaryBm.ForgetHdTexture(HdPicTexture); // gibt sie nach dem naechsten Frame frei
+        HdPicTexture = nullptr;
+    }
+    if (HdRefSurface != nullptr) {
+        SDL_FreeSurface(HdRefSurface);
+        HdRefSurface = nullptr;
+    }
+}
+
+//--------------------------------------------------------------------------------------------
 // Ein neues Hintergrundbild einbinden:
 //--------------------------------------------------------------------------------------------
 void CStdRaum::ReSize(const CString &GfxLibName, __int64 graficId) {
@@ -529,6 +574,7 @@ void CStdRaum::ReSize(const CString &GfxLibName, __int64 graficId) {
     }
 
     if (GfxLibName.GetLength() > 0) {
+        HdRoomName = static_cast<const char *>(GfxLibName);
         pGfxMain->LoadLib(const_cast<char *>((LPCTSTR)FullFilename(GfxLibName, RoomPath)), &pRoomLib, L_LOCMEM);
     } else {
         pRoomLib = nullptr;
@@ -539,6 +585,7 @@ void CStdRaum::ReSize(const CString &GfxLibName, __int64 graficId) {
     } else {
         PicBitmap.ReSize(pRoomLib, graficId, CREATE_SYSMEM);
     }
+    UpdateHdBackground(graficId);
 
     RoomBm.ReSize(PicBitmap.Size, CREATE_SYSMEM);
 }
@@ -552,6 +599,7 @@ void CStdRaum::ReSize(__int64 graficId) {
     } else {
         PicBitmap.ReSize(pRoomLib, graficId, CREATE_SYSMEM);
     }
+    UpdateHdBackground(graficId);
 
     RoomBm.ReSize(PicBitmap.Size, CREATE_SYSMEM);
 }
@@ -861,7 +909,7 @@ void CStdRaum::MakeNumberWindow(CString Text) {
                         SDL_Rect SrcRect = {0, 0, gNumberTemplate.Size.x, gNumberTemplate.Size.y};
                         SDL_Rect DestRect = {0, 0, NumberBitmap.Size.x, NumberBitmap.Size.y};
 
-                        SDL_BlitScaled(gNumberTemplate.pBitmap->GetSurface(), &SrcRect, NumberBitmap.pBitmap->GetSurface(), &DestRect);
+                        gNumberTemplate.pBitmap->BlitScaled(NumberBitmap.pBitmap, SrcRect, DestRect);
 
                         SLONG sizey = NumberBitmap.TryPrintAt(Text, FontDialogPartner, TEC_FONT_LEFT, XY(10, 10), NumberBitmap.Size - XY(10, 10));
 
@@ -2580,6 +2628,27 @@ void CStdRaum::PumpToolTips() {
 }
 
 //--------------------------------------------------------------------------------------------
+// Breitbild (H17b): Einige Raeume zeichnen nach PostPaint eigene Grafik in den Bereich der Statuszeile (z. B. der
+// Exit-Knopf der Statistik ueber dem linken Block). Pos ist in Spielkoordinaten; im Breitbild liegt die Zeile aber am
+// Bildrand, also ausserhalb des mittleren Ausschnitts. Gezeichnet wird deshalb mit derselben Abbildung wie Maus und
+// Tooltips (GameToFrame), damit Bild und Klickflaeche uebereinstimmen.
+//--------------------------------------------------------------------------------------------
+void CStdRaum::BlitIntoStatusBand(SBBM &Bm, XY Pos) {
+    const bool wideStatus = gHallMargin != 0 && WantsWideFrame() != 0 && bHandy == 0;
+    if (!wideStatus) {
+        PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
+        PrimaryBm.BlitFrom(Bm, Pos);
+        return;
+    }
+
+    PrimaryBm.PrimaryBm.EndView();
+    PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 440, 640 + 2 * gHallMargin, 480));
+    PrimaryBm.BlitFrom(Bm, GameToFrame(Pos));
+    PrimaryBm.PrimaryBm.BeginView(gHallMargin, 640 + gRightAnchor);
+    PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, UiRightEdge(), 480));
+}
+
+//--------------------------------------------------------------------------------------------
 // Malt ggf. über den gesammten Raum noch den Text drüber:
 //--------------------------------------------------------------------------------------------
 void CStdRaum::PostPaint() {
@@ -2635,16 +2704,18 @@ void CStdRaum::PostPaint() {
             }
             RoomBm.pBitmap->SetClipRect(CRect(0, 0, 640, 480));
         } else {
-            PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, 640, 440));
-            PrimaryBm.BlitFrom(qRoom.RoomBm, SrcRect, Dest);
+            // Breitbild (H15): in der Halle am rechten Bildrand (gHallMargin weiter rechts als der mittlere Ausschnitt)
+            const SLONG hx = gRightAnchor;
+            PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, UiRightEdge(), 440));
+            PrimaryBm.BlitFrom(qRoom.RoomBm, SrcRect, Dest + XY(hx, 0));
 
             for (SLONG cy = 0; cy < 9; cy++) {
                 PrimaryBm.BlitFrom(qRoom.RoomBm, CRect(qRoom.HandyOffset - 13 * cy, -24 + cy * 52, qRoom.HandyOffset + 13, min(440, 28 + cy * 52)),
-                                   XY(qRoom.TempScreenScroll - 13 * cy, -24 + cy * 52));
+                                   XY(qRoom.TempScreenScroll + hx - 13 * cy, -24 + cy * 52));
 
-                PrimaryBm.BlitFromT(gDialogBarBm, qRoom.TempScreenScroll + 1 - 13 - 13 * cy, -24 + cy * 52);
+                PrimaryBm.BlitFromT(gDialogBarBm, qRoom.TempScreenScroll + hx + 1 - 13 - 13 * cy, -24 + cy * 52);
             }
-            PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
+            PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, UiRightEdge(), 480));
         }
     }
 
@@ -2752,7 +2823,7 @@ void CStdRaum::PostPaint() {
             StatusCount = max(StatusCount, 3);
 
             if (qMessages.AktuellerBeraterTyp < 100) { // Berater rechts, andere links
-                PrimaryBm.BlitFromT(BeraterBms[qMessages.AktuelleBeraterBitmap][0], 640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x,
+                PrimaryBm.BlitFromT(BeraterBms[qMessages.AktuelleBeraterBitmap][0], UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x,
                                     qPlayer.Messages.BeraterPosY);
             } else {
                 if (DontDisplayPlayer == -1 && (IsInBuro == 0)) {
@@ -2763,6 +2834,18 @@ void CStdRaum::PostPaint() {
             }
         }
 
+        // Breitbild (H15): in der Halle reicht die Statuszeile ueber die ganze Bildbreite. Sie wird ausserhalb des mittleren
+        // Ausschnitts gezeichnet (Bildkoordinaten): linker Block und Inventar am linken, die rechte Endkappe am rechten
+        // Bildrand, dazwischen weitere Rohrsegmente. Mauskoordinaten in der Zeile: siehe FrameToGame.
+        const bool wideStatus = gHallMargin != 0 && WantsWideFrame() != 0 && bHandy == 0;
+        const XY savedWinP1 = WinP1;
+        const XY savedWinP2 = WinP2;
+        if (wideStatus) {
+            PrimaryBm.PrimaryBm.EndView();
+            WinP1.x = 0;
+            WinP2.x = 640 + 2 * gHallMargin;
+        }
+
         // Die Statuszeile
         if ((StatusCount > 0 || (bNoSpeedyBar != 0) || (gBlendState >= 0 && gBlendState <= 8)) && PicBitmap.Size.y <= 440) {
             if (StatusCount > 0) {
@@ -2770,6 +2853,16 @@ void CStdRaum::PostPaint() {
             }
 
             PrimaryBm.BlitFrom(StatusLineBms[0], WinP1.x, WinP2.y - StatusLineSizeY);
+            if (wideStatus) {
+                // Rohrsegmente (wie die leeren Inventarplaetze, gleiches Raster) bis zur rechten Endkappe
+                const SLONG split = StatusSplitX();
+                const SLONG end = WinP2.x - (640 - split);
+                PrimaryBm.PrimaryBm.SetClipRect(CRect(split, WinP2.y - StatusLineSizeY, end, WinP2.y));
+                for (SLONG x = 256 - 8 + 60 * ((split - 256 + 8) / 60); x < end; x += 60) {
+                    PrimaryBm.BlitFrom(StatusLineBms[5], x, WinP2.y - StatusLineSizeY);
+                }
+                PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, WinP2.x, 480));
+            }
             PrimaryBm.BlitFrom(StatusLineBms[6], WinP2.x - StatusLineBms[6].Size.x, WinP2.y - StatusLineSizeY);
 
             if (qPlayer.Messages.LastMessage.BeraterTyp != -1) {
@@ -2890,16 +2983,23 @@ void CStdRaum::PostPaint() {
             }
         }
 
+        if (wideStatus) {
+            WinP1 = savedWinP1;
+            WinP2 = savedWinP2;
+            PrimaryBm.PrimaryBm.BeginView(gHallMargin, 640 + gRightAnchor);
+            PrimaryBm.PrimaryBm.SetClipRect(CRect(0, 0, UiRightEdge(), 480));
+        }
+
         // Einen anderen Spieler als Dialogpartner anzeigen:
         if (DialogPartner == TALKER_COMPETITOR) {
             if (AtGetTime() > DWORD(SmackerTimeToTalk) || TextAlign != 0 || ((TalkingSpeechFx > 0 && !SpeechFx.pFX->IsMouthOpen(200)))) {
                 PrimaryBm.FlipBlitFromT(BeraterBms[12 + DialogPar1][static_cast<SLONG>(DialogMedium == MEDIUM_HANDY) * 4],
-                                        XY(640 - BeraterBms[12 + DialogPar1][0].Size.x,
+                                        XY(UiRightEdge() - BeraterBms[12 + DialogPar1][0].Size.x,
                                            440 - BeraterSlideY[12 + DialogPar1 + static_cast<SLONG>(DialogMedium == MEDIUM_HANDY) * 4]));
             } else {
                 PrimaryBm.FlipBlitFromT(BeraterBms[12 + DialogPar1]["\x0\x2\x1\x3\x2\x3\x0\x1\x2"[(AtGetTime() / 50 / 3) & 7] +
                                                                     static_cast<SLONG>(DialogMedium == MEDIUM_HANDY) * 4],
-                                        XY(640 - BeraterBms[12 + DialogPar1][0].Size.x,
+                                        XY(UiRightEdge() - BeraterBms[12 + DialogPar1][0].Size.x,
                                            440 - BeraterSlideY[12 + DialogPar1 + static_cast<SLONG>(DialogMedium == MEDIUM_HANDY) * 4]));
             }
 
@@ -2909,7 +3009,7 @@ void CStdRaum::PostPaint() {
                 if (OnscreenBitmap.pBitmap == nullptr) {
                     if (DisplayThisBubble != 0) {
                         ColorFX.BlitTrans(MoodBms[MoodPersonEmpty].pBitmap, &PrimaryBm.PrimaryBm,
-                                          XY(640 - BeraterBms[12 + DialogPar1][0].Size.x,
+                                          XY(UiRightEdge() - BeraterBms[12 + DialogPar1][0].Size.x,
                                              440 - BeraterSlideY[12 + DialogPar1 + static_cast<SLONG>(DialogMedium == MEDIUM_HANDY) * 4]) -
                                               XY(-5, MoodBms[MoodPersonEmpty].Size.y),
                                           nullptr, 4);
@@ -2958,7 +3058,7 @@ void CStdRaum::PostPaint() {
                         DestRect.h = SLONG(OnscreenBitmap.Size.y * (MinimumZoom * 100 + ((ZoomCounter * (1.0 - MinimumZoom)))) / 100);
                     }
 
-                    SDL_BlitScaled(OnscreenBitmap.pBitmap->GetSurface(), &SrcRect, PrimaryBm.PrimaryBm.GetSurface(), &DestRect);
+                    OnscreenBitmap.pBitmap->BlitScaled(&PrimaryBm.PrimaryBm, SrcRect, DestRect);
                 }
 
                 if (CurrentMenu == MENU_EXTRABLATT) {
@@ -3007,7 +3107,7 @@ void CStdRaum::PostPaint() {
                 DestRect.w = SLONG(OnscreenBitmap.Size.x * (MinimumZoom * 100 + ((ZoomCounter * (1.0 - MinimumZoom)))) / 100);
                 DestRect.h = SLONG(OnscreenBitmap.Size.y * (MinimumZoom * 100 + ((ZoomCounter * (1.0 - MinimumZoom)))) / 100);
 
-                SDL_BlitScaled(OnscreenBitmap.pBitmap->GetSurface(), &SrcRect, PrimaryBm.PrimaryBm.GetSurface(), &DestRect);
+                OnscreenBitmap.pBitmap->BlitScaled(&PrimaryBm.PrimaryBm, SrcRect, DestRect);
             }
         }
 
@@ -3022,7 +3122,7 @@ void CStdRaum::PostPaint() {
                 PrimaryBm.BlitFromT(
                     BeraterBms[qMessages.AktuelleBeraterBitmap]["\0\0\x1\0\x1\x1"[(qMessages.TalkPhase / 3) % 6] +
                                                                 (static_cast<SLONG>(qMessages.BlinkCountdown > 0) * BeraterBms[0].AnzEntries() / 2)],
-                    640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x, qMessages.BeraterPosY);
+                    UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x, qMessages.BeraterPosY);
             } else if (DontDisplayPlayer == -1 && (IsInBuro == 0)) {
                 PrimaryBm.BlitFromT(BeraterBms[qMessages.AktuelleBeraterBitmap]
                                               ["\x0\x2\x1\x3\x2\x3\x0\x1\x2"[static_cast<SLONG>(TalkingSpeechFx == 0 || SpeechFx.pFX->IsMouthOpen(200)) *
@@ -3036,21 +3136,21 @@ void CStdRaum::PostPaint() {
 
             if (qMessages.Messages[static_cast<SLONG>(0)].Message.GetLength() > 0 && qMessages.AktuellerBeraterTyp < 100) {
                 ColorFX.BlitWhiteTrans(qMessages.SprechblaseBm.pBitmap, &PrimaryBm.PrimaryBm,
-                                       XY(640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x +
+                                       XY(UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x +
                                               BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x - qMessages.SprechblaseBm.Size.x,
                                           qMessages.BeraterPosY + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].y));
 
                 if (qMessages.Messages[static_cast<SLONG>(0)].Mood != -1) {
                     if (qMessages.Messages[static_cast<SLONG>(0)].BubbleType == 1) {
                         ColorFX.BlitTrans(SmileyBms[qMessages.Messages[static_cast<SLONG>(0)].Mood].pBitmap, &PrimaryBm.PrimaryBm,
-                                          XY(640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x +
+                                          XY(UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x +
                                                  BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x - qMessages.SprechblaseBm.Size.x,
                                              qMessages.BeraterPosY + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].y) +
                                               XY(5, 7),
                                           nullptr, 2);
                     } else if (qMessages.Messages[static_cast<SLONG>(0)].BubbleType == 2) {
                         ColorFX.BlitTrans(SmileyBms[qMessages.Messages[static_cast<SLONG>(0)].Mood].pBitmap, &PrimaryBm.PrimaryBm,
-                                          XY(640 - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x +
+                                          XY(UiRightEdge() - BeraterBms[qMessages.AktuelleBeraterBitmap][0].Size.x +
                                                  BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].x - qMessages.SprechblaseBm.Size.x,
                                              qMessages.BeraterPosY + BeraterSprechblasenOffset[qMessages.AktuelleBeraterBitmap].y) +
                                               XY(7, 18),
@@ -3535,7 +3635,10 @@ void CStdRaum::OnPaint(BOOL /*bHandyDialog*/) {
         CurrentTipType = TIP_NONE;
 
         if (PicBitmap.Size.x != 0) {
-            RoomBm.BlitFrom(PicBitmap, WinP1.x, WinP1.y);
+            RoomBm.BlitFrom(PicBitmap, WinP1.x, WinP1.y); // nimmt den HD-Hintergrund als Eintrag mit (H6)
+        }
+        if (SB_GetHdMissingLog() && PlayerNum >= 0 && Sim.Players.Players[PlayerNum].LocationWin == this) {
+            SB_SetHdRoom(HdRoomName.empty() ? "Flughafen/ohne Raum-GLI" : HdRoomName.c_str());
         }
 
         if (bHandy != 0) // Handy einblendung?

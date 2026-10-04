@@ -68,6 +68,11 @@ class CStdRaum {
     SLONG TimeBubbleDisplayed{}; // Wann wurde diese Sprechblase eröffnet (wg. Timeout beim Gespräch mit Spielern)
     GfxLib *pRoomLib;            // Library für den Raum;
     SBBM PicBitmap;              // Der Raum
+    SDL_Texture *HdPicTexture{}; // HD-Fassung von PicBitmap als GPU-Textur (Phase 2), sonst nullptr
+    std::string HdRoomName;      // GLI-Datei des Raums, fuer die HD-fehlt-Liste
+    SDL_Surface *HdRefSurface{}; // unveraenderte 1x-Kopie von PicBitmap direkt nach dem Laden (Referenz fuer die Differenzmaske)
+    void UpdateHdBackground(__int64 graficId);
+    void ReleaseHdBackground();
     SBBM OnscreenBitmap;         // On-Screen Dialoge & Menüs
     SBBM NumberBitmap;           // Mit dieser Bitmap werden Zahlen eingeblendet, die früher über Zahlensynthese erzeugt wurden
     XY NumberBitmapPos;          // Position der NumberBitmap
@@ -177,6 +182,7 @@ class CStdRaum {
     BOOL PreLButtonDown(CPoint point);
     void RepaintText(BOOL RefreshAll);
     void PostPaint(void);
+    void BlitIntoStatusBand(SBBM &Bm, XY Pos); // Breitbild (H17b): Raum-eigene Grafik in der Statuszeile (y >= 440)
     void CheckHighlight(const CPoint &point);
     void SetTip(SBBM *pBitmapSource, void *pBitmapSource2, BOOL ForceRedraw, XY Pos, SLONG TipType, SLONG TipId, SLONG TipPar1 = 0, SLONG TipPar2 = 0);
     void AnnouceTipDataUpdate(SLONG TipType);
@@ -232,6 +238,9 @@ class CStdRaum {
     virtual ~CStdRaum();
 
     void ProcessEvent(const SDL_Event &event, const CPoint &position);
+    // Breitbild: Bildschirm nutzt die ganze Leinwand. Raeume mit Statuszeile (H17): Raum mittig, Statuszeile ueber die ganze Breite
+    virtual BOOL WantsWideFrame() const { return static_cast<BOOL>(PicBitmap.Size.y <= 440 && bHandy == 0); }
+    virtual BOOL IsHallView() const { return FALSE; } // Halle: zeichnet selbst ueber die ganze Breite (H14)
 
     // Generated message map functions
   protected:

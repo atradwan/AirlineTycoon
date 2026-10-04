@@ -22,3 +22,25 @@ gamefiles/*
 .vscode
 !.vscode/extensions.json
 .DS_Store
+# --- Lizenzschutz: Spieldateien, HD-Grafiken und KI-Modelle nie committen (siehe ASSETS.md) ---
+*.[gG][lL][iI]
+*.[gG][lL][jJ]
+*.[sS][mM][kK]
+*.[lL][bB][mM]
+*.[pP][oO][lL]
+*.[mM][cC][fF]
+*.[rR][aA][wW]
+*.[rR][eE][sS]
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.onnx
+hd/
+hd_debug/
+hd_assets/
+assets_export/
+upscaled/
+
+# Python
+__pycache__/

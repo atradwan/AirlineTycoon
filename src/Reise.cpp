@@ -272,7 +272,7 @@ void CReisebuero::OnPaint() {
                 DestRect.w = SLONG(ZettelBms[c].Size.x * (p + 400) / 1400);
                 DestRect.h = SLONG(ZettelBms[c].Size.y * (p + 400) / 1400);
 
-                SDL_BlitScaled(ZettelBms[c].pBitmap->GetSurface(), &SrcRect, RoomBm.pBitmap->GetSurface(), &DestRect);
+                ZettelBms[c].pBitmap->BlitScaled(RoomBm.pBitmap, SrcRect, DestRect);
             }
         }
     }

@@ -1,0 +1,4 @@
+# Dateien aus dem Original-Repository (mertenpopp), die der Asset-Guard sonst
+# melden wuerde. Nur mit Begruendung erweitern.
+# (bot_standalone/*.csv und libs/CrashRpt/install/... sind auf develop entfernt.)
+gamefiles/README.md

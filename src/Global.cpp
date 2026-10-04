@@ -16,6 +16,8 @@ const char ExcCreateWindow[] = "CreateWindow failed!";
 SBBM gBlendBm;
 SBBM gBlendBm2;
 SLONG gBlendState = -1;
+SLONG gHallMargin = 0;
+SLONG gRightAnchor = 0;
 SLONG gFramesToDrawBeforeFirstBlend = 0; // Paint 2 frames, before reading from the screen for blending reasons
 
 //--------------------------------------------------------------------------------------------

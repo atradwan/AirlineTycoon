@@ -674,6 +674,11 @@ void BLOCK::LinkeSeiteInhalt(XY TitleArea, XY ClientArea) {
             CRect rect(0, 0, 9999, 9999);
             if (Photo.Size.x != 0) {
                 RemapColor(Photo.pBitmap, rect, 0x0000, 0x0001);
+                static CString LastPhotoLog;
+                if (SB_GetRenderScale() > 1 && LastPhotoLog != tmp) {
+                    LastPhotoLog = tmp;
+                    AT_Log_I("HD", "Stadtfoto %s: %s", tmp.c_str(), Photo.pBitmap->GetHdTexture() != nullptr ? "in HD" : "in 1x (keine 4x-PNG oder Grafik bemalt)");
+                }
             }
             Bitmap.BlitFrom(Photo, ClientArea - XY(0, 3) + XY(85, 85) - Photo.Size / SLONG(2));
         }

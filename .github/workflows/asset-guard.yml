@@ -1,0 +1,16 @@
+name: asset guard
+
+# Laeuft bei jedem Push und Pull Request und bricht ab, sobald Spieldateien,
+# HD-Grafiken oder KI-Modelle im Repository landen wuerden.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Asset-Guard
+        run: python3 tools/asset_guard.py

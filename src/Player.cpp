@@ -4883,7 +4883,10 @@ void PLAYER::RobotExecuteAction() {
                         if (RobotUse(ROBOT_USE_MILD_SABOTAGE) && ArabTrust >= 3 && LocalRandom.Rand(3) != 0) {
                             targetMode = min(targetMode, 3);
                         }
-                        if (targetMode == 1 && ArabTrust > targetMode && rand() % 2 == 0) {
+                        // Eigener Zufall statt rand(): rand() laeuft auch beim Zeichnen (Rauch, Stimmungsblasen)
+                        // und haengt damit vom Bildausschnitt ab; hier entscheidet er ueber die Sabotage (H13)
+                        if (targetMode == 1 && ArabTrust > targetMode &&
+                            TEAKRAND(ULONG(Sim.StartTime + Sim.Date * 7919 + Sim.Time + PlayerNum * 104729 + 0x45534341)).Rand(2) == 0) {
                             targetMode++;
                         }
                         if (targetMode == 2 && (Sim.Players.Players[ArabOpfer2].HasItem(ITEM_LAPTOP) == 0)) {

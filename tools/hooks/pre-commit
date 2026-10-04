@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blockiert Commits mit Spieldateien, HD-Grafiken oder KI-Modellen.
+# Aktivieren: git config core.hooksPath tools/hooks
+exec python3 "$(git rev-parse --show-toplevel)/tools/asset_guard.py" --staged
