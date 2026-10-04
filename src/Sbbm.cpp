@@ -629,17 +629,8 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
 
     // Widescreen: latch the width of the frame being presented (airport = wide, rooms/menus = 640).
     const SLONG newPresentW = (gScreenW > 640 && gWideStripDrawn) ? gScreenW : 640;
-    if (newPresentW > 640) {
-        // the airport drew the world down to y=440 and a centred 640 status bar; clear the side parts of the status band
-        SB_CBitmapKey StripKey(PrimaryBm);
-        if (StripKey.Bitmap != nullptr) {
-            for (SLONG y = 440; y < 480; y++) {
-                char *row = static_cast<char *>(StripKey.Bitmap) + y * StripKey.lPitch;
-                memset(row, 0, gUiOffsetX * 2);
-                memset(row + (gUiOffsetX + 640) * 2, 0, std::max(static_cast<SLONG>(0), gScreenW - 640 - gUiOffsetX) * 2);
-            }
-        }
-    }
+    // the airport status band is presented stretched to full width from the centred 640 bar
+    PrimaryBm.SetStatusSplit(newPresentW > 640 ? gUiOffsetX : -1);
     gWideStripDrawn = FALSE;
     if (newPresentW != gPresentW) {
         gPresentW = newPresentW;

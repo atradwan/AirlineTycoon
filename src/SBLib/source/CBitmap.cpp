@@ -488,6 +488,18 @@ bool SB_CPrimaryBitmap::FastClip(CRect clipRect, POINT *pPoint, RECT *pRect) {
     return pRect->right - pRect->left > 0 && pRect->bottom - pRect->top > 0;
 }
 
+static bool SplitCopyRects(SLONG srcW, SLONG statusX, SLONG srcH, const SDL_Rect &t, SDL_Rect *s1, SDL_Rect *d1, SDL_Rect *s2, SDL_Rect *d2) {
+    if (statusX < 0 || srcW <= 640 || srcH != 480) {
+        return false;
+    }
+    const int th = t.h * 440 / 480;
+    *s1 = SDL_Rect{0, 0, srcW, 440};
+    *d1 = SDL_Rect{t.x, t.y, t.w, th};
+    *s2 = SDL_Rect{statusX, 440, 640, 40};
+    *d2 = SDL_Rect{t.x, t.y + th, t.w, t.h - th};
+    return true;
+}
+
 SLONG SB_CPrimaryBitmap::Flip() {
     SetViewOffset(0);
     if (lpDD != nullptr) {
@@ -509,7 +521,12 @@ SLONG SB_CPrimaryBitmap::Flip() {
         SDL_Rect target = SDL_Rect{TargetOffset.x, TargetOffset.y, TargetSize.x, TargetSize.y};
         SDL_Rect srcRect = SDL_Rect{0, 0, SourceW, Size.y};
         const SDL_Rect *pSrc = (SourceW > 0 && SourceW < Size.x) ? &srcRect : nullptr;
-        if (SDL_BlitScaled(lpDDSurface, pSrc, SDL_GetWindowSurface(Window), &target) < 0) {
+        SDL_Rect s1, d1, s2, d2;
+        if (SplitCopyRects(SourceW, StatusSrcX, Size.y, target, &s1, &d1, &s2, &d2)) {
+            if (SDL_BlitScaled(lpDDSurface, &s1, SDL_GetWindowSurface(Window), &d1) < 0 || SDL_BlitScaled(lpDDSurface, &s2, SDL_GetWindowSurface(Window), &d2) < 0) {
+                return -2;
+            }
+        } else if (SDL_BlitScaled(lpDDSurface, pSrc, SDL_GetWindowSurface(Window), &target) < 0) {
             return -2;
         }
 
@@ -564,7 +581,12 @@ SLONG SB_CPrimaryBitmap::Present() {
         const SDL_Rect srcRect = SDL_Rect{0, 0, SourceW, Size.y};
         const SDL_Rect *pSrc = (SourceW > 0 && SourceW < Size.x) ? &srcRect : nullptr;
         // Copy our primary texture to the backbuffer
-        if (SDL_RenderCopy(lpDD, lpTexture, pSrc, &target) < 0) {
+        SDL_Rect s1, d1, s2, d2;
+        if (SplitCopyRects(SourceW, StatusSrcX, Size.y, target, &s1, &d1, &s2, &d2)) {
+            if (SDL_RenderCopy(lpDD, lpTexture, &s1, &d1) < 0 || SDL_RenderCopy(lpDD, lpTexture, &s2, &d2) < 0) {
+                return -2;
+            }
+        } else if (SDL_RenderCopy(lpDD, lpTexture, pSrc, &target) < 0) {
             return -2;
         }
 

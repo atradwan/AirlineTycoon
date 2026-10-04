@@ -213,6 +213,8 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
     void SetTarget(XY offset, XY size);
     // Visible source width (<= Size.x). 0 or Size.x = whole bitmap.
     void SetSourceWidth(SLONG w) { SourceW = w; }
+    // Widescreen: if >= 0 (and SourceW > 640) the bottom 40 rows are presented from the 640 wide status bar at column x, stretched to the full target width.
+    void SetStatusSplit(SLONG x) { StatusSrcX = x; }
     // Widescreen UI: x>0 redirects all drawing (lpDDSurface) to a 640x480 alias of the real surface starting at column x;
     // 0 restores the full surface. Must be 0 across Flip/Release and for anything that copies gScreenW columns.
     void SetViewOffset(SLONG x);
@@ -229,6 +231,7 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
     XY TargetSize{640, 480};
     XY TargetOffset{0, 0};
     SLONG SourceW{0};
+    SLONG StatusSrcX{-1};
     SDL_Surface *RealSurface{nullptr};
     SDL_Surface *AliasSurface{nullptr};
     SLONG ViewOffset{0};

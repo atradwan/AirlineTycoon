@@ -514,7 +514,11 @@ static bool MapWideMouse(CPoint *pos, int kind, int b) {
     bool keep = true;
     if (ui) {
         sCursorFullX = pos->x;
-        pos->x -= gUiOffsetX;
+        if (pos->y >= 440) {
+            pos->x = pos->x * 640 / gPresentW; // the status band is presented stretched to full width: linear map, nothing dropped
+        } else {
+            pos->x -= gUiOffsetX;
+        }
         if (pos->x < 0 || pos->x > 639) {
             if (kind == 0) {
                 if (pos->x < 0) {
