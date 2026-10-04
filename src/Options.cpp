@@ -646,6 +646,7 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
 
             if (Line == 12) {
                 Sim.Options.OptionWideAirport = (Sim.Options.OptionWideAirport == 0) ? 1 : 0; // takes effect after restart
+                Sim.SaveOptions();
             }
 
             if (Line == 13) {
