@@ -27,6 +27,21 @@ extern SLONG gBlendState;
 extern SLONG gFramesToDrawBeforeFirstBlend;
 
 //--------------------------------------------------------------------------------------------
+// Widescreen airport: gScreenW = visible width of the primary bitmap (640 unless OptionWideAirport),
+// gScreenMaxW = allocated width (640 or WIDE_MAX_W, fixed at startup), gWideStripDrawn = airport drew x>=640 this frame
+//--------------------------------------------------------------------------------------------
+constexpr SLONG WIDE_MAX_W = 1280;
+extern SLONG gScreenW;
+extern SLONG gScreenMaxW;
+extern BOOL gWideStripDrawn;
+// Width of the frame currently presented (latched in SBPRIMARYBM::Flip: gScreenW for airport frames, else 640).
+// Present source width and mouse mapping both use it. gBlendFromW = gPresentW when a fade source was captured.
+extern SLONG gPresentW;
+extern SLONG gBlendFromW;
+extern SLONG gUiOffsetX;
+extern BOOL gMouseUiSpace;
+
+//--------------------------------------------------------------------------------------------
 // Flags für Cheats:
 //--------------------------------------------------------------------------------------------
 extern BOOL CheatRunningman;
@@ -73,6 +88,8 @@ extern SB_CCursor *pCursor;
 extern SLONG gRepairPrice[];
 extern SLONG gWerbePrice[];
 extern SLONG RightAirportClip;
+// Right culling edge of the airport view: the full width in wide mode (the dialog is centred there), else RightAirportClip (378 under a dialog).
+inline SLONG AirportRightClip() { return (gScreenW > 640) ? gScreenW : RightAirportClip; }
 extern SB_CBitmapMain *bitmapMain;
 extern GfxMain *pGfxMain;
 extern GfxLib *pGLibStd;

@@ -83,3 +83,21 @@
   O::# Sound:
   S::# Sound:
   D::# Sound:
+>>0000040
+  B::# Widescreen Airport: Off (restart)
+  E::# Widescreen Airport: Off (restart)
+  F::# Widescreen Airport: Off (restart)
+  I::# Widescreen Airport: Off (restart)
+  N::# Widescreen Airport: Off (restart)
+  O::# Widescreen Airport: Off (restart)
+  S::# Widescreen Airport: Off (restart)
+  D::# Widescreen Airport: Off (restart)
+>>0000041
+  B::# Widescreen Airport: On (restart)
+  E::# Widescreen Airport: On (restart)
+  F::# Widescreen Airport: On (restart)
+  I::# Widescreen Airport: On (restart)
+  N::# Widescreen Airport: On (restart)
+  O::# Widescreen Airport: On (restart)
+  S::# Widescreen Airport: On (restart)
+  D::# Widescreen Airport: On (restart)

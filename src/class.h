@@ -2456,6 +2456,7 @@ class COptions {
   public:
     SLONG OptionFullscreen{};
     BOOL OptionKeepAspectRatio{};
+    BOOL OptionWideAirport{};
     SLONG OptionScreenWindowedWidth{};
     SLONG OptionScreenWindowedHeight{};
     BOOL OptionPlanes{};

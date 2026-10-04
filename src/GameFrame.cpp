@@ -23,10 +23,13 @@
 #include "StdRaum.h"
 #include "Synthese.h"
 
+#include <algorithm>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_hints.h>
 
 extern SBNetwork gNetwork;
+extern CString MakeVideoPath;
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -205,11 +208,26 @@ void GameFrame::UpdateWindow() const {
     UpdateFrameSize();
 }
 
-constexpr SLONG getAspectWidth(SLONG height) { return static_cast<SLONG>(static_cast<float>(height) * (640.0f / 480.0f)); }
+static float getAspectWidthRatio() { return static_cast<float>(gPresentW) / 480.0f; }
+
+static SLONG getAspectWidth(SLONG height) { return static_cast<SLONG>(static_cast<float>(height) * getAspectWidthRatio()); }
+
+// Visible width of the primary bitmap for a window of size w x h. Only wider than 640 if the
+// widescreen airport was enabled at startup (gScreenMaxW > 640); never exceeds the allocated width.
+static SLONG computeScreenW(SLONG w, SLONG h) {
+    if (gScreenMaxW <= 640 || w <= 0 || h <= 0) {
+        return 640;
+    }
+    const SLONG sw = static_cast<SLONG>(std::lround(480.0 * static_cast<double>(w) / static_cast<double>(h)));
+    return std::min(std::max(sw, static_cast<SLONG>(640)), gScreenMaxW);
+}
 
 void GameFrame::UpdateFrameSize() const {
     SLONG screenW = 0, screenH = 0;
     SDL_GetWindowSize(m_hWnd, &screenW, &screenH);
+    gScreenW = computeScreenW(screenW, screenH);
+    gPresentW = std::min(gPresentW, gScreenW);
+    PrimaryBm.PrimaryBm.SetSourceWidth(gPresentW);
     SDL_RenderSetLogicalSize(lpDD, screenW, screenH);
     // update setting file
     Sim.Options.OptionScreenWindowedWidth = screenW;
@@ -240,7 +258,7 @@ void GameFrame::TranslatePointToGameSpace(CPoint *p) const {
     }
 
     x /= static_cast<FLOAT>(screenW);
-    x *= 640;
+    x *= static_cast<FLOAT>(gPresentW);
     y /= static_cast<FLOAT>(screenH);
     y *= 480;
 
@@ -261,7 +279,7 @@ void GameFrame::TranslatePointToScreenSpace(SLONG &x, SLONG &y) const {
 
     FLOAT _x = static_cast<FLOAT>(x);
     FLOAT _y = static_cast<FLOAT>(y);
-    _x /= 640;
+    _x /= static_cast<FLOAT>(gPresentW);
     _x *= static_cast<FLOAT>(screenW);
     _y /= 480;
     _y *= static_cast<FLOAT>(screenH);
@@ -327,8 +345,10 @@ GameFrame::GameFrame() {
 
     pGfxMain = new GfxMain(lpDD);
 
-    PrimaryBm.ReSize(h, bFullscreen, XY(640, 480));
-    PrimaryBm.ReSizePartB(h, bFullscreen, XY(640, 480));
+    // Widescreen airport: allocate the wide bitmap once (restart to toggle); never when recording video
+    gScreenMaxW = (Sim.Options.OptionWideAirport != 0 && MakeVideoPath.GetLength() == 0) ? WIDE_MAX_W : 640;
+    PrimaryBm.ReSize(h, bFullscreen, XY(gScreenMaxW, 480));
+    PrimaryBm.ReSizePartB(h, bFullscreen, XY(gScreenMaxW, 480));
     pCursor = new SB_CCursor(&PrimaryBm.PrimaryBm);
     PrimaryBm.PrimaryBm.AssignCursor(pCursor);
 
@@ -457,6 +477,81 @@ GameFrame::~GameFrame() {
     hprintf("logging ends..");
 }
 
+// Widescreen airport frames: the UI (status bar, menus, dialogs) is drawn centred through an alias, so mouse events that
+// belong to the UI are shifted into 640 space; clicks beside the UI area are dropped. The space is locked on button down.
+static bool sBtnDown[2] = {false, false};    // per button (0 = left, 1 = right): press is latched
+static bool sBtnUi[2] = {false, false};      // the press started in UI space
+static bool sBtnDropped[2] = {false, false}; // the press started outside the UI area: ignore it and its release
+static SLONG sCursorFullX = -1;          // unshifted mouse x (full coords) of the last mouse event if it was in UI space, for drawing the cursor; else -1
+
+static bool WideUiSpaceAt(const CPoint &pos) {
+    if (Sim.localPlayer == -1 || Sim.localPlayer >= Sim.Players.Players.AnzEntries()) {
+        return pos.y >= 440;
+    }
+    const CStdRaum *w = Sim.Players.Players[Sim.localPlayer].LocationWin;
+    return pos.y >= 440 || (w != nullptr && (w->MenuIsOpen() != 0 || w->IsDialogOpen() != 0));
+}
+
+// Returns false if the event must be dropped. kind: 0 = move, 1 = button down, 2 = button up; b: 0 = left, 1 = right, -1 = other.
+static bool MapWideMouse(CPoint *pos, int kind, int b) {
+    sCursorFullX = -1;
+    if (gPresentW <= 640) {
+        gMouseUiSpace = FALSE;
+        sBtnDown[0] = sBtnDown[1] = false;
+        sBtnDropped[0] = sBtnDropped[1] = false;
+        return true;
+    }
+
+    bool ui = false;
+    if (kind == 2 && b >= 0 && sBtnDown[b]) {
+        ui = sBtnUi[b]; // the release belongs to the space of its press
+    } else if (kind != 1 && (sBtnDown[0] || sBtnDown[1])) {
+        ui = sBtnDown[0] ? sBtnUi[0] : sBtnUi[1]; // moves while a button is held keep that press space
+    } else {
+        ui = WideUiSpaceAt(*pos);
+    }
+
+    bool keep = true;
+    if (ui) {
+        sCursorFullX = pos->x;
+        if (pos->y >= 440) {
+            pos->x = pos->x * 640 / gPresentW; // the status band is presented stretched to full width: linear map, nothing dropped
+        } else {
+            pos->x -= gUiOffsetX;
+        }
+        if (pos->x < 0 || pos->x > 639) {
+            if (kind == 0) {
+                if (pos->x < 0) {
+                    pos->x = 0; // hover only
+                } else {
+                    pos->x = 639;
+                }
+            } else {
+                keep = false;
+            }
+        }
+    }
+
+    if (b >= 0) {
+        if (kind == 1) {
+            sBtnDown[b] = true;
+            sBtnUi[b] = ui;
+            sBtnDropped[b] = !keep;
+        } else if (kind == 2) {
+            if (sBtnDown[b] && sBtnDropped[b]) {
+                keep = false;
+            }
+            sBtnDown[b] = false;
+            sBtnDropped[b] = false;
+        }
+    }
+    gMouseUiSpace = ui ? TRUE : FALSE;
+    return keep;
+}
+
+// Maps an SDL mouse button to the latch index.
+static int WideButtonIndex(Uint8 button) { return button == SDL_BUTTON_LEFT ? 0 : (button == SDL_BUTTON_RIGHT ? 1 : -1); }
+
 void GameFrame::ProcessEvent(const SDL_Event &event) const {
     switch (event.type) {
     case SDL_WINDOWEVENT: {
@@ -511,6 +606,7 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEMOTION: {
         CPoint pos = CPoint(event.motion.x, event.motion.y);
         TranslatePointToGameSpace(&pos);
+        MapWideMouse(&pos, 0, -1);
         FrameWnd->OnMouseMove(0, pos);
     } break;
     case SDL_TEXTINPUT:
@@ -525,6 +621,9 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEBUTTONDOWN: {
         CPoint pos = CPoint(event.button.x, event.button.y);
         TranslatePointToGameSpace(&pos);
+        if (!MapWideMouse(&pos, 1, WideButtonIndex(event.button.button))) {
+            break;
+        }
         if (event.button.button == SDL_BUTTON_LEFT) {
             if (event.button.clicks == 2) {
                 FrameWnd->OnLButtonDblClk(WM_LBUTTONDBLCLK, pos);
@@ -541,6 +640,9 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEBUTTONUP: {
         CPoint pos = CPoint(event.button.x, event.button.y);
         TranslatePointToGameSpace(&pos);
+        if (!MapWideMouse(&pos, 2, WideButtonIndex(event.button.button))) {
+            break;
+        }
         if (event.button.button == SDL_BUTTON_LEFT) {
             FrameWnd->OnLButtonUp(WM_LBUTTONUP, pos);
         } else if (event.button.button == SDL_BUTTON_RIGHT) {
@@ -612,6 +714,9 @@ void GameFrame::OnSysKeyUp(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/) {}
 // Prepares the fade-Bitmap
 //--------------------------------------------------------------------------------------------
 void GameFrame::PrepareFade() {
+    gBlendFromW = gPresentW;
+    const SLONG oldViewOffset = PrimaryBm.PrimaryBm.GetViewOffset();
+    PrimaryBm.PrimaryBm.SetViewOffset(0); // copies gScreenW columns of the real surface
     gBlendBm.ReSize(PrimaryBm.Size);
 
     // Erklärung, bei der Kopie dieses Code-Fragments...
@@ -621,10 +726,11 @@ void GameFrame::PrepareFade() {
 
         if (SrcKey.Bitmap != nullptr) {
             for (SLONG y = 0; y < 480; y++) {
-                memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, 640 * 2);
+                memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, gScreenW * 2);
             }
         }
     }
+    PrimaryBm.PrimaryBm.SetViewOffset(oldViewOffset);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -666,6 +772,7 @@ void GameFrame::OnPaint() {
         TXY<SLONG> rcWindow;
 
         if (bCursorCaptured != 0) {
+            const SLONG tipW = gMouseUiSpace ? 640 : gPresentW; // tooltip clamp width (UI space is the centred 640 area)
             // Administrate ToolTip
             if (::ToolTipId != ToolTipNewId) {
                 ::ToolTipId = ToolTipNewId;
@@ -731,7 +838,7 @@ void GameFrame::OnPaint() {
                     gToolTipBm.BlitFrom(gToolTipBms[2], SizeX - 28, 0);
 
                     gToolTipBm.PrintAt(str, FontBigGrey, TEC_FONT_CENTERED, 0, 2, SizeX, 28);
-                    Limit(SLONG(0), ToolTipPos.x, 639 - SizeX);
+                    Limit(SLONG(0), ToolTipPos.x, tipW - 1 - SizeX);
 
                     ToolTipState = TRUE;
                 }
@@ -741,20 +848,25 @@ void GameFrame::OnPaint() {
                 SLONG px = gMousePosition.x + 16 - gToolTipBm.Size.x / 2;
                 SLONG py = 0;
 
+                // Widescreen airport frame: tooltips in UI space go through the centred alias, world tooltips use full coords
+                const SLONG oldViewOffset = PrimaryBm.PrimaryBm.GetViewOffset();
                 UpdateStatusBar();
+                if (gWideStripDrawn) {
+                    PrimaryBm.PrimaryBm.SetViewOffset(gMouseUiSpace ? gUiOffsetX : 0);
+                }
 
                 if (px < 2) {
                     px = 2;
                 }
-                if (px > 639 - gToolTipBm.Size.x) {
-                    px = 639 - gToolTipBm.Size.x;
+                if (px > tipW - 1 - gToolTipBm.Size.x) {
+                    px = tipW - 1 - gToolTipBm.Size.x;
                 }
 
                 if (gMousePosition.y < 439) {
                     py = gMousePosition.y + 32;
                 } else {
                     py = gMousePosition.y;
-                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < 630) {
+                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < tipW - 10) {
                         px = gMousePosition.x + 32;
                     } else {
                         px = gMousePosition.x - 5 - gToolTipBm.Size.x;
@@ -766,6 +878,7 @@ void GameFrame::OnPaint() {
                 }
 
                 ColorFX.BlitWhiteTrans(gToolTipBm.pBitmap, &PrimaryBm.PrimaryBm, XY(px, py));
+                PrimaryBm.PrimaryBm.SetViewOffset(oldViewOffset);
             }
 
             if (gUseWindowsMouse == 0) {
@@ -820,6 +933,9 @@ void GameFrame::OnPaint() {
                             MouseCursorOffset = XY(0, 16);
                         }
                         SLONG _x = gMousePosition.x;
+                        if (sCursorFullX >= 0 && gPresentW > 640) {
+                            _x = sCursorFullX + 2;
+                        }
                         SLONG _y = gMousePosition.y;
                         TranslatePointToScreenSpace(_x, _y);
                         pCursor->MoveImage(_x - MouseCursorOffset.x, _y - MouseCursorOffset.y);
@@ -843,6 +959,7 @@ void GameFrame::OnPaint() {
             if (Sim.localPlayer != -1 && (Sim.Players.Players[Sim.localPlayer].LocationWin != nullptr)) {
                 (Sim.Players.Players[Sim.localPlayer].LocationWin)->StatusCount = 32;
             }
+            PrimaryBm.PrimaryBm.SetViewOffset(0); // pause: whole real surface, no UI alias
             gBlendBm.ReSize(PrimaryBm.Size);
 
             // Definitiv extrem krank: Wenn man per FastBlt Daten aus der Grafikkarte
@@ -856,7 +973,7 @@ void GameFrame::OnPaint() {
                 SB_CBitmapKey TgtKey(*gBlendBm.pBitmap);
 
                 for (SLONG y = 0; y < 480; y++) {
-                    memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, 640 * 2);
+                    memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch, gScreenW * 2);
                 }
             }
 
@@ -986,6 +1103,9 @@ void GameFrame::OnMouseMove(UINT /*nFlags*/, CPoint point) {
     if (gUseWindowsMouse == 0) {
         if ((bActive != 0) && (pCursor != nullptr) && bNoQuickMouse == FALSE) {
             SLONG _x = gMousePosition.x;
+            if (sCursorFullX >= 0 && gPresentW > 640) {
+                _x = sCursorFullX + 2; // draw the cursor where the mouse really is (UI space is shifted)
+            }
             SLONG _y = gMousePosition.y;
             FrameWnd->TranslatePointToScreenSpace(_x, _y);
             pCursor->MoveImage(_x - MouseCursorOffset.x, _y - MouseCursorOffset.y);
@@ -2330,7 +2450,7 @@ void DefaultOnLButtonDown() {
     gMouseLButtonDownTimer = AtGetTime();
 
     for (SLONG c = 0; c < Sim.Players.Players.AnzEntries(); c++) {
-        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2)) {
+        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2 + XY(gPresentW - 640, 0))) {
             Sim.Players.Players[c].Buttons |= 1;
         }
     }
@@ -2361,7 +2481,7 @@ void DefaultOnRButtonDown() {
     PlayerDidntMove = 0;
 
     for (SLONG c = 0; c < Sim.Players.Players.AnzEntries(); c++) {
-        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2)) {
+        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2 + XY(gPresentW - 640, 0))) {
             Sim.Players.Players[c].Buttons |= 2;
         }
     }
