@@ -434,7 +434,7 @@ void Options::OnPaint() {
             break;
 
         case 2: // Grafik:
-            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 13) {
+            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 13) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;

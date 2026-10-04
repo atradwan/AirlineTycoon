@@ -666,6 +666,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                 CString tmp = CString(":") + bprintf("%06i", AtGetTime() - SoundLogFileStartTime) + " Video recording begins\xd\xa";
                 fwrite(tmp, 1, strlen(tmp), pSoundLogFile);
 
+                // 640 is safe: recording video forces gScreenMaxW == 640 (widescreen airport disabled)
                 OldFrame.ReSize(640, 480);
                 OldFrame.FillWith(0);
             }

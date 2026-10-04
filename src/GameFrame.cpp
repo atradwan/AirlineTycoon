@@ -750,7 +750,7 @@ void GameFrame::OnPaint() {
                     gToolTipBm.BlitFrom(gToolTipBms[2], SizeX - 28, 0);
 
                     gToolTipBm.PrintAt(str, FontBigGrey, TEC_FONT_CENTERED, 0, 2, SizeX, 28);
-                    Limit(SLONG(0), ToolTipPos.x, 639 - SizeX);
+                    Limit(SLONG(0), ToolTipPos.x, gScreenW - 1 - SizeX);
 
                     ToolTipState = TRUE;
                 }
@@ -765,8 +765,8 @@ void GameFrame::OnPaint() {
                 if (px < 2) {
                     px = 2;
                 }
-                if (px > 639 - gToolTipBm.Size.x) {
-                    px = 639 - gToolTipBm.Size.x;
+                if (px > gScreenW - 1 - gToolTipBm.Size.x) {
+                    px = gScreenW - 1 - gToolTipBm.Size.x;
                 }
 
                 if (gMousePosition.y < 439) {
