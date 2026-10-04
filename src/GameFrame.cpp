@@ -2446,7 +2446,7 @@ void DefaultOnLButtonDown() {
     gMouseLButtonDownTimer = AtGetTime();
 
     for (SLONG c = 0; c < Sim.Players.Players.AnzEntries(); c++) {
-        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2)) {
+        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2 + XY(gPresentW - 640, 0))) {
             Sim.Players.Players[c].Buttons |= 1;
         }
     }
@@ -2477,7 +2477,7 @@ void DefaultOnRButtonDown() {
     PlayerDidntMove = 0;
 
     for (SLONG c = 0; c < Sim.Players.Players.AnzEntries(); c++) {
-        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2)) {
+        if (Sim.Players.Players[c].Owner == 0 && gMousePosition.IfIsWithin(Sim.Players.Players[c].WinP1, Sim.Players.Players[c].WinP2 + XY(gPresentW - 640, 0))) {
             Sim.Players.Players[c].Buttons |= 2;
         }
     }

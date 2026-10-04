@@ -1530,7 +1530,7 @@ void AirportView::OnLButtonDown(UINT nFlags, CPoint point) {
     }
 
     // Ist das Fenster hier zuständig? Ist der Klick in diesem Fenster?
-    if (point.x >= WinP1.x && point.x <= WinP2.x && point.y >= WinP1.y && point.y <= WinP2.y - StatusLineSizeY * static_cast<SLONG>(Editor == 0)) {
+    if (point.x >= WinP1.x && point.x <= WinP2.x + (gPresentW - 640) && point.y >= WinP1.y && point.y <= WinP2.y - StatusLineSizeY * static_cast<SLONG>(Editor == 0)) {
         LButtonState = TRUE;
 
         point.x -= WinP1.x;
@@ -1838,7 +1838,7 @@ void AirportView::OnLButtonUp(UINT /*nFlags*/, CPoint point) {
     }
 
     // Ist das Fenster hier zuständig? Ist der Klick in diesem Fenster?
-    if (point.x >= WinP1.x && point.x <= WinP2.x && point.y >= WinP1.y && point.y <= WinP2.y && (MenuIsOpen() == 0)) {
+    if (point.x >= WinP1.x && point.x <= WinP2.x + (gPresentW - 640) && point.y >= WinP1.y && point.y <= WinP2.y && (MenuIsOpen() == 0)) {
         if (AtGetTime() - gMouseLButtonDownTimer < 500 && (gMouseScroll != 0) && (Editor == 0) && gMousePosition.y < 440 && (MouseWait == 0)) {
             if (Sim.Players.Players[PlayerNum].IsWalking2Player == -1 && (IsDialogOpen() == 0)) {
                 // gMouseScroll=0;
@@ -1857,7 +1857,7 @@ void AirportView::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) {
     }
 
     // Ist das Fenster hier zuständig? Ist der Klick in diesem Fenster?
-    if (point.x >= WinP1.x && point.x <= WinP2.x && point.y >= WinP1.y && point.y <= WinP2.y && (Editor == 0)) {
+    if (point.x >= WinP1.x && point.x <= WinP2.x + (gPresentW - 640) && point.y >= WinP1.y && point.y <= WinP2.y && (Editor == 0)) {
         if (MenuIsOpen() != 0) {
             if (CalculatorIsOpen != 0) {
                 CalcClick();
