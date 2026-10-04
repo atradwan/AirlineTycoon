@@ -489,14 +489,46 @@ static bool BlendIsActive() {
     return gFramesToDrawBeforeFirstBlend == 0 && gBlendState != -1 && (Sim.Options.OptionBlenden != 0) && (bLeaveGameLoop == 0);
 }
 
+// Rescales the captured fade source gBlendBm from the presented width fromW to toW (one of 640 / gScreenW), in memory layout:
+// rows 0..439 are stretched horizontally (nearest neighbour). The status band (rows 440..479) is NOT scaled: in an airport frame it sits as a
+// 640 wide bar centred at (gScreenW-640)/2 and the present stretches it; in a room frame it is part of the 640 wide image. So it is only shifted.
+static void RescaleBlendSource(SLONG fromW, SLONG toW) {
+    if (fromW == toW || gBlendBm.Size.y == 0 || gBlendBm.pBitmap == nullptr) {
+        return;
+    }
+    const SLONG off = (gScreenW - 640) / 2;
+    const SLONG maxW = std::max(fromW, toW);
+    BUFFER_V<UWORD> line(std::max(maxW, gScreenMaxW));
+    SB_CBitmapKey Key(*gBlendBm.pBitmap);
+    if (Key.Bitmap == nullptr) {
+        return;
+    }
+    for (SLONG y = 0; y < 480; y++) {
+        UWORD *row = reinterpret_cast<UWORD *>(static_cast<char *>(Key.Bitmap) + y * Key.lPitch);
+        const SLONG fullW = std::max(gScreenW, static_cast<SLONG>(640));
+        for (SLONG x = 0; x < fullW; x++) {
+            line[x] = 0;
+        }
+        if (y < 440) {
+            for (SLONG x = 0; x < toW; x++) {
+                line[x] = row[x * fromW / toW];
+            }
+        } else {
+            const SLONG srcX = (fromW > 640) ? off : 0;
+            const SLONG dstX = (toW > 640) ? off : 0;
+            for (SLONG x = 0; x < 640; x++) {
+                line[dstX + x] = row[srcX + x];
+            }
+        }
+        memcpy(row, &line[0], fullW * 2);
+    }
+}
+
 void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
     PrimaryBm.SetViewOffset(0); // blends, strip clear and present always work on the whole surface
-    // Widescreen: a fade between frames of different presented width (wide airport vs 640 room) is skipped (hard cut)
-    if (gScreenW > 640 && BlendIsActive() &&
-        gBlendFromW != (gWideStripDrawn ? gScreenW : 640)) {
-        gBlendBm.Destroy();
-        gBlendBm2.Destroy();
-        gBlendState = -1;
+    // Widescreen: a fade between frames of different presented width (wide airport vs 640 room) rescales the captured old frame once, at the start of the blend
+    if (gScreenW > 640 && BlendIsActive() && gBlendState == -2) {
+        RescaleBlendSource(gBlendFromW, gWideStripDrawn ? gScreenW : 640);
     }
 
     if (BlendIsActive()) {
