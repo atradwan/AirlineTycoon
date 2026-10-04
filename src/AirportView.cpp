@@ -397,10 +397,10 @@ void AirportView::FocusCameraOnPos(XY Pos, BOOL Speed) {
     }
 
     // Wenn man ganz rechts ist, darf man nicht, nach oben gescrollt haben:
-    if (ViewPos.y < 0 && ViewPos.x > ((Airport.LeftEnd + Airport.RightEnd * 4) / 5)) {
+    if (ViewPos.y < 0 && ViewPos.x + (gScreenW - 640) / 2 > ((Airport.LeftEnd + Airport.RightEnd * 4) / 5)) {
         ViewPos.y++;
     }
-    if (ViewPos.x > Airport.RightEnd - 800) {
+    if (ViewPos.x > Airport.RightEnd - 800 - (gScreenW - 640)) {
         ViewPos.y = 0;
     }
 
@@ -1338,7 +1338,7 @@ void AirportView::OnPaint() {
             }
 
             AmbientManager.SetVolume(AMBIENT_PEOPLE, LastAnzPeopleOnScreen * 2);
-            AmbientManager.SetVolume(AMBIENT_JET_FIELD, 150 - (Airport.RightEnd - (ViewPos.x + 320)) / 6);
+            AmbientManager.SetVolume(AMBIENT_JET_FIELD, 150 - (Airport.RightEnd - (ViewPos.x + gScreenW / 2)) / 6);
 
             // Draw intuitive Walknet:
             if (Editor == EDITOR_LINKS) {
@@ -3834,7 +3834,7 @@ void AIRPORT::PumpDoors() {
                     Doors[c].Dir = 0;
 
                     if (Sim.Players.Players[Sim.localPlayer].GetRoom() == ROOM_AIRPORT &&
-                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + 320 - Doors[c].ArrayPos.x * 44) < 400) {
+                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + gScreenW / 2 - Doors[c].ArrayPos.x * 44) < 400 + (gScreenW - 640) / 2) {
                         gDoorClose.Play(DSBPLAY_NOSTOP, Sim.Options.OptionEffekte * 100 / 7);
                     }
                 }
@@ -3874,14 +3874,14 @@ void AIRPORT::TryDoor(XY ArrayPos, BOOL Player, SLONG PlayerNum) {
                 if (Doors[c].Dir == 0 && Doors[c].State == 0) {
                     Doors[c].Dir = 1;
                     if (Sim.Players.Players[Sim.localPlayer].GetRoom() == ROOM_AIRPORT &&
-                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + 320 - Doors[c].ArrayPos.x * 44) < 400) {
+                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + gScreenW / 2 - Doors[c].ArrayPos.x * 44) < 400 + (gScreenW - 640) / 2) {
                         gArabDoorFx.Play(DSBPLAY_NOSTOP, Sim.Options.OptionEffekte * 100 / 7);
                     }
                 } else if (Doors[c].Dir == 0 && Doors[c].State >= 40 && ArrayPos.y != 9) {
                     Doors[c].State = (10 - 1) * 2;
                     Doors[c].Dir = -1;
                     if (Sim.Players.Players[Sim.localPlayer].GetRoom() == ROOM_AIRPORT &&
-                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + 320 - Doors[c].ArrayPos.x * 44) < 400) {
+                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + gScreenW / 2 - Doors[c].ArrayPos.x * 44) < 400 + (gScreenW - 640) / 2) {
                         gArabDoorFx.Play(DSBPLAY_NOSTOP, Sim.Options.OptionEffekte * 100 / 7);
                     }
                 }
@@ -3968,7 +3968,7 @@ void AIRPORT::TryDoor(XY ArrayPos, BOOL Player, SLONG PlayerNum) {
             if (Doors[c].Dir != 1 && Doors[c].State == 0) {
                 if (bIngnoreNextDoor == FALSE) {
                     if (Sim.Players.Players[Sim.localPlayer].GetRoom() == ROOM_AIRPORT &&
-                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + 320 - Doors[c].ArrayPos.x * 44) < 400 && Doors[c].ArabDoor != 3) {
+                        abs(Sim.Players.Players[Sim.localPlayer].ViewPos.x + gScreenW / 2 - Doors[c].ArrayPos.x * 44) < 400 + (gScreenW - 640) / 2 && Doors[c].ArabDoor != 3) {
                         gDoorOpen.Play(DSBPLAY_NOSTOP, Sim.Options.OptionEffekte * 100 / 7);
                     }
                 }

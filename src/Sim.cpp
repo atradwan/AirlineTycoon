@@ -2749,7 +2749,7 @@ void SIM::ReformGates() {
 //--------------------------------------------------------------------------------------------
 void SIM::ComputerOnToilet(SLONG ComputerPlayer) {
     if (Players.Players[localPlayer].GetRoom() == ROOM_AIRPORT) {
-        if (abs(Players.Players[localPlayer].ViewPos.x - Persons[Persons.GetPlayerIndex(ComputerPlayer)].ScreenPos.x) < 400) {
+        if (abs(Players.Players[localPlayer].ViewPos.x + (gScreenW - 640) / 2 - Persons[Persons.GetPlayerIndex(ComputerPlayer)].ScreenPos.x) < 400) {
             gToiletFx.ReInit("toilet.raw");
             gToiletFx.Play(0, Options.OptionEffekte * 100 / 7);
         }
