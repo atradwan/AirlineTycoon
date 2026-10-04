@@ -484,6 +484,14 @@ BOOL SBPRIMARYBM::BlitFromT(SBBM & /*TecBitmap*/, XY /*p1*/, XY /*p2*/) { return
 BOOL SBPRIMARYBM::BlitFromT(SBBM & /*TecBitmap*/, SLONG /*tx*/, SLONG /*ty*/, SLONG /*tx2*/, SLONG /*ty2*/) { return 0; }
 
 void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
+    // Widescreen: a fade between frames of different presented width (wide airport vs 640 room) is skipped (hard cut)
+    if (gScreenW > 640 && gFramesToDrawBeforeFirstBlend == 0 && gBlendState != -1 && (Sim.Options.OptionBlenden != 0) && (bLeaveGameLoop == 0) &&
+        gBlendFromW != (gWideStripDrawn ? gScreenW : 640)) {
+        gBlendBm.Destroy();
+        gBlendBm2.Destroy();
+        gBlendState = -1;
+    }
+
     if (gFramesToDrawBeforeFirstBlend == 0 && gBlendState != -1 && (Sim.Options.OptionBlenden != 0) && (bLeaveGameLoop == 0)) {
         if (gBlendState == -2) {
             gBlendState = 8;
@@ -604,17 +612,26 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
 
     // TextOut (0, 20, RGB(0,0,255), RGB(255,255,0), bprintf ("%f FPS", GetFrameRate()));
     // TextOut (0, 32, RGB(0,0,255), RGB(255,255,0), bprintf ("%li Personen", Sim.Persons.GetNumUsed()));
-    // Widescreen: clear the strip right of the 640 area when the airport did not draw it (rooms, menus)
-    if (gScreenW > 640) {
+    // Widescreen: latch the width of the frame being presented (airport = wide, rooms/menus = 640).
+    const SLONG newPresentW = (gScreenW > 640 && gWideStripDrawn) ? gScreenW : 640;
+    if (newPresentW > 640) {
+        // the airport drew the strip down to y=440; clear the status band below it
         SB_CBitmapKey StripKey(PrimaryBm);
         if (StripKey.Bitmap != nullptr) {
-            // airport drew the strip down to y=440 (status bar band below stays black)
-            for (SLONG y = gWideStripDrawn ? 440 : 0; y < 480; y++) {
+            for (SLONG y = 440; y < 480; y++) {
                 memset(static_cast<char *>(StripKey.Bitmap) + y * StripKey.lPitch + 640 * 2, 0, (gScreenW - 640) * 2);
             }
         }
     }
     gWideStripDrawn = FALSE;
+    if (newPresentW != gPresentW) {
+        gPresentW = newPresentW;
+        if (FrameWnd != nullptr) {
+            FrameWnd->UpdateFrameSize(); // also updates the present source width and target rect
+        } else {
+            PrimaryBm.SetSourceWidth(gPresentW);
+        }
+    }
 
     Bench.FlipTime.Start();
     PrimaryBm.Flip();

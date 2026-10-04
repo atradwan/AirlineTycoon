@@ -34,6 +34,13 @@ constexpr SLONG WIDE_MAX_W = 1120;
 extern SLONG gScreenW;
 extern SLONG gScreenMaxW;
 extern BOOL gWideStripDrawn;
+// Width of the frame currently presented (latched in SBPRIMARYBM::Flip: gScreenW for airport frames, else 640).
+// Present source width and mouse mapping both use it. gBlendFromW = gPresentW when a fade source was captured.
+extern SLONG gPresentW;
+extern SLONG gBlendFromW;
+extern SLONG gUiOffsetX;
+extern BOOL gMouseUiLatched;
+extern BOOL gMouseUiSpace;
 
 //--------------------------------------------------------------------------------------------
 // Flags für Cheats:

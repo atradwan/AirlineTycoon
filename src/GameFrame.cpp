@@ -208,7 +208,7 @@ void GameFrame::UpdateWindow() const {
     UpdateFrameSize();
 }
 
-static float getAspectWidthRatio() { return static_cast<float>(gScreenW) / 480.0f; }
+static float getAspectWidthRatio() { return static_cast<float>(gPresentW) / 480.0f; }
 
 static SLONG getAspectWidth(SLONG height) { return static_cast<SLONG>(static_cast<float>(height) * getAspectWidthRatio()); }
 
@@ -226,7 +226,8 @@ void GameFrame::UpdateFrameSize() const {
     SLONG screenW = 0, screenH = 0;
     SDL_GetWindowSize(m_hWnd, &screenW, &screenH);
     gScreenW = computeScreenW(screenW, screenH);
-    PrimaryBm.PrimaryBm.SetSourceWidth(gScreenW);
+    gPresentW = std::min(gPresentW, gScreenW);
+    PrimaryBm.PrimaryBm.SetSourceWidth(gPresentW);
     SDL_RenderSetLogicalSize(lpDD, screenW, screenH);
     // update setting file
     Sim.Options.OptionScreenWindowedWidth = screenW;
@@ -257,7 +258,7 @@ void GameFrame::TranslatePointToGameSpace(CPoint *p) const {
     }
 
     x /= static_cast<FLOAT>(screenW);
-    x *= static_cast<FLOAT>(gScreenW);
+    x *= static_cast<FLOAT>(gPresentW);
     y /= static_cast<FLOAT>(screenH);
     y *= 480;
 
@@ -278,7 +279,7 @@ void GameFrame::TranslatePointToScreenSpace(SLONG &x, SLONG &y) const {
 
     FLOAT _x = static_cast<FLOAT>(x);
     FLOAT _y = static_cast<FLOAT>(y);
-    _x /= static_cast<FLOAT>(gScreenW);
+    _x /= static_cast<FLOAT>(gPresentW);
     _x *= static_cast<FLOAT>(screenW);
     _y /= 480;
     _y *= static_cast<FLOAT>(screenH);
@@ -631,6 +632,7 @@ void GameFrame::OnSysKeyUp(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/) {}
 // Prepares the fade-Bitmap
 //--------------------------------------------------------------------------------------------
 void GameFrame::PrepareFade() {
+    gBlendFromW = gPresentW;
     gBlendBm.ReSize(PrimaryBm.Size);
 
     // Erklärung, bei der Kopie dieses Code-Fragments...
@@ -750,7 +752,7 @@ void GameFrame::OnPaint() {
                     gToolTipBm.BlitFrom(gToolTipBms[2], SizeX - 28, 0);
 
                     gToolTipBm.PrintAt(str, FontBigGrey, TEC_FONT_CENTERED, 0, 2, SizeX, 28);
-                    Limit(SLONG(0), ToolTipPos.x, gScreenW - 1 - SizeX);
+                    Limit(SLONG(0), ToolTipPos.x, gPresentW - 1 - SizeX);
 
                     ToolTipState = TRUE;
                 }
@@ -765,15 +767,15 @@ void GameFrame::OnPaint() {
                 if (px < 2) {
                     px = 2;
                 }
-                if (px > gScreenW - 1 - gToolTipBm.Size.x) {
-                    px = gScreenW - 1 - gToolTipBm.Size.x;
+                if (px > gPresentW - 1 - gToolTipBm.Size.x) {
+                    px = gPresentW - 1 - gToolTipBm.Size.x;
                 }
 
                 if (gMousePosition.y < 439) {
                     py = gMousePosition.y + 32;
                 } else {
                     py = gMousePosition.y;
-                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < gScreenW - 10) {
+                    if (gMousePosition.x + 32 + gToolTipBm.Size.x < gPresentW - 10) {
                         px = gMousePosition.x + 32;
                     } else {
                         px = gMousePosition.x - 5 - gToolTipBm.Size.x;
@@ -863,6 +865,7 @@ void GameFrame::OnPaint() {
                 (Sim.Players.Players[Sim.localPlayer].LocationWin)->StatusCount = 32;
             }
             gBlendBm.ReSize(PrimaryBm.Size);
+            gBlendFromW = gPresentW;
 
             // Definitiv extrem krank: Wenn man per FastBlt Daten aus der Grafikkarte
             // ins System-RAM kopiert wird das ganze Game 50% langsamer. Vermutlich

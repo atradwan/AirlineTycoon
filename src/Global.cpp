@@ -20,6 +20,11 @@ SLONG gFramesToDrawBeforeFirstBlend = 0; // Paint 2 frames, before reading from 
 SLONG gScreenW = 640;     // Widescreen airport: visible primary width (see global.h)
 SLONG gScreenMaxW = 640;  // Widescreen airport: allocated primary width (fixed at startup)
 BOOL gWideStripDrawn = FALSE;
+SLONG gPresentW = 640;
+SLONG gBlendFromW = 640;
+SLONG gUiOffsetX = 0;
+BOOL gMouseUiLatched = FALSE;
+BOOL gMouseUiSpace = FALSE;
 
 //--------------------------------------------------------------------------------------------
 // Flags für Cheats:
