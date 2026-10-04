@@ -88,8 +88,8 @@ extern SB_CCursor *pCursor;
 extern SLONG gRepairPrice[];
 extern SLONG gWerbePrice[];
 extern SLONG RightAirportClip;
-// Right culling edge of the airport view: the full screen width unless a dialog narrowed it (378).
-inline SLONG AirportRightClip() { return RightAirportClip == 640 ? gScreenW : RightAirportClip; }
+// Right culling edge of the airport view: the full width in wide mode (the dialog is centred there), else RightAirportClip (378 under a dialog).
+inline SLONG AirportRightClip() { return (gScreenW > 640) ? gScreenW : RightAirportClip; }
 extern SB_CBitmapMain *bitmapMain;
 extern GfxMain *pGfxMain;
 extern GfxLib *pGLibStd;
