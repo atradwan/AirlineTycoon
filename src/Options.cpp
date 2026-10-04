@@ -216,7 +216,6 @@ void Options::RefreshKlackerField() {
         KlackerTafel.PrintAt(0, 8, StandardTexte.GetS(TOKEN_MISC, 4026 + Sim.Options.OptionSchatten));
         KlackerTafel.PrintAt(0, 10, ModdedTexte.GetS(TOKEN_MISC, 1 + Sim.Options.OptionFullscreen));
         KlackerTafel.PrintAt(0, 11, ModdedTexte.GetS(TOKEN_MISC, 10 + Sim.Options.OptionKeepAspectRatio));
-        KlackerTafel.PrintAt(0, 12, ModdedTexte.GetS(TOKEN_MISC, 40 + (Sim.Options.OptionWideAirport != 0 ? 1 : 0)));
         KlackerTafel.PrintAt(0, 13, StandardTexte.GetS(TOKEN_MISC, 4099));
     } else if (PageNum == 3) // Musik-Optionen
     {
@@ -434,7 +433,7 @@ void Options::OnPaint() {
             break;
 
         case 2: // Grafik:
-            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 13) {
+            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 13) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;
@@ -643,11 +642,6 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
                 Sim.Options.OptionKeepAspectRatio = !Sim.Options.OptionKeepAspectRatio;
                 FrameWnd->UpdateFrameSize();
             } // Aspect Ratio Option
-
-            if (Line == 12) {
-                Sim.Options.OptionWideAirport = (Sim.Options.OptionWideAirport == 0) ? 1 : 0; // takes effect after restart
-                Sim.SaveOptions();
-            }
 
             if (Line == 13) {
                 if (ChangedDisplay != 0) {

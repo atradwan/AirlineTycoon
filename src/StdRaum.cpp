@@ -3684,7 +3684,7 @@ BOOL CStdRaum::ConvertMousePosition(const XY &WindowsBased, XY *RoomBased) const
     *RoomBased = WindowsBased + XY(-WinP1.x, -WinP1.y);
 
     // Klick außerhalb vom Fenster?
-    if (WindowsBased.x < WinP1.x || WindowsBased.y < WinP1.y || WindowsBased.x > WinP2.x + (gPresentW - 640) || WindowsBased.y > WinP2.y) {
+    if (WindowsBased.x < WinP1.x || WindowsBased.y < WinP1.y || WindowsBased.x > WinP2.x || WindowsBased.y > WinP2.y) {
         return (FALSE); // außerhalb?
     }
     return (TRUE); // innerhalb

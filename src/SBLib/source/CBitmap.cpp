@@ -488,20 +488,7 @@ bool SB_CPrimaryBitmap::FastClip(CRect clipRect, POINT *pPoint, RECT *pRect) {
     return pRect->right - pRect->left > 0 && pRect->bottom - pRect->top > 0;
 }
 
-static bool SplitCopyRects(SLONG srcW, SLONG statusX, SLONG srcH, const SDL_Rect &t, SDL_Rect *s1, SDL_Rect *d1, SDL_Rect *s2, SDL_Rect *d2) {
-    if (statusX < 0 || srcW <= 640 || srcH != 480) {
-        return false;
-    }
-    const int th = t.h * 440 / 480;
-    *s1 = SDL_Rect{0, 0, srcW, 440};
-    *d1 = SDL_Rect{t.x, t.y, t.w, th};
-    *s2 = SDL_Rect{statusX, 440, 640, 40};
-    *d2 = SDL_Rect{t.x, t.y + th, t.w, t.h - th};
-    return true;
-}
-
 SLONG SB_CPrimaryBitmap::Flip() {
-    SetViewOffset(0);
     if (lpDD != nullptr) {
         /*
          * None of the SDL renderers actually lock the GPU resource,
@@ -519,14 +506,7 @@ SLONG SB_CPrimaryBitmap::Flip() {
         }
 
         SDL_Rect target = SDL_Rect{TargetOffset.x, TargetOffset.y, TargetSize.x, TargetSize.y};
-        SDL_Rect srcRect = SDL_Rect{0, 0, SourceW, Size.y};
-        const SDL_Rect *pSrc = (SourceW > 0 && SourceW < Size.x) ? &srcRect : nullptr;
-        SDL_Rect s1, d1, s2, d2;
-        if (SplitCopyRects(SourceW, StatusSrcX, Size.y, target, &s1, &d1, &s2, &d2)) {
-            if (SDL_BlitScaled(lpDDSurface, &s1, SDL_GetWindowSurface(Window), &d1) < 0 || SDL_BlitScaled(lpDDSurface, &s2, SDL_GetWindowSurface(Window), &d2) < 0) {
-                return -2;
-            }
-        } else if (SDL_BlitScaled(lpDDSurface, pSrc, SDL_GetWindowSurface(Window), &target) < 0) {
+        if (SDL_BlitScaled(lpDDSurface, nullptr, SDL_GetWindowSurface(Window), &target) < 0) {
             return -2;
         }
 
@@ -536,35 +516,6 @@ SLONG SB_CPrimaryBitmap::Flip() {
     }
 
     return Present();
-}
-
-void SB_CPrimaryBitmap::SetViewOffset(SLONG x) {
-    if (x == ViewOffset) {
-        return;
-    }
-    if (ViewOffset != 0) { // leave the alias
-        lpDDSurface = RealSurface;
-        SDL_SetClipRect(lpDDSurface, nullptr); // full (0,0,Size.x,480) again; callers set their own clip
-        Size.x = FullWidth;
-        SDL_FreeSurface(AliasSurface);
-        AliasSurface = nullptr;
-        RealSurface = nullptr;
-        ViewOffset = 0;
-    }
-    if (x > 0 && lpDDSurface != nullptr && x + 640 <= lpDDSurface->w) {
-        RealSurface = lpDDSurface;
-        FullWidth = Size.x;
-        AliasSurface = SDL_CreateRGBSurfaceWithFormatFrom(static_cast<Uint8 *>(RealSurface->pixels) + x * 2, 640, RealSurface->h, 16, RealSurface->pitch,
-                                                          SDL_PIXELFORMAT_RGB565);
-        if (AliasSurface == nullptr) {
-            RealSurface = nullptr;
-            return;
-        }
-        lpDDSurface = AliasSurface;
-        SDL_SetClipRect(lpDDSurface, nullptr); // (0,0,640,480)
-        Size.x = 640;
-        ViewOffset = x;
-    }
 }
 
 SLONG SB_CPrimaryBitmap::Present() {
@@ -578,15 +529,8 @@ SLONG SB_CPrimaryBitmap::Present() {
         }
 
         const SDL_Rect target = SDL_Rect{TargetOffset.x, TargetOffset.y, TargetSize.x, TargetSize.y};
-        const SDL_Rect srcRect = SDL_Rect{0, 0, SourceW, Size.y};
-        const SDL_Rect *pSrc = (SourceW > 0 && SourceW < Size.x) ? &srcRect : nullptr;
         // Copy our primary texture to the backbuffer
-        SDL_Rect s1, d1, s2, d2;
-        if (SplitCopyRects(SourceW, StatusSrcX, Size.y, target, &s1, &d1, &s2, &d2)) {
-            if (SDL_RenderCopy(lpDD, lpTexture, &s1, &d1) < 0 || SDL_RenderCopy(lpDD, lpTexture, &s2, &d2) < 0) {
-                return -2;
-            }
-        } else if (SDL_RenderCopy(lpDD, lpTexture, pSrc, &target) < 0) {
+        if (SDL_RenderCopy(lpDD, lpTexture, nullptr, &target) < 0) {
             return -2;
         }
 
@@ -643,7 +587,6 @@ SLONG SB_CPrimaryBitmap::Create(SDL_Renderer **out, SDL_Window *Wnd, unsigned sh
 }
 
 ULONG SB_CPrimaryBitmap::Release() {
-    SetViewOffset(0);
     if (lpDD == nullptr) {
         if (lpDDSurface != nullptr) {
             SDL_FreeSurface(lpDDSurface);

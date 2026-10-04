@@ -295,7 +295,7 @@ void CLAN::BlitAt(SBPRIMARYBM &Offscreen, SLONG Dir, SLONG Phase, XY ScreenPos, 
     SLONG localDir = 0;
     SLONG localFaktor = 0;
 
-    if (ScreenPos.x + 200 < 0 || ScreenPos.x > AirportRightClip() + 100 || (bActive == 0)) {
+    if (ScreenPos.x + 200 < 0 || ScreenPos.x > RightAirportClip + 100 || (bActive == 0)) {
         return;
     }
 
@@ -328,7 +328,7 @@ void CLAN::BlitAt(SBPRIMARYBM &Offscreen, SLONG Dir, SLONG Phase, XY ScreenPos, 
     }
 
     if (pbm != nullptr) {
-        if (ScreenPos.x > -60 && ScreenPos.x < AirportRightClip() + 50) {
+        if (ScreenPos.x > -60 && ScreenPos.x < RightAirportClip + 50) {
             bool bNotSecurity = true;
 
             // Bei 'Player' wird das Status-byte nicht normal verwendet. Hier ist es die Nummer des Spielers
@@ -363,7 +363,7 @@ void CLAN::BlitAt(SBPRIMARYBM &Offscreen, SLONG Dir, SLONG Phase, XY ScreenPos, 
             // Person blitten:
             AnzPeopleOnScreen++;
             Offscreen.BlitFromT(*pbm, ScreenPos - Size + Offset);
-        } else if (ScreenPos.x > -260 && ScreenPos.x < AirportRightClip() + 250) {
+        } else if (ScreenPos.x > -260 && ScreenPos.x < RightAirportClip + 250) {
             AnzPeopleOnScreen++;
         }
     }
@@ -387,7 +387,7 @@ void CLAN::BlitSkelettAt(SBPRIMARYBM &Offscreen, SLONG Dir, SLONG Phase, XY Scre
         pbm = &(Skelett[8])[Phase];
     }
 
-    if ((pbm != nullptr) && ScreenPos.x > -60 && ScreenPos.x < AirportRightClip() + 50) {
+    if ((pbm != nullptr) && ScreenPos.x > -60 && ScreenPos.x < RightAirportClip + 50) {
         // Person blitten:
         XY Size = XY(pbm->Size.x / 2, pbm->Size.y - 1);
 
@@ -420,7 +420,7 @@ void CLAN::BlitLargeAt(SBBM &Offscreen, SLONG Dir, SLONG Phase, XY ScreenPos) {
 
     if (pbm != nullptr) {
         if (pbm->pBitmap != nullptr) {
-            if (ScreenPos.x > -60 && ScreenPos.x < gScreenW + 60) {
+            if (ScreenPos.x > -60 && ScreenPos.x < 700) {
                 Size = XY(pbm->Size.x / 2, pbm->Size.y - 1) * SLONG(2);
                 SDL_Rect SrcRect = {0, 0, pbm->pBitmap->GetXSize(), pbm->pBitmap->GetYSize()};
                 SDL_Rect DestRect = {ScreenPos.x - Size.x, ScreenPos.y - pbm->pBitmap->GetYSize() * 2, ScreenPos.x - Size.x + pbm->pBitmap->GetXSize() * 2,

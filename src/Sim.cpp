@@ -2753,7 +2753,7 @@ void SIM::ReformGates() {
 //--------------------------------------------------------------------------------------------
 void SIM::ComputerOnToilet(SLONG ComputerPlayer) {
     if (Players.Players[localPlayer].GetRoom() == ROOM_AIRPORT) {
-        if (abs(Players.Players[localPlayer].ViewPos.x + (gScreenW - 640) / 2 - Persons[Persons.GetPlayerIndex(ComputerPlayer)].ScreenPos.x) < 400) {
+        if (abs(Players.Players[localPlayer].ViewPos.x - Persons[Persons.GetPlayerIndex(ComputerPlayer)].ScreenPos.x) < 400) {
             gToiletFx.ReInit("toilet.raw");
             gToiletFx.Play(0, Options.OptionEffekte * 100 / 7);
         }
@@ -3129,10 +3129,6 @@ BOOL SIM::LoadGame(SLONG Number) {
 
     InputFile >> Airport;
     InputFile.ReadTrap(100);
-
-    if (gScreenMaxW > 640) {
-        Airport.DoHashBuilds(); // wide buckets (c+5) are not in saves made with the option off
-    }
 
     InputFile >> LastAnzPeopleOnScreen;
     InputFile.ReadTrap(100);
@@ -3995,9 +3991,6 @@ void COptions::ReadOptions() {
         if (!reg.ReadRegistryKey_b(OptionKeepAspectRatio)) {
             OptionKeepAspectRatio = 1;
         }
-        if (!reg.ReadRegistryKey_b(OptionWideAirport)) {
-            OptionWideAirport = 1;
-        }
         if (!reg.ReadRegistryKey_u(OptionTicketPriceIncrement)) {
             OptionTicketPriceIncrement = 10;
         }
@@ -4277,7 +4270,6 @@ void COptions::WriteOptions() {
     reg.WriteRegistryKeyEx_l(gLanguage, "OptionLanguage");
     reg.WriteRegistryKey_l(OptionFullscreen);
     reg.WriteRegistryKey_b(OptionKeepAspectRatio);
-    reg.WriteRegistryKey_b(OptionWideAirport);
     reg.WriteRegistryKey_u(OptionTicketPriceIncrement);
     reg.WriteRegistryKey_u(OptionRentOfficeTriggerPercent);
     reg.WriteRegistryKey_u(OptionRentOfficeMinAvailable);

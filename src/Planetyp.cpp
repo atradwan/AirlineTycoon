@@ -401,7 +401,7 @@ void CPlane::DoOneStep(SLONG PlayerNum) {
             Speed = max(3, min(10, abs(AirportPos.x - TargetX) / 30));
 
             // Lautstärke für Flugzeuge berechnen:
-            Temp = 150 - abs(AirportPos.x - gScreenW / 2 - Sim.Players.Players[Sim.localPlayer].ViewPos.x) / 4;
+            Temp = 150 - abs(AirportPos.x - 320 - Sim.Players.Players[Sim.localPlayer].ViewPos.x) / 4;
             if (Temp < 0) {
                 Temp = 0;
             }

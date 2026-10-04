@@ -20,7 +20,7 @@ XY BRICK::GetBitmapDimension() const { return (Bitmap[0L].Size); }
 // Einen Brick an Stelle X blitten:
 //--------------------------------------------------------------------------------------------
 void BRICK::BlitAt(SBBM &Offscreen, BOOL Ansatz, const XY &ScreenPos, SLONG Phase) {
-    if (ScreenPos.x + Bitmap[0L].Size.x < -2 || ScreenPos.x > AirportRightClip() || (bActive == 0)) {
+    if (ScreenPos.x + Bitmap[0L].Size.x < -2 || ScreenPos.x > RightAirportClip || (bActive == 0)) {
         return;
     }
 
@@ -97,7 +97,7 @@ void BRICK::BlitAt(SBBM & /*Offscreen*/, BOOL Ansatz, const XY &p1, const XY &p2
 // Einen Brick an Stelle X blitten:
 //--------------------------------------------------------------------------------------------
 void BRICK::BlitAt(SBPRIMARYBM &Offscreen, BOOL Ansatz, const XY &ScreenPos, SLONG Phase) {
-    if (ScreenPos.x + Bitmap[0L].Size.x < -2 || ScreenPos.x > gScreenW || (bActive == 0)) {
+    if (ScreenPos.x + Bitmap[0L].Size.x < -2 || ScreenPos.x > 640 || (bActive == 0)) {
         return;
     }
 

@@ -11,7 +11,6 @@
 #include "helper.h"
 #include "Proto.h"
 
-#include <algorithm>
 #include <SDL_ttf.h>
 
 extern SB_CColorFX ColorFX;
@@ -484,54 +483,8 @@ BOOL SBPRIMARYBM::BlitFrom(SBBM & /*TecBitmap*/, SLONG /*tx*/, SLONG /*ty*/, SLO
 BOOL SBPRIMARYBM::BlitFromT(SBBM & /*TecBitmap*/, XY /*p1*/, XY /*p2*/) { return 0; }
 BOOL SBPRIMARYBM::BlitFromT(SBBM & /*TecBitmap*/, SLONG /*tx*/, SLONG /*ty*/, SLONG /*tx2*/, SLONG /*ty2*/) { return 0; }
 
-// A screen-blend is due this frame:
-static bool BlendIsActive() {
-    return gFramesToDrawBeforeFirstBlend == 0 && gBlendState != -1 && (Sim.Options.OptionBlenden != 0) && (bLeaveGameLoop == 0);
-}
-
-// Rescales the captured fade source gBlendBm from the presented width fromW to toW (one of 640 / gScreenW), in memory layout:
-// rows 0..439 are stretched horizontally (nearest neighbour). The status band (rows 440..479) is NOT scaled: in an airport frame it sits as a
-// 640 wide bar centred at (gScreenW-640)/2 and the present stretches it; in a room frame it is part of the 640 wide image. So it is only shifted.
-static void RescaleBlendSource(SLONG fromW, SLONG toW) {
-    if (fromW == toW || gBlendBm.Size.y == 0 || gBlendBm.pBitmap == nullptr) {
-        return;
-    }
-    const SLONG off = (gScreenW - 640) / 2;
-    const SLONG maxW = std::max(fromW, toW);
-    BUFFER_V<UWORD> line(std::max(maxW, gScreenMaxW));
-    SB_CBitmapKey Key(*gBlendBm.pBitmap);
-    if (Key.Bitmap == nullptr) {
-        return;
-    }
-    for (SLONG y = 0; y < 480; y++) {
-        UWORD *row = reinterpret_cast<UWORD *>(static_cast<char *>(Key.Bitmap) + y * Key.lPitch);
-        const SLONG fullW = std::max(gScreenW, static_cast<SLONG>(640));
-        for (SLONG x = 0; x < fullW; x++) {
-            line[x] = 0;
-        }
-        if (y < 440) {
-            for (SLONG x = 0; x < toW; x++) {
-                line[x] = row[x * fromW / toW];
-            }
-        } else {
-            const SLONG srcX = (fromW > 640) ? off : 0;
-            const SLONG dstX = (toW > 640) ? off : 0;
-            for (SLONG x = 0; x < 640; x++) {
-                line[dstX + x] = row[srcX + x];
-            }
-        }
-        memcpy(row, &line[0], fullW * 2);
-    }
-}
-
 void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
-    PrimaryBm.SetViewOffset(0); // blends, strip clear and present always work on the whole surface
-    // Widescreen: a fade between frames of different presented width (wide airport vs 640 room) rescales the captured old frame once, at the start of the blend
-    if (gScreenW > 640 && BlendIsActive() && gBlendState == -2) {
-        RescaleBlendSource(gBlendFromW, gWideStripDrawn ? gScreenW : 640);
-    }
-
-    if (BlendIsActive()) {
+    if (gFramesToDrawBeforeFirstBlend == 0 && gBlendState != -1 && (Sim.Options.OptionBlenden != 0) && (bLeaveGameLoop == 0)) {
         if (gBlendState == -2) {
             gBlendState = 8;
         }
@@ -544,7 +497,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                     }
 
                     // if (((CStdRaum*)Sim.Players.Players[Sim.localPlayer].LocationWin)->PicBitmap.Size.y==480)
-                    PrimaryBm.SetClipRect(CRect(0, 0, gScreenW, 480));
+                    PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
                     /*else
                       PrimaryBm.SetClipRect(CRect(0,0,640,440)); */
 
@@ -559,7 +512,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                                 if (SrcKey.Bitmap != nullptr) {
                                     for (SLONG y = 0; y < 480; y++) {
                                         memcpy(static_cast<char *>(TgtKey.Bitmap) + y * TgtKey.lPitch, static_cast<char *>(SrcKey.Bitmap) + y * SrcKey.lPitch,
-                                               gScreenW * 2);
+                                               640 * 2);
                                     }
                                 }
                             }
@@ -568,7 +521,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                     } else if (gBlendState != 0) {
                         ColorFX.ApplyOn2(gBlendState, gBlendBm.pBitmap, 8 - gBlendState, gBlendBm2.pBitmap, &PrimaryBm);
                     }
-                    PrimaryBm.SetClipRect(CRect(0, 0, gScreenW, 480));
+                    PrimaryBm.SetClipRect(CRect(0, 0, 640, 480));
 
                     gBlendState--;
                 }
@@ -627,12 +580,6 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
         gFramesToDrawBeforeFirstBlend--;
     }
 
-    // Widescreen: the network overlay is centred in the airport (UI alias), unchanged in rooms
-    const bool uiAlias = gScreenW > 640 && gWideStripDrawn;
-    if (uiAlias) {
-        PrimaryBm.SetViewOffset(gUiOffsetX);
-    }
-
     if (gNetworkBms.AnzEntries() > 0 && (gNetworkBms[0].Size.y != 0) && (Sim.Players.Players[Sim.localPlayer].LocationWin != nullptr)) {
         BlitFrom(gNetworkBms[0], (640 - ((gNetworkBms[0].Size.x + 3) & 0xfffc)) / 2, (440 - gNetworkBms[0].Size.y) / 2);
 
@@ -657,22 +604,6 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
 
     // TextOut (0, 20, RGB(0,0,255), RGB(255,255,0), bprintf ("%f FPS", GetFrameRate()));
     // TextOut (0, 32, RGB(0,0,255), RGB(255,255,0), bprintf ("%li Personen", Sim.Persons.GetNumUsed()));
-    PrimaryBm.SetViewOffset(0);
-
-    // Widescreen: latch the width of the frame being presented (airport = wide, rooms/menus = 640).
-    const SLONG newPresentW = (gScreenW > 640 && gWideStripDrawn) ? gScreenW : 640;
-    // the airport status band is presented stretched to full width from the centred 640 bar
-    PrimaryBm.SetStatusSplit(newPresentW > 640 ? gUiOffsetX : -1);
-    gWideStripDrawn = FALSE;
-    if (newPresentW != gPresentW) {
-        gPresentW = newPresentW;
-        if (FrameWnd != nullptr) {
-            FrameWnd->UpdateFrameSize(); // also updates the present source width and target rect
-        } else {
-            PrimaryBm.SetSourceWidth(gPresentW);
-        }
-    }
-
     Bench.FlipTime.Start();
     PrimaryBm.Flip();
     Bench.FlipTime.Stop();
@@ -724,7 +655,6 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                 CString tmp = CString(":") + bprintf("%06i", AtGetTime() - SoundLogFileStartTime) + " Video recording begins\xd\xa";
                 fwrite(tmp, 1, strlen(tmp), pSoundLogFile);
 
-                // 640 is safe: recording video forces gScreenMaxW == 640 (widescreen airport disabled)
                 OldFrame.ReSize(640, 480);
                 OldFrame.FillWith(0);
             }
