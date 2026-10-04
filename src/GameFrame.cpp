@@ -865,7 +865,6 @@ void GameFrame::OnPaint() {
                 (Sim.Players.Players[Sim.localPlayer].LocationWin)->StatusCount = 32;
             }
             gBlendBm.ReSize(PrimaryBm.Size);
-            gBlendFromW = gPresentW;
 
             // Definitiv extrem krank: Wenn man per FastBlt Daten aus der Grafikkarte
             // ins System-RAM kopiert wird das ganze Game 50% langsamer. Vermutlich

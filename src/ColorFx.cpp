@@ -10,6 +10,8 @@
 #include "helper.h"
 #include "Proto.h"
 
+#include <algorithm>
+
 #define RDTSC __asm _emit 0x0F __asm _emit 0x31
 
 //--------------------------------------------------------------------------------------------
@@ -306,7 +308,7 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *DestBitmap, SLONG Step2, 
         return;
     }
 
-    sizex = DestBitmap->GetXSize();
+    sizex = std::min(DestBitmap->GetXSize(), SrcBitmap2->GetXSize()); // Src2 may be narrower (640 pause bitmap vs wide primary)
 
     CRect ClipRect = DestBitmap->GetClipRect();
 
@@ -468,7 +470,7 @@ void SB_CColorFX::ApplyOn2(SLONG Step, SB_CBitmapCore *SrcBitmap, SLONG Step2, S
                 pop   ebp
         }
 #else
-        sizex = SrcBitmap->GetXSize();
+        sizex = std::min(SrcBitmap->GetXSize(), std::min(SrcBitmap2->GetXSize(), TgtBitmap->GetXSize()));
 
         for (cx = sizex; cx > 0; cx--) {
             *ppp = Table[(reinterpret_cast<UBYTE *>(p))[0]] + Table[256 + (reinterpret_cast<UBYTE *>(p))[1]] + Table2[(reinterpret_cast<UBYTE *>(pp))[0]] +
