@@ -1798,7 +1798,7 @@ static void HdLogSubFallback(const SDL_Surface *surface) {
     }
 }
 
-void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target,SB_CBitmapCore *src, const SDL_Rect &srcRect, XY pos, const SDL_Rect &clip, SLONG kind,
+void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target, SB_CBitmapCore *src, const SDL_Rect &srcRect, XY pos, const SDL_Rect &clip, SLONG kind,
                                        Uint8 alpha, SLONG param, SB_HdEffectReplay replay, const void *ctx) {
     target->HdCheck = true;
     {
