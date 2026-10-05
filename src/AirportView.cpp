@@ -2778,7 +2778,7 @@ XY AIRPORT::GetBestStairs(UBYTE Par, SLONG x1, SLONG x2) {
 //--------------------------------------------------------------------------------------------
 // Gibt zurück, welchen Parameter die Rune des Types n in der Umgebung von XY hat:
 //--------------------------------------------------------------------------------------------
-UBYTE AIRPORT::GetRuneParNear(const XY &Pos, const XY &MaxDist, ULONG RuneType) {
+UBYTE AIRPORT::GetRuneParNear(const XY &Pos, const XY &MaxDist, ULONG RuneType) const {
     SLONG c = 0;
 
     // Alle durchsuchen:
@@ -3158,7 +3158,7 @@ void AIRPORT::CalcPlates() {
 #define FUCK(a)                                                                                                                                                \
     {                                                                                                                                                          \
         if ((a) < 0 || (a) >= (PlateDimension.x - 20) * PlateDimension.y)                                                                                      \
-            AtDebugBreak();                                                                                                                                      \
+            AtDebugBreak();                                                                                                                                    \
     }
 
     LeftEnd = -99999;
