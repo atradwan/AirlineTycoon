@@ -137,3 +137,21 @@
   O::# Widescreen: On
   S::# Widescreen: On
   D::# Breitbild: An
+>>0000120
+  B::# Room sides: Black
+  E::# Room sides: Black
+  F::# Room sides: Black
+  I::# Room sides: Black
+  N::# Room sides: Black
+  O::# Room sides: Black
+  S::# Room sides: Black
+  D::# Raumseiten: Schwarz
+>>0000121
+  B::# Room sides: Blurred
+  E::# Room sides: Blurred
+  F::# Room sides: Blurred
+  I::# Room sides: Blurred
+  N::# Room sides: Blurred
+  O::# Room sides: Blurred
+  S::# Room sides: Blurred
+  D::# Raumseiten: Weich

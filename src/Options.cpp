@@ -223,6 +223,7 @@ void Options::RefreshKlackerField() {
             KlackerTafel.PrintAt(0, 12, ModdedTexte.GetS(TOKEN_MISC, hdWanted == hdNow ? 100 + (hdWanted ? 1 : 0) : 102 + (hdWanted ? 1 : 0)));
         }
         KlackerTafel.PrintAt(0, 13, ModdedTexte.GetS(TOKEN_MISC, 110 + Sim.Options.OptionWidescreen));
+        KlackerTafel.PrintAt(0, 14, ModdedTexte.GetS(TOKEN_MISC, 120 + Sim.Options.OptionWidescreenRoomBorder));
         KlackerTafel.PrintAt(0, 15, StandardTexte.GetS(TOKEN_MISC, 4099));
     } else if (PageNum == 3) // Musik-Optionen
     {
@@ -440,7 +441,7 @@ void Options::OnPaint() {
             break;
 
         case 2: // Grafik:
-            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 13 || Line == 15) {
+            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 13 || Line == 14 || Line == 15) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;
@@ -661,6 +662,12 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
                 if (FrameWnd != nullptr) {
                     FrameWnd->UpdateFrameSize();
                 }
+            }
+
+            if (Line == 14) {
+                // C4: Raumseiten im Breitbild weich (aus dem Bild) oder schwarz, wirkt sofort
+                Sim.Options.OptionWidescreenRoomBorder ^= 1;
+                PrimaryBm.PrimaryBm.SetRoomBorder(Sim.Options.OptionWidescreenRoomBorder != 0);
             }
 
             if (Line == 15) {
