@@ -4002,7 +4002,8 @@ void COptions::ReadOptions() {
         }
         if (!reg.ReadRegistryKey_l(OptionRenderScale)) {
             // C4: Schluessel fehlt (Neuinstallation): HD an, wenn der hd-Ordner vorhanden ist
-            const bool hasHd = fs::is_directory(fs::path{AppPath.c_str()} / "hd");
+            std::error_code ec;
+            const bool hasHd = fs::is_directory(fs::path{AppPath.c_str()} / "hd", ec);
             OptionRenderScale = hasHd ? 4 : 1;
             AT_Log("RenderScale default %d (hd/ %s)", OptionRenderScale, hasHd ? "present" : "missing");
         } else if (OptionRenderScale < 1 || OptionRenderScale > 4) {
