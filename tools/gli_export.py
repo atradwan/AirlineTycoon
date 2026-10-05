@@ -14,8 +14,9 @@ Dateiformat (siehe src/SBLib/source/GfxLib.cpp):
   "GLIB", Kopf (Laenge als dword, darin Anzahl Eintraege und Position des Verzeichnisses)
   Verzeichnis: je Eintrag dword Groesse, byte Typ; Typ 1 = Grafik mit
                char[8] Name und dword Offset
-  Grafik am Offset: 76 Byte Bildkopf, danach Size Byte Pixel (meist RGB565, 8-Bit-Chunks ohne Palette = Graustufe 0-31 (KAPUTT in fax/letter),
-               einige Chunks 24 Bit, z. B. ZEIGER01-04 in buero_b.gli)
+  Grafik am Offset: 76 Byte Bildkopf, danach Size Byte Pixel (meist RGB565,
+               einige Chunks 24 Bit, z. B. ZEIGER01-04 in buero_b.gli;
+               8 Bit ohne Palette = Graustufe 0-31, nur KAPUTT in fax/letter.gli)
 Keine Abhaengigkeiten ausser der Python-Standardbibliothek.
 """
 import argparse
