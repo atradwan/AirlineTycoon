@@ -1191,18 +1191,22 @@ void AirportView::OnPaint() {
                                             ULONG(qBrick.Bitmap.AnzEntries())) {
                                         Airport.Triggers[static_cast<SLONG>(qBuild.Par)].Winkel = 0;
 
-                                        if (Sim.DontDisplayPlayer != -1 && qBuild.BrickId == SLONG(Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO))) {
-                                            PLAYER &qPlayer = Sim.Players.Players[Sim.DontDisplayPlayer];
+                                        if (Sim.ElectroSmokePlayer != -1 && qBuild.BrickId == SLONG(Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO))) {
+                                            PLAYER &qPlayer = Sim.Players.Players[Sim.ElectroSmokePlayer];
+                                            ULONG personIndex = Sim.Persons.GetPlayerIndex(Sim.ElectroSmokePlayer);
+                                            Sim.ElectroSmokePlayer = -1;
 
                                             for (SLONG c = 0; c < 20; c++) {
                                                 qPlayer.Smoke[c].TTL = 0;
                                             }
 
-                                            for (c = 0; c < 4; c++) {
-                                                qPlayer.Smoke[c].Position = Sim.Persons[Sim.Persons.GetPlayerIndex(Sim.localPlayer)].ScreenPos;
-                                                qPlayer.Smoke[c].Position.x += rand() % 20 - 23;
-                                                qPlayer.Smoke[c].Position.y -= rand() % 60 + 25;
-                                                qPlayer.Smoke[c].TTL = 10 + rand() % 10;
+                                            if (personIndex != 0xffffffff) {
+                                                for (c = 0; c < 4; c++) {
+                                                    qPlayer.Smoke[c].Position = Sim.Persons[static_cast<SLONG>(personIndex)].ScreenPos;
+                                                    qPlayer.Smoke[c].Position.x += rand() % 20 - 23;
+                                                    qPlayer.Smoke[c].Position.y -= rand() % 60 + 25;
+                                                    qPlayer.Smoke[c].TTL = 10 + rand() % 10;
+                                                }
                                             }
                                         }
                                     }

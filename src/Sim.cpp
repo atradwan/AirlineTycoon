@@ -654,6 +654,7 @@ void SIM::ChooseStartup() {
     UsedPlaneProp2 = FALSE;
     DontDisplayPlayer = -1;
     ElectroShockSteps = 0;
+    ElectroSmokePlayer = -1;
     ShowExtrablatt = -1;
 
     TickMuseumRefill = 6;
@@ -2939,6 +2940,7 @@ TEAKFILE &operator>>(TEAKFILE &File, SIM &Sim) {
     File >> Sim.LaptopSoldTo >> Sim.MoneyInBankTrash >> Sim.Slimed;
     File >> Sim.UsedTelescope >> Sim.DontDisplayPlayer;
     Sim.ElectroShockSteps = 0;
+    Sim.ElectroSmokePlayer = -1;
     File >> Sim.MissionCities;
 
     if (SaveVersionSub >= 100) {

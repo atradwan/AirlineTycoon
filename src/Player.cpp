@@ -6371,6 +6371,7 @@ void PLAYER::ElectroShock() {
         BRICK &qElectro = Bricks[Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO)];
         SLONG ticks = SLONG(qElectro.Bitmap.AnzEntries()) * max(SLONG(1), SLONG(qElectro.AnimSpeed));
         Sim.ElectroShockSteps = (ticks * 32 + 49) / 50 + 4;
+        Sim.ElectroSmokePlayer = PlayerNum;
     }
     /* Smoke after the shock, set here (every peer) instead of when the painted animation ends.
        98, not more: 99 and above never wear off. */
