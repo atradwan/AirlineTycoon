@@ -487,12 +487,14 @@ void CPlane::DoOneStep(SLONG PlayerNum) {
                                 if (Sim.Persons[c].Dir == 7) {
                                     Sim.Persons[c].Dir = 1;
                                 }
+                                // Salted per person, so boarding passengers still spread over the runes:
+                                TEAKRAND boardRand(ULONG(Sim.StartTime + Sim.Date * 7919 + Sim.Time + c * 104729 + Gate * 31));
                                 if (bFirstClass != 0) {
                                     Sim.Persons[c].State = PERSON_BOARDING;
-                                    Sim.Persons[c].Target = Airport.GetRandomTypedRune(RUNE_WAIT, static_cast<UBYTE>(Gate));
+                                    Sim.Persons[c].Target = Airport.GetRandomTypedRune(RUNE_WAIT, static_cast<UBYTE>(Gate), false, &boardRand);
                                 } else {
                                     Sim.Persons[c].State = PERSON_2DURCHLEUCHTER;
-                                    Sim.Persons[c].Target = Airport.GetRandomTypedRune(RUNE_DURCHLEUCHTER, static_cast<UBYTE>(Gate));
+                                    Sim.Persons[c].Target = Airport.GetRandomTypedRune(RUNE_DURCHLEUCHTER, static_cast<UBYTE>(Gate), false, &boardRand);
                                 }
                             }
                         }

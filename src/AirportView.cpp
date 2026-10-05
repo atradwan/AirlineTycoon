@@ -722,6 +722,7 @@ void AirportView::OnPaint() {
 
         FlackerCount++;
 
+        // Cheat/editor spawn only (single player, never networked): libc rand() is fine here.
         if ((PersonsToAdd != 0) && rand() % 4 == 0 && Sim.Persons.GetNumFree() > 20) {
             Sim.Persons *= PERSON(Clans.GetCustomerId(0, 99), Airport.GetRandomBirthplace(0), REASON_SHOPPING, 99, 0, 0);
             PersonsToAdd--;
@@ -2703,7 +2704,10 @@ XY AIRPORT::GetRandomTypedRune(ULONG BrickId, UBYTE Par, bool AcceptError, TEAKR
     if (pRand != nullptr) {
         return (Runes[static_cast<SLONG>(Buffer[pRand->Rand(Anz)])].ScreenPos);
     }
-    return (Runes[static_cast<SLONG>(Buffer[rand() % Anz])].ScreenPos);
+    /* No generator given: never libc rand() here, its position differs between peers (it is also
+       drawn by painting). Deterministic from synced state, so every peer picks the same rune. */
+    TEAKRAND fallbackRand(ULONG(Sim.StartTime + Sim.Date * 7919 + Sim.Time + BrickId * 31 + Par * 104729));
+    return (Runes[static_cast<SLONG>(Buffer[fallbackRand.Rand(Anz)])].ScreenPos);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -3049,14 +3053,15 @@ void AIRPORT::NewDay() {
     for (c = d = 0; c < Builds.AnzEntries(); c++) {
         if (Builds.IsInAlbum(c) != 0) {
             if (Builds[c].BrickId - 0x10000000 == RUNE_WAYPOINT_START) {
+                TEAKRAND wayRand(ULONG(Sim.StartTime + Sim.Date * 7919 + c * 104729));
                 if (Builds[c].Par == 240) // Hund-Gedankenblase
                 {
-                    ULONG index = (Sim.Persons += PERSON(Clans.GetCustomerIdByGroup(Builds[c].Par), GetRandomTypedRune(RUNE_WAYPOINT_START, Builds[c].Par),
+                    ULONG index = (Sim.Persons += PERSON(Clans.GetCustomerIdByGroup(Builds[c].Par), GetRandomTypedRune(RUNE_WAYPOINT_START, Builds[c].Par, false, &wayRand),
                                                          REASON_WAYPOINT, Builds[c].Par, Builds[c].Par, 0, static_cast<UBYTE>(MoodPersonBone)));
                     Sim.Persons[index].Position = Sim.Persons[index].Target;
                     Sim.Persons[index].WaitCount = 170;
                 } else {
-                    Sim.Persons += PERSON(Clans.GetCustomerIdByGroup(Builds[c].Par), GetRandomTypedRune(RUNE_WAYPOINT_START, Builds[c].Par), REASON_WAYPOINT,
+                    Sim.Persons += PERSON(Clans.GetCustomerIdByGroup(Builds[c].Par), GetRandomTypedRune(RUNE_WAYPOINT_START, Builds[c].Par, false, &wayRand), REASON_WAYPOINT,
                                           Builds[c].Par, Builds[c].Par, 0, 0);
                 }
             }
