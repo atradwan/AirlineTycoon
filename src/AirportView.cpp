@@ -935,16 +935,15 @@ void AirportView::OnPaint() {
                 }
                 BUFFER_V<BUILDS> &hash = gHallMargin != 0 ? Airport.HashBuildsWide : Airport.HashBuilds;
                 SLONG Index = (ViewPos.x - Airport.LeftEnd) / BUILDHASHSIZE;
-                if (gHallMargin != 0) {
-                    Index = min(max(Index, SLONG(0)), hash.AnzEntries() - 1);
-                }
 
                 if (gHallMargin == 0 && (Index < 0 || Index >= hash.AnzEntries())) {
                     AtDebugBreak();
                 }
+                // Both paths: nearest section instead of an out-of-range read (release has no debug break).
+                Index = min(max(Index, SLONG(0)), hash.AnzEntries() - 1);
 
                 static BUILDS noBuilds;
-                if (gHallMargin != 0 && (Index < 0 || Index >= hash.AnzEntries())) {
+                if (Index < 0 || Index >= hash.AnzEntries()) {
                     // Breitbild: keine Abschnitte (sollte nach dem Anlegen oben nicht vorkommen) - leer statt Absturz
                     static bool logged = false;
                     if (!logged) {
