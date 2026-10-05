@@ -1947,9 +1947,11 @@ bool SB_CPrimaryBitmap::HdSubMatches(SDL_Surface *src, const std::vector<SB_HdEn
     }
     Uint64 hash = HdHashSurface(src) ^ (Uint64(sub.size()) * 0x9E3779B97F4A7C15ULL);
     for (const SB_HdEntry &e : sub) {
-        if (e.Glyph) {
-            hash = (hash ^ Uint64(Uint32(e.Dst.x) | (Uint64(Uint32(e.Dst.y)) << 32))) * 1099511628211ULL;
-        }
+        const Uint64 flags = Uint64(e.Glyph ? 1 : 0) | (Uint64(e.ColorKey ? 1 : 0) << 1) | (Uint64(Uint32(e.Kind)) << 2);
+        hash = (hash ^ Uint64(reinterpret_cast<uintptr_t>(e.Src))) * 1099511628211ULL;
+        hash = (hash ^ Uint64(Uint32(e.Dst.x) | (Uint64(Uint32(e.Dst.y)) << 32))) * 1099511628211ULL;
+        hash = (hash ^ Uint64(Uint32(e.SrcRect.x) | (Uint64(Uint32(e.SrcRect.y)) << 32))) * 1099511628211ULL;
+        hash = (hash ^ flags) * 1099511628211ULL;
     }
     auto cached = HdSubCheck.find(src);
     if (cached != HdSubCheck.end() && cached->second.first == hash) {
