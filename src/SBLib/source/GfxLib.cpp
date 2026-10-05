@@ -5,6 +5,7 @@
 
 #include <SDL_image.h>
 
+#include <algorithm>
 #include <cctype>
 #include <string>
 #include <system_error>
@@ -299,6 +300,28 @@ SLONG GfxLib::ReadGfxChunk(SDL_RWops *file, GfxChunkHeader header, SLONG /*unuse
     // word bpp = image.BitDepth / 8;
     char *pixels = new char[image.Size];
     SDL_RWread(file, pixels, 1, image.Size);
+    // 8-Bit-Chunks (nur KAPUTT in fax.gli/letter.gli) haben keine Palette: Wert 0-31 = Graustufe.
+    // Als RGB565 aufbereiten, damit 1x und HD den normalen 16-Bit-Weg nehmen (SDL-Standardpalette waere weiss).
+    // Muss zu tools/gli_export.py (_grey8_to_565) passen.
+    if (image.BitDepth == 8 && image.Width != 0 && image.Height != 0) {
+        const dword pitch8 = image.Size / image.Height;
+        char *grey = new char[image.Width * image.Height * 2];
+        for (dword y = 0; y < image.Height; y++) {
+            for (dword x = 0; x < image.Width; x++) {
+                const dword i = std::min(dword(Uint8(pixels[y * pitch8 + x])), dword(31));
+                const auto v = Uint16((i << 11) | (((i << 1) | (i >> 4)) << 5) | i);
+                grey[(y * image.Width + x) * 2] = char(v & 0xFF);
+                grey[(y * image.Width + x) * 2 + 1] = char(v >> 8);
+            }
+        }
+        delete[] pixels;
+        pixels = grey;
+        image.BitDepth = 16;
+        image.Size = image.Width * image.Height * 2;
+        image.Rmask = 0xF800;
+        image.Gmask = 0x07E0;
+        image.Bmask = 0x001F;
+    }
     if (!HdDir.empty()) {
         SDL_Surface *hd = LoadHdPixels(HdDir, header.Name, image, pixels);
         if (hd != nullptr) {

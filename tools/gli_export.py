@@ -14,7 +14,7 @@ Dateiformat (siehe src/SBLib/source/GfxLib.cpp):
   "GLIB", Kopf (Laenge als dword, darin Anzahl Eintraege und Position des Verzeichnisses)
   Verzeichnis: je Eintrag dword Groesse, byte Typ; Typ 1 = Grafik mit
                char[8] Name und dword Offset
-  Grafik am Offset: 76 Byte Bildkopf, danach Size Byte Pixel (meist RGB565,
+  Grafik am Offset: 76 Byte Bildkopf, danach Size Byte Pixel (meist RGB565, 8-Bit-Chunks ohne Palette = Graustufe 0-31 (KAPUTT in fax/letter),
                einige Chunks 24 Bit, z. B. ZEIGER01-04 in buero_b.gli)
 Keine Abhaengigkeiten ausser der Python-Standardbibliothek.
 """
@@ -115,7 +115,23 @@ def _to_rgb_wide(width, height, bpp, masks, pitch, pixels):
     return rows
 
 
+GREY565_MASKS = (0xF800, 0x07E0, 0x001F)
+
+
+def _grey8_to_565(width, height, pitch, pixels):
+    """8-bit chunks (only KAPUTT in fax.gli/letter.gli) carry no palette: value 0-31 = grey level.
+    Must match GfxLib.cpp ReadGfxChunk (8-bit branch)."""
+    out = bytearray()
+    for y in range(height):
+        for i in pixels[y * pitch:y * pitch + width]:
+            i = min(i, 31)
+            out += struct.pack("<H", (i << 11) | (((i << 1) | (i >> 4)) << 5) | i)
+    return bytes(out)
+
+
 def to_rgb(width, height, bpp, masks, pitch, pixels):
+    if bpp == 8:
+        return _to_rgb16(width, height, GREY565_MASKS, width * 2, _grey8_to_565(width, height, pitch, pixels))
     if bpp == 16:
         return _to_rgb16(width, height, masks, pitch, pixels)
     if bpp in (24, 32):
