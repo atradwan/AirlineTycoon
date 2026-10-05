@@ -158,7 +158,9 @@ ULONG TeakAlbumRandom(BUFFER<ULONG> &ids, ULONG anz, CString const &name, TEAKRA
         TeakLibW_Exception(FNL, ExcAlbumFind, name.c_str());
     }
 
-    SLONG target = random != nullptr ? random->Rand(used) : rand() % 5;
+    /* Only reached through ALBUM<T>::GetRandomUsedIndex, which nothing instantiates (all albums are ALBUM_V).
+       A sim caller must pass a synced TEAKRAND; libc rand() is the unseeded fallback. */
+    SLONG target = random != nullptr ? random->Rand(used) : rand() % used;
     SLONG index = 0;
     for (SLONG i = ids.AnzEntries() - 1; i >= 0; --i) {
         if (++index > target) {
