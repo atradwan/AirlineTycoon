@@ -83,3 +83,39 @@
   O::# Sound:
   S::# Sound:
   D::# Sound:
+>>0000100
+  B::# HD graphics: Off
+  E::# HD graphics: Off
+  F::# HD graphics: Off
+  I::# HD graphics: Off
+  N::# HD graphics: Off
+  O::# HD graphics: Off
+  S::# HD graphics: Off
+  D::# HD-Grafik: Aus
+>>0000101
+  B::# HD graphics: On
+  E::# HD graphics: On
+  F::# HD graphics: On
+  I::# HD graphics: On
+  N::# HD graphics: On
+  O::# HD graphics: On
+  S::# HD graphics: On
+  D::# HD-Grafik: An
+>>0000102
+  B::# HD: Off after restart
+  E::# HD: Off after restart
+  F::# HD: Off after restart
+  I::# HD: Off after restart
+  N::# HD: Off after restart
+  O::# HD: Off after restart
+  S::# HD: Off after restart
+  D::# HD: Aus nach Neustart
+>>0000103
+  B::# HD: On after restart
+  E::# HD: On after restart
+  F::# HD: On after restart
+  I::# HD: On after restart
+  N::# HD: On after restart
+  O::# HD: On after restart
+  S::# HD: On after restart
+  D::# HD: An nach Neustart

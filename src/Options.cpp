@@ -216,7 +216,13 @@ void Options::RefreshKlackerField() {
         KlackerTafel.PrintAt(0, 8, StandardTexte.GetS(TOKEN_MISC, 4026 + Sim.Options.OptionSchatten));
         KlackerTafel.PrintAt(0, 10, ModdedTexte.GetS(TOKEN_MISC, 1 + Sim.Options.OptionFullscreen));
         KlackerTafel.PrintAt(0, 11, ModdedTexte.GetS(TOKEN_MISC, 10 + Sim.Options.OptionKeepAspectRatio));
-        KlackerTafel.PrintAt(0, 13, StandardTexte.GetS(TOKEN_MISC, 4099));
+        {
+            // C4: HD wirkt erst nach einem Neustart; abweichender Wunsch wird im Text angezeigt
+            const bool hdWanted = Sim.Options.OptionRenderScale > 1;
+            const bool hdNow = SB_GetRenderScale() > 1;
+            KlackerTafel.PrintAt(0, 12, ModdedTexte.GetS(TOKEN_MISC, hdWanted == hdNow ? 100 + (hdWanted ? 1 : 0) : 102 + (hdWanted ? 1 : 0)));
+        }
+        KlackerTafel.PrintAt(0, 15, StandardTexte.GetS(TOKEN_MISC, 4099));
     } else if (PageNum == 3) // Musik-Optionen
     {
         KlackerTafel.PrintAt(0, 0, StandardTexte.GetS(TOKEN_MISC, 4120));
@@ -433,7 +439,7 @@ void Options::OnPaint() {
             break;
 
         case 2: // Grafik:
-            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 13) {
+            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 15) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;
@@ -643,7 +649,12 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
                 FrameWnd->UpdateFrameSize();
             } // Aspect Ratio Option
 
-            if (Line == 13) {
+            if (Line == 12) {
+                // C4: HD an/aus (wirkt nach Neustart); an = Faktor 4
+                Sim.Options.OptionRenderScale = Sim.Options.OptionRenderScale > 1 ? 1 : 4;
+            }
+
+            if (Line == 15) {
                 if (ChangedDisplay != 0) {
                     FrameWnd->UpdateWindow();
                 }
