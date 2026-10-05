@@ -1086,6 +1086,7 @@ void SB_CPrimaryBitmap::DropHdBlitsFrom(SB_CBitmapCore *core) {
             ForgetHdTexture(t);
         }
     }
+    HdSubCheck.erase(src);
     KeepHdSource(src);
 }
 
@@ -1789,7 +1790,15 @@ void SB_CPrimaryBitmap::RecordHdHighlight(SB_CBitmapCore *target, const SDL_Rect
     HdLimit(*list, target == this ? 16384 : 4096);
 }
 
-void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target, SB_CBitmapCore *src, const SDL_Rect &srcRect, XY pos, const SDL_Rect &clip, SLONG kind,
+// Meldet (einmal je Groesse), dass eine zusammengesetzte Effekt-Quelle in 1x bleibt
+static void HdLogSubFallback(const SDL_Surface *surface) {
+    static std::set<Uint32> seen;
+    if (seen.insert((Uint32(surface->w) << 16) | Uint32(surface->h & 0xFFFF)).second) {
+        AT_Log("HD: Quelle mit 1x-Text bemalt, Effekt in 1x (%dx%d)", surface->w, surface->h);
+    }
+}
+
+void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target,SB_CBitmapCore *src, const SDL_Rect &srcRect, XY pos, const SDL_Rect &clip, SLONG kind,
                                        Uint8 alpha, SLONG param, SB_HdEffectReplay replay, const void *ctx) {
     target->HdCheck = true;
     {
@@ -1839,6 +1848,10 @@ void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target, SB_CBitmapCore *s
         if (!HdCompositeOk) {
             e.Sub.reset(); // ohne Zwischenziel: Rahmen und Zeichen aus der 1x-Schicht
         }
+        if (e.Sub != nullptr && !HdSubMatches(surface, *e.Sub)) {
+            e.Sub.reset(); // unaufgezeichnet bemalt: Rahmen und Zeichen aus der 1x-Schicht
+            HdLogSubFallback(surface);
+        }
         HdFlat *f = GetWhiteTextures(surface, Uint16((param >> 16) & 0xFFFF), e.Sub.get());
         if (f == nullptr) {
             return;
@@ -1855,6 +1868,12 @@ void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target, SB_CBitmapCore *s
         if (src->HdList != nullptr && !src->HdList->empty() && HdCompositeOk) {
             // Quelle ist selbst zusammengesetzt: ihre HD-Inhalte werden im Zwischenziel gezeichnet
             e.Sub = std::make_shared<const std::vector<SB_HdEntry>>(*src->HdList);
+            if (!HdSubMatches(surface, *e.Sub)) {
+                e.Sub.reset(); // unaufgezeichnet bemalt: weiter wie ohne Unterliste
+                HdLogSubFallback(surface);
+            }
+        }
+        if (e.Sub != nullptr) {
             e.Tex = Get1xTexture(surface);
         } else if (src->HdTexture != nullptr && SDL_HasColorKey(surface) == SDL_TRUE) {
             e.Tex = src->HdTexture;
@@ -1916,6 +1935,60 @@ static void HdReplayEntry1x(SDL_Surface *ref, const SB_HdEntry &b, const SDL_Rec
     if (!hasKey && b.KeyZero) {
         SDL_SetColorKey(b.Src, SDL_FALSE, 0);
     }
+}
+
+// Prueft, ob die HD-Unterliste einer zusammengesetzten Effekt-Quelle deren 1x-Pixel vollstaendig erklaert:
+// Die Eintraege werden in 1x auf eine invertierte Kopie von src nachgespielt. Jeder nicht-leere Pixel (ungleich 0)
+// von src, den die Kopie nicht genauso zeigt, ist unaufgezeichnet bemalt (z. B. 1x-Text ohne HD-Zeichen).
+// Pixel 0 sind Colorkey/durchsichtig und zaehlen nicht. Ergebnis wird je Quelle und Pruefsumme gemerkt.
+bool SB_CPrimaryBitmap::HdSubMatches(SDL_Surface *src, const std::vector<SB_HdEntry> &sub) {
+    if (src == nullptr || src->format->BytesPerPixel != 2) {
+        return false;
+    }
+    Uint64 hash = HdHashSurface(src) ^ (Uint64(sub.size()) * 0x9E3779B97F4A7C15ULL);
+    for (const SB_HdEntry &e : sub) {
+        if (e.Glyph) {
+            hash = (hash ^ Uint64(Uint32(e.Dst.x) | (Uint64(Uint32(e.Dst.y)) << 32))) * 1099511628211ULL;
+        }
+    }
+    auto cached = HdSubCheck.find(src);
+    if (cached != HdSubCheck.end() && cached->second.first == hash) {
+        return cached->second.second;
+    }
+    SDL_Surface *ref = SDL_ConvertSurface(src, src->format, 0);
+    if (ref == nullptr) {
+        return false;
+    }
+    for (SLONG y = 0; y < src->h; y++) {
+        const auto *s = reinterpret_cast<const Uint16 *>(static_cast<const Uint8 *>(src->pixels) + y * src->pitch);
+        auto *r = reinterpret_cast<Uint16 *>(static_cast<Uint8 *>(ref->pixels) + y * ref->pitch);
+        for (SLONG x = 0; x < src->w; x++) {
+            r[x] = Uint16(~s[x]);
+        }
+    }
+    const SDL_Rect full{0, 0, src->w, src->h};
+    for (const SB_HdEntry &b : sub) {
+        SDL_Rect clip;
+        if (b.Src == nullptr || SDL_IntersectRect(&b.Clip, &full, &clip) == SDL_FALSE) {
+            continue;
+        }
+        HdReplayEntry1x(ref, b, clip);
+    }
+    SDL_SetClipRect(ref, nullptr);
+    bool match = true;
+    for (SLONG y = 0; y < src->h && match; y++) {
+        const auto *s = reinterpret_cast<const Uint16 *>(static_cast<const Uint8 *>(src->pixels) + y * src->pitch);
+        const auto *r = reinterpret_cast<const Uint16 *>(static_cast<const Uint8 *>(ref->pixels) + y * ref->pitch);
+        for (SLONG x = 0; x < src->w; x++) {
+            if (s[x] != 0 && s[x] != r[x]) {
+                match = false;
+                break;
+            }
+        }
+    }
+    SDL_FreeSurface(ref);
+    HdSubCheck[src] = std::make_pair(hash, match);
+    return match;
 }
 
 // Spielt die Eintraege einer Liste auf ref nach (Ausgangspunkt: invertierter Frame, passt nirgends)
@@ -2771,6 +2844,7 @@ ULONG SB_CPrimaryBitmap::Release() {
         }
     }
     HdFlatCache.clear();
+    HdSubCheck.clear();
     for (SDL_Texture *t : HdGraveyard) {
         SDL_DestroyTexture(t);
     }

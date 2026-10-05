@@ -388,6 +388,8 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
         Uint64 WhiteHash{0};
     };
     std::unordered_map<const SDL_Surface *, HdFlat> HdFlatCache;
+    std::unordered_map<const SDL_Surface *, std::pair<Uint64, bool>> HdSubCheck; // Ergebnis von HdSubMatches je Quelle (Pruefsumme, passt)
+    bool HdSubMatches(SDL_Surface *src, const std::vector<SB_HdEntry> &sub);
     SDL_Texture *Get1xTexture(SDL_Surface *src);
     HdFlat *GetWhiteTextures(SDL_Surface *src, Uint16 white, const std::vector<SB_HdEntry> *sub);
     void DrawHdEntry(const SB_HdEntry &b, XY offset, const SDL_Rect *limit, bool nested);
