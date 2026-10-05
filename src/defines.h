@@ -149,7 +149,7 @@ constexpr char VersionString[] = AT_VERSION_TEXT;
    VersionString as the release, but not its network protocol, so the suffix is raised whenever
    the protocol changes within a version. The build label (if any) is included, so only identical
    builds play together. */
-constexpr char NetVersionString[] = AT_VERSION_TEXT " / net 2";
+constexpr char NetVersionString[] = AT_VERSION_TEXT " / net 3";
 
 // Generelles
 #define CUSTOMERS_PER_PERSON 5   // Eine Person (Bildschirm) repräsentiert 10 Kunden
