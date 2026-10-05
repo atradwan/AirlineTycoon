@@ -1887,6 +1887,37 @@ void SB_CPrimaryBitmap::HdWritten(SB_CBitmapCore *target, const SDL_Rect *rect, 
     }
 }
 
+// Spielt einen Eintrag in 1x auf ref nach (clip: bereits mit der Flaeche von ref geschnitten).
+static void HdReplayEntry1x(SDL_Surface *ref, const SB_HdEntry &b, const SDL_Rect &clip) {
+    if (b.Replay != nullptr) {
+        SDL_SetClipRect(ref, nullptr);
+        b.Replay(ref, clip, b.Src, b.SrcRect, b.Pos, b.Param, b.Ctx); // Effekt wie im Frame
+        return;
+    }
+    SDL_SetClipRect(ref, &clip);
+    SDL_Rect srcRect = b.SrcRect;
+    SDL_Rect dst = b.Dst;
+    Uint32 key = 0;
+    const bool hasKey = SDL_GetColorKey(b.Src, &key) == 0;
+    if (hasKey && !b.ColorKey) {
+        SDL_SetColorKey(b.Src, SDL_FALSE, key);
+    }
+    if (!hasKey && b.KeyZero) {
+        SDL_SetColorKey(b.Src, SDL_TRUE, 0); // wie der Colorkey-Blit der Offscreen-Bitmap (H14)
+    }
+    if (dst.w != srcRect.w || dst.h != srcRect.h) {
+        SDL_BlitScaled(b.Src, &srcRect, ref, &dst); // wie im Spiel (Zoom)
+    } else {
+        SDL_BlitSurface(b.Src, &srcRect, ref, &dst);
+    }
+    if (hasKey && !b.ColorKey) {
+        SDL_SetColorKey(b.Src, SDL_TRUE, key);
+    }
+    if (!hasKey && b.KeyZero) {
+        SDL_SetColorKey(b.Src, SDL_FALSE, 0);
+    }
+}
+
 // Spielt die Eintraege einer Liste auf ref nach (Ausgangspunkt: invertierter Frame, passt nirgends)
 // und baut daraus die Overlay-Pixel. Rueckgabe: Anzahl durchsichtiger Pixel.
 SLONG SB_CPrimaryBitmap::BuildHdRef(const std::vector<SB_HdEntry> &list, SDL_Surface *ref, std::vector<Uint32> &mask, SLONG *nearMiss) {
@@ -1903,33 +1934,7 @@ SLONG SB_CPrimaryBitmap::BuildHdRef(const std::vector<SB_HdEntry> &list, SDL_Sur
         if (b.Src == nullptr || SDL_IntersectRect(&b.Clip, &full, &clip) == SDL_FALSE) {
             continue;
         }
-        if (b.Replay != nullptr) {
-            SDL_SetClipRect(ref, nullptr);
-            b.Replay(ref, clip, b.Src, b.SrcRect, b.Pos, b.Param, b.Ctx); // Effekt wie im Frame
-            continue;
-        }
-        SDL_SetClipRect(ref, &clip);
-        SDL_Rect srcRect = b.SrcRect;
-        SDL_Rect dst = b.Dst;
-        Uint32 key = 0;
-        const bool hasKey = SDL_GetColorKey(b.Src, &key) == 0;
-        if (hasKey && !b.ColorKey) {
-            SDL_SetColorKey(b.Src, SDL_FALSE, key);
-        }
-        if (!hasKey && b.KeyZero) {
-            SDL_SetColorKey(b.Src, SDL_TRUE, 0); // wie der Colorkey-Blit der Offscreen-Bitmap (H14)
-        }
-        if (dst.w != srcRect.w || dst.h != srcRect.h) {
-            SDL_BlitScaled(b.Src, &srcRect, ref, &dst); // wie im Spiel (Zoom)
-        } else {
-            SDL_BlitSurface(b.Src, &srcRect, ref, &dst);
-        }
-        if (hasKey && !b.ColorKey) {
-            SDL_SetColorKey(b.Src, SDL_TRUE, key);
-        }
-        if (!hasKey && b.KeyZero) {
-            SDL_SetColorKey(b.Src, SDL_FALSE, 0);
-        }
+        HdReplayEntry1x(ref, b, clip);
     }
     SDL_SetClipRect(ref, nullptr);
     mask.resize(size_t(full.w) * size_t(full.h));
