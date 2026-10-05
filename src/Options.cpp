@@ -234,7 +234,8 @@ void Options::RefreshKlackerField() {
             if (HdRowEnabled()) {
                 KlackerTafel.PrintAt(0, 12, hdText);
             } else {
-                KlackerTafel.PrintAt(1, 12, hdText + 1); // ohne hd-Ordner: ohne '#' (Ueberschriftenstil), nicht klickbar
+                const char *hdPlain = (hdText[0] == '#') ? hdText + 1 : hdText;
+                KlackerTafel.PrintAt(1, 12, hdPlain); // ohne hd-Ordner: ohne '#' (Ueberschriftenstil), nicht klickbar
             }
         }
         KlackerTafel.PrintAt(0, 13, ModdedTexte.GetS(TOKEN_MISC, 110 + Sim.Options.OptionWidescreen));
@@ -243,7 +244,8 @@ void Options::RefreshKlackerField() {
             if (Sim.Options.OptionWidescreen != 0) {
                 KlackerTafel.PrintAt(0, 14, sidesText);
             } else {
-                KlackerTafel.PrintAt(1, 14, sidesText + 1); // Breitbild aus: ohne '#', nicht klickbar
+                const char *sidesPlain = (sidesText[0] == '#') ? sidesText + 1 : sidesText;
+                KlackerTafel.PrintAt(1, 14, sidesPlain); // Breitbild aus: ohne '#', nicht klickbar
             }
         }
         KlackerTafel.PrintAt(0, 15, StandardTexte.GetS(TOKEN_MISC, 4099));
