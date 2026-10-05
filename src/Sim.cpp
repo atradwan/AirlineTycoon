@@ -1354,6 +1354,15 @@ void SIM::DoTimeStep() {
     Time += bNetwork ? ServerGameSpeed : GameSpeed;
     PlayerDidntMove++; // Wird ggf. bei WalkPersons resettet
 
+    /* Stench wears off with sim time, not with painted frames (was 1 per frame in AirportView::OnPaint;
+       3 per 50 ms step = the old rate at 60 Hz). 9999 and above never wear off, as before. */
+    for (c = 0; c < 4; c++) {
+        SLONG &stink = Players.Players[c].PlayerStinking;
+        if (stink > 0 && stink < 9999) {
+            stink = max(0, stink - 3);
+        }
+    }
+
     if (Time >= 24 * 60000) {
         NewDay();
         Airport.NewDay();

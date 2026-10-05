@@ -1074,10 +1074,6 @@ void AirportView::OnPaint() {
                                                 }
                                             }
                                         }
-
-                                        if (qPlayer.PlayerStinking < 9999) {
-                                            qPlayer.PlayerStinking--;
-                                        }
                                     } else if (qPlayer.PlayerSmoking != 0) {
                                         for (SLONG c = 0; c < 20; c++) {
                                             if (qPlayer.Smoke[c].TTL != 0) {
