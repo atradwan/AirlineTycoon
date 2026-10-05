@@ -119,3 +119,21 @@
   O::# HD: On after restart
   S::# HD: On after restart
   D::# HD: An nach Neustart
+>>0000110
+  B::# Widescreen: Off
+  E::# Widescreen: Off
+  F::# Widescreen: Off
+  I::# Widescreen: Off
+  N::# Widescreen: Off
+  O::# Widescreen: Off
+  S::# Widescreen: Off
+  D::# Breitbild: Aus
+>>0000111
+  B::# Widescreen: On
+  E::# Widescreen: On
+  F::# Widescreen: On
+  I::# Widescreen: On
+  N::# Widescreen: On
+  O::# Widescreen: On
+  S::# Widescreen: On
+  D::# Breitbild: An

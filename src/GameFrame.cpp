@@ -648,6 +648,31 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     }
 }
 
+// Ueberblendung zwischen verschieden breiten Bildern (H15): altes Bild mittig auf die neue Breite bringen
+// (schmaler -> schwarze Raender, breiter -> mittlerer Ausschnitt)
+static void FitBlendToWidth(SLONG frameW) {
+    if (gBlendState != -1 && gBlendBm.pBitmap != nullptr && gBlendBm.Size.x != frameW) {
+        const SLONG oldW = gBlendBm.Size.x;
+        const SLONG h = gBlendBm.Size.y;
+        std::vector<UWORD> rows(size_t(frameW) * size_t(h), 0);
+        {
+            SB_CBitmapKey key(*gBlendBm.pBitmap);
+            const SLONG dx = (frameW - oldW) / 2;
+            for (SLONG y = 0; y < h && key.Bitmap != nullptr; y++) {
+                const auto *src = reinterpret_cast<const UWORD *>(static_cast<const char *>(key.Bitmap) + y * key.lPitch);
+                for (SLONG x = max(SLONG(0), dx); x < min(frameW, oldW + dx); x++) {
+                    rows[size_t(y) * frameW + x] = src[x - dx];
+                }
+            }
+        }
+        gBlendBm.ReSize(XY(frameW, h));
+        SB_CBitmapKey key(*gBlendBm.pBitmap);
+        for (SLONG y = 0; y < h && key.Bitmap != nullptr; y++) {
+            memcpy(static_cast<char *>(key.Bitmap) + y * key.lPitch, &rows[size_t(y) * frameW], size_t(frameW) * 2);
+        }
+    }
+}
+
 void GameFrame::Invalidate() {
     CStdRaum *w = nullptr;
     SLONG c = 0;
@@ -668,28 +693,7 @@ void GameFrame::Invalidate() {
             if (loc != nullptr) {
                 loc->StatusCount = max(loc->StatusCount, SLONG(3)); // Statuszeile im neuen Bild neu zeichnen
             }
-            if (gBlendState != -1 && gBlendBm.pBitmap != nullptr && gBlendBm.Size.x != frameW) {
-                // Ueberblendung zwischen verschieden breiten Bildern (H15): altes Bild mittig auf die neue Breite bringen
-                // (schmaler -> schwarze Raender, breiter -> mittlerer Ausschnitt)
-                const SLONG oldW = gBlendBm.Size.x;
-                const SLONG h = gBlendBm.Size.y;
-                std::vector<UWORD> rows(size_t(frameW) * size_t(h), 0);
-                {
-                    SB_CBitmapKey key(*gBlendBm.pBitmap);
-                    const SLONG dx = (frameW - oldW) / 2;
-                    for (SLONG y = 0; y < h && key.Bitmap != nullptr; y++) {
-                        const auto *src = reinterpret_cast<const UWORD *>(static_cast<const char *>(key.Bitmap) + y * key.lPitch);
-                        for (SLONG x = max(SLONG(0), dx); x < min(frameW, oldW + dx); x++) {
-                            rows[size_t(y) * frameW + x] = src[x - dx];
-                        }
-                    }
-                }
-                gBlendBm.ReSize(XY(frameW, h));
-                SB_CBitmapKey key(*gBlendBm.pBitmap);
-                for (SLONG y = 0; y < h && key.Bitmap != nullptr; y++) {
-                    memcpy(static_cast<char *>(key.Bitmap) + y * key.lPitch, &rows[size_t(y) * frameW], size_t(frameW) * 2);
-                }
-            }
+            FitBlendToWidth(frameW);
         }
         gHallMargin = (PrimaryBm.Size.x - 640) / 2;
         // H17: Raeume mit Statuszeile im breiten Bild: Raum im mittleren Ausschnitt, daneben (y < 440) der Rand der GPU
@@ -704,6 +708,13 @@ void GameFrame::Invalidate() {
                 static_cast<SB_CBitmapCore &>(PrimaryBm.PrimaryBm).HdWritten(&r, true);
             }
         }
+    } else if (PrimaryBm.Size.x != 640) {
+        // C4: Breitbild wurde zur Laufzeit ausgeschaltet: Bild wieder auf 640 zurueckfuehren
+        PrimaryBm.SetFrameWidth(640);
+        FitBlendToWidth(640);
+        gHallMargin = 0;
+        gRightAnchor = 0;
+        PrimaryBm.PrimaryBm.SetSideBorder(0);
     }
 
     if (TopWin != nullptr) {

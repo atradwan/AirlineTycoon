@@ -222,6 +222,7 @@ void Options::RefreshKlackerField() {
             const bool hdNow = SB_GetRenderScale() > 1;
             KlackerTafel.PrintAt(0, 12, ModdedTexte.GetS(TOKEN_MISC, hdWanted == hdNow ? 100 + (hdWanted ? 1 : 0) : 102 + (hdWanted ? 1 : 0)));
         }
+        KlackerTafel.PrintAt(0, 13, ModdedTexte.GetS(TOKEN_MISC, 110 + Sim.Options.OptionWidescreen));
         KlackerTafel.PrintAt(0, 15, StandardTexte.GetS(TOKEN_MISC, 4099));
     } else if (PageNum == 3) // Musik-Optionen
     {
@@ -439,7 +440,7 @@ void Options::OnPaint() {
             break;
 
         case 2: // Grafik:
-            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 15) {
+            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 13 || Line == 15) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;
@@ -652,6 +653,14 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
             if (Line == 12) {
                 // C4: HD an/aus (wirkt nach Neustart); an = Faktor 4
                 Sim.Options.OptionRenderScale = Sim.Options.OptionRenderScale > 1 ? 1 : 4;
+            }
+
+            if (Line == 13) {
+                // C4: Kapi-Breitbild an/aus, wirkt sofort
+                Sim.Options.OptionWidescreen ^= 1;
+                if (FrameWnd != nullptr) {
+                    FrameWnd->UpdateFrameSize();
+                }
             }
 
             if (Line == 15) {
