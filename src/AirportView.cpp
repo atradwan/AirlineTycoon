@@ -1195,7 +1195,6 @@ void AirportView::OnPaint() {
                                         if (Sim.DontDisplayPlayer != -1 && qBuild.BrickId == SLONG(Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO))) {
                                             PLAYER &qPlayer = Sim.Players.Players[Sim.DontDisplayPlayer];
 
-
                                             for (SLONG c = 0; c < 20; c++) {
                                                 qPlayer.Smoke[c].TTL = 0;
                                             }
