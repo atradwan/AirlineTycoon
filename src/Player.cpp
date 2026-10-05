@@ -1815,7 +1815,9 @@ void PLAYER::NewDay() {
         }
 
         if (Sim.Date == 40 && Planes.GetNumUsed() > 0) {
-            SLONG i = Planes.GetRandomUsedIndex();
+            /* Not libc rand(): its position depends on how often each peer drew a frame. */
+            TEAKRAND rnd(ULONG(Sim.StartTime + Sim.Date * 7919 + PlayerNum * 104729 + 0x41544653));
+            SLONG i = Planes.GetRandomUsedIndex(&rnd);
 
             Planes -= i;
             UpdateAuftragsUsage();
