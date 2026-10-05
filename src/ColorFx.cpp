@@ -1007,13 +1007,13 @@ void SB_CColorFX::BlitGlow(SB_CBitmapCore *SrcBitmap, SB_CBitmapCore *TgtBitmap,
     UWORD *p = nullptr;
     UWORD *pp = nullptr;
     static SLONG sizex;
-    BUFFER_V<UWORD> PixelBuffer(640);
 
     XY t = TargetPos;
 
-    if (SrcBitmap->GetXSize() <= 0 || SrcBitmap->GetXSize() >= 640) {
-        AtDebugBreak();
+    if (SrcBitmap->GetXSize() <= 0 || SrcBitmap->GetYSize() <= 0) {
+        return;
     }
+    BUFFER_V<UWORD> PixelBuffer(SrcBitmap->GetXSize()); // sizex below is at most the source width
 
     CRect Rect;
     Rect = CRect(0, 0, SrcBitmap->GetXSize() - 1, SrcBitmap->GetYSize() - 1);
