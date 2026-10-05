@@ -75,6 +75,11 @@ Options::Options(BOOL bHandy, SLONG PlayerNum) : CStdRaum(bHandy, PlayerNum, "st
         gKlackerPlanes.Reset();
     }
 
+    {
+        std::error_code ec;
+        HdFolderPresent = fs::is_directory(fs::path{AppPath.c_str()} / "hd", ec);
+    }
+
     RefreshKlackerField();
 
     // Create a timer to 'klacker'
@@ -176,6 +181,11 @@ void Options::UpdateSavegameNames() {
 }
 
 //--------------------------------------------------------------------------------------------
+// C4: HD-Zeile nur bedienbar, wenn der hd-Ordner existiert (oder HD bereits an ist, damit man es ausschalten kann)
+//--------------------------------------------------------------------------------------------
+bool Options::HdRowEnabled() const { return HdFolderPresent || Sim.Options.OptionRenderScale > 1; }
+
+//--------------------------------------------------------------------------------------------
 // Aktualisiert die Text-Daten im Klacker-Feld:
 //--------------------------------------------------------------------------------------------
 void Options::RefreshKlackerField() {
@@ -220,10 +230,22 @@ void Options::RefreshKlackerField() {
             // C4: HD wirkt erst nach einem Neustart; abweichender Wunsch wird im Text angezeigt
             const bool hdWanted = Sim.Options.OptionRenderScale > 1;
             const bool hdNow = SB_GetRenderScale() > 1;
-            KlackerTafel.PrintAt(0, 12, ModdedTexte.GetS(TOKEN_MISC, hdWanted == hdNow ? 100 + (hdWanted ? 1 : 0) : 102 + (hdWanted ? 1 : 0)));
+            const char *hdText = ModdedTexte.GetS(TOKEN_MISC, hdWanted == hdNow ? 100 + (hdWanted ? 1 : 0) : 102 + (hdWanted ? 1 : 0));
+            if (HdRowEnabled()) {
+                KlackerTafel.PrintAt(0, 12, hdText);
+            } else {
+                KlackerTafel.PrintAt(1, 12, hdText + 1); // ohne hd-Ordner: ohne '#' (Ueberschriftenstil), nicht klickbar
+            }
         }
         KlackerTafel.PrintAt(0, 13, ModdedTexte.GetS(TOKEN_MISC, 110 + Sim.Options.OptionWidescreen));
-        KlackerTafel.PrintAt(0, 14, ModdedTexte.GetS(TOKEN_MISC, 120 + Sim.Options.OptionWidescreenRoomBorder));
+        {
+            const char *sidesText = ModdedTexte.GetS(TOKEN_MISC, 120 + Sim.Options.OptionWidescreenRoomBorder);
+            if (Sim.Options.OptionWidescreen != 0) {
+                KlackerTafel.PrintAt(0, 14, sidesText);
+            } else {
+                KlackerTafel.PrintAt(1, 14, sidesText + 1); // Breitbild aus: ohne '#', nicht klickbar
+            }
+        }
         KlackerTafel.PrintAt(0, 15, StandardTexte.GetS(TOKEN_MISC, 4099));
     } else if (PageNum == 3) // Musik-Optionen
     {
@@ -441,7 +463,8 @@ void Options::OnPaint() {
             break;
 
         case 2: // Grafik:
-            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || Line == 12 || Line == 13 || Line == 14 || Line == 15) {
+            if ((Line >= 2 && Line <= 8) || Line == 10 || Line == 11 || (Line == 12 && HdRowEnabled()) || Line == 13 ||
+                (Line == 14 && Sim.Options.OptionWidescreen != 0) || Line == 15) {
                 SetMouseLook(CURSOR_HOT, 0, -100, 0);
             }
             break;
@@ -651,9 +674,9 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
                 FrameWnd->UpdateFrameSize();
             } // Aspect Ratio Option
 
-            if (Line == 12) {
-                // C4: HD an/aus (wirkt nach Neustart); an = Faktor 4
-                Sim.Options.OptionRenderScale = Sim.Options.OptionRenderScale > 1 ? 1 : 4;
+            if (Line == 12 && HdRowEnabled()) {
+                // C4: HD an/aus (wirkt nach Neustart); an = Faktor 4 (nur wenn der hd-Ordner vorhanden ist)
+                Sim.Options.OptionRenderScale = Sim.Options.OptionRenderScale > 1 ? 1 : (HdFolderPresent ? 4 : 1);
             }
 
             if (Line == 13) {
@@ -664,7 +687,7 @@ void Options::OnLButtonDown(UINT /*nFlags*/, CPoint point) {
                 }
             }
 
-            if (Line == 14) {
+            if (Line == 14 && Sim.Options.OptionWidescreen != 0) {
                 // C4: Raumseiten im Breitbild weich (aus dem Bild) oder schwarz, wirkt sofort
                 Sim.Options.OptionWidescreenRoomBorder ^= 1;
                 PrimaryBm.PrimaryBm.SetRoomBorder(Sim.Options.OptionWidescreenRoomBorder != 0);

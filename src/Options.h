@@ -17,6 +17,8 @@ class Options : public CStdRaum {
 
   private:
     BOOL ChangedDisplay;
+    bool HdFolderPresent{};
+    bool HdRowEnabled() const;
     enum PAGE_TYPE : UBYTE {
         GRAPHICS,
         MUSIC,
