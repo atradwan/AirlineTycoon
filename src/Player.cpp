@@ -6364,6 +6364,13 @@ void PLAYER::ElectroShock() {
     }
 
     Sim.DontDisplayPlayer = PlayerNum;
+    /* How long the cola machine's shock animation runs (Ticker units of 32 ms, AirportView::OnPaint),
+       as 50 ms sim steps, so the player reappears and gets input back even if the machine is never drawn. */
+    {
+        BRICK &qElectro = Bricks[Bricks(static_cast<SLONG>(0x10000000) + BRICK_ELECTRO)];
+        SLONG ticks = SLONG(qElectro.Bitmap.AnzEntries()) * max(SLONG(1), SLONG(qElectro.AnimSpeed));
+        Sim.ElectroShockSteps = (ticks * 32 + 49) / 50 + 1;
+    }
     /* Smoke after the shock, set here (every peer) instead of when the painted animation ends.
        98, not more: 99 and above never wear off. */
     if (PlayerSmoking < 98) {

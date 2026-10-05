@@ -2609,6 +2609,7 @@ class SIM // Die Simulationswelt; alles was zur aktuellen Partie gehört
     BOOL UsedTelescope{};
     BOOL UsedPlaneProp2{};
     SLONG DontDisplayPlayer{};
+    SLONG ElectroShockSteps{}; // sim steps until DontDisplayPlayer ends (not saved: 0 after a load ends it)
     BOOL bAllowCheating; // Ist cheaten im Netzwerk erlaubt?
     SLONG ShowExtrablatt{};
     BOOL ItemGlove{};    // Hat heute schon jemand die Handschuhe genommen?

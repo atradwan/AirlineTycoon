@@ -653,6 +653,7 @@ void SIM::ChooseStartup() {
     UsedTelescope = FALSE;
     UsedPlaneProp2 = FALSE;
     DontDisplayPlayer = -1;
+    ElectroShockSteps = 0;
     ShowExtrablatt = -1;
 
     TickMuseumRefill = 6;
@@ -1364,6 +1365,15 @@ void SIM::DoTimeStep() {
         SLONG &smoke = Players.Players[c].PlayerSmoking; // drawn smoke puffs; 99 = until the next day, as before
         if (smoke > 0 && smoke < 99) {
             smoke = max(0, smoke - 3);
+        }
+    }
+
+    if (DontDisplayPlayer != -1) {
+        if (ElectroShockSteps > 0) {
+            ElectroShockSteps--;
+        }
+        if (ElectroShockSteps == 0) {
+            DontDisplayPlayer = -1;
         }
     }
 
@@ -2928,6 +2938,7 @@ TEAKFILE &operator>>(TEAKFILE &File, SIM &Sim) {
     File >> Sim.DayState >> Sim.CallItADay >> Sim.Tutorial;
     File >> Sim.LaptopSoldTo >> Sim.MoneyInBankTrash >> Sim.Slimed;
     File >> Sim.UsedTelescope >> Sim.DontDisplayPlayer;
+    Sim.ElectroShockSteps = 0;
     File >> Sim.MissionCities;
 
     if (SaveVersionSub >= 100) {
