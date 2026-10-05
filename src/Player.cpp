@@ -6364,6 +6364,11 @@ void PLAYER::ElectroShock() {
     }
 
     Sim.DontDisplayPlayer = PlayerNum;
+    /* Smoke after the shock, set here (every peer) instead of when the painted animation ends.
+       98, not more: 99 and above never wear off. */
+    if (PlayerSmoking < 98) {
+        PlayerSmoking = 98;
+    }
     qPerson.LookDir = 2;
     qPerson.Phase = 0;
 

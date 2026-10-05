@@ -1096,10 +1096,6 @@ void AirportView::OnPaint() {
                                                 }
                                             }
                                         }
-
-                                        if (qPlayer.PlayerSmoking < 99) {
-                                            qPlayer.PlayerSmoking--;
-                                        }
                                     }
                                 }
 
@@ -1200,7 +1196,6 @@ void AirportView::OnPaint() {
                                             PLAYER &qPlayer = Sim.Players.Players[Sim.DontDisplayPlayer];
 
                                             Sim.DontDisplayPlayer = -1;
-                                            qPlayer.PlayerSmoking = max(qPlayer.PlayerSmoking, 60);
 
                                             for (SLONG c = 0; c < 20; c++) {
                                                 qPlayer.Smoke[c].TTL = 0;
