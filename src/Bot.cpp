@@ -1215,8 +1215,9 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
     if (savegameVersion < 104) {
         bot.mOptions.kRepairBudgetPercent = Bot::ConfigurableOptions{}.kRepairBudgetPercent;
         bot.mOptions.kStockWarfarce = Bot::ConfigurableOptions{}.kStockWarfarce;
+        bot.mOptions.kStockWarfarceTargetHuman = Bot::ConfigurableOptions{}.kStockWarfarceTargetHuman;
     } else {
-        File >> bot.mOptions.kRepairBudgetPercent >> bot.mOptions.kStockWarfarce;
+        File >> bot.mOptions.kRepairBudgetPercent >> bot.mOptions.kStockWarfarce >> bot.mOptions.kStockWarfarceTargetHuman;
     }
     /* Fork block 104 saves (before the upstream 1.9.1 merge) end here; 105 adds these two */
     if (savegameVersion < 105) {
