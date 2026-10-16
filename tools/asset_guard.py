@@ -23,7 +23,7 @@ GAME_EXT = {".gli", ".glj", ".lbm", ".pol", ".pcx", ".smk", ".flc", ".raw", ".mc
 MODEL_EXT = {".pth", ".pt", ".ckpt", ".safetensors", ".onnx", ".bin", ".param"}
 # Bilder/Videos: nur klein und nicht in Asset-Ordnern erlaubt
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".bmp", ".tga", ".webp", ".gif", ".tif", ".tiff", ".mp4", ".avi", ".mkv"}
-ASSET_DIRS = ("hd/", "hd_debug/", "hd_assets/", "assets_export/", "export/", "upscaled/", "gamefiles/")
+ASSET_DIRS = ("hd/", "hd_debug/", "hd_assets/", "assets_export/", "export/", "upscaled/", "gamefiles/", "models/")
 MAX_IMAGE = 200 * 1024          # 200 KB
 MAX_ANY = 5 * 1024 * 1024       # 5 MB
 # Dateikoepfe der Spielformate

@@ -2469,6 +2469,8 @@ class COptions {
     SLONG OptionRenderScale{}; // Render-Faktor s (1 = wie bisher), wirkt beim Neustart
     SLONG OptionWidescreen{};  // Breitbild (H13): 1 = Leinwand nach Fenster-Seitenverhaeltnis (16:10 -> 768, 16:9 -> 854), 0 = aus
     SLONG OptionWidescreenRoomBorder{}; // Breitbild (H16): Raender neben Raeumen 1 = weichgezeichnet aus dem Bild, 0 = schwarz
+    SLONG OptionHdPolCheck{};           // Debug (H21a): 1 = beim Start Export-PNGs der Figuren (hd_assets/original) gegen die Engine pruefen
+    CString OptionHdVideoExport;        // H25a: beim Start Personen-Videos exportieren ("" = aus, "alle", Raeume/Clips, z. B. "duty")
     SLONG OptionHdOverlayFilter{}; // Filter fuer das 1x-Overlay ueber HD-Hintergruenden: 0 = nearest, 1 = linear
     BOOL OptionHdMissingLog{};     // 1: jeder GLI-Chunk ohne HD-PNG einmal als "HD fehlt" im Log (mit Raum, Pfad, Groesse)
     BOOL OptionHdDebugMask{};      // 1: alle 5 s hd_frame/hd_ref/hd_mask.png in den Ordner hd_debug neben der AT.exe

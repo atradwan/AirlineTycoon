@@ -20,6 +20,7 @@
 #include "global.h"
 #include "Globe.h"
 #include "helper.h"
+#include "HdVideoExport.h"
 #include "HLine.h"
 #include "Insel.h"
 #include "Intro.h"
@@ -527,6 +528,12 @@ void CTakeOffApp::InitInstance(int argc, char *argv[]) {
         Sim.SaveOptions();
     }
 
+    // H25a: Bilder der animierten Personen in Raeumen exportieren, gleich beim Programmstart (ohne Partie);
+    // Zaehlung danach mit tools/video_count.py
+    if (Sim.Options.OptionHdVideoExport.GetLength() > 0) {
+        HdVideoExport(std::string((LPCTSTR)Sim.Options.OptionHdVideoExport));
+    }
+
     CreateVideo();
 
     FrameWnd = new GameFrame;
@@ -901,6 +908,35 @@ void CTakeOffApp::InitInstance(int argc, char *argv[]) {
                                                CString("................................................................").Left(n / 4)));
                     n++;
                 }
+            }
+
+            // Debug (H21a): Export-PNGs von tools/pol_export.py gegen die Engine pruefen, Ergebnis im Log
+            if (Sim.Options.OptionHdPolCheck != 0) {
+                const std::string dir = std::string((LPCTSTR)AppPath) + "hd_assets/original";
+                CHLPool::ExportCheck total;
+                AT_Log_I("HD", "Pol-Pruefung: vergleiche Export-PNGs in %s mit CHLObj::BlitAt", dir.c_str());
+                auto check = [&](CHLPool &pool) {
+                    CHLPool::ExportCheck r;
+                    pool.CheckExport(dir, r);
+                    if (r.Objects > 0) {
+                        AT_Log_I("HD", "Pol-Pruefung %s: %d Bilder, %d gleich, %d fehlen, %d abweichend", (LPCTSTR)pool.GetFilename(), r.Objects, r.Ok,
+                                 r.Missing, r.Different);
+                    }
+                    total.Objects += r.Objects;
+                    total.Ok += r.Ok;
+                    total.Missing += r.Missing;
+                    total.Different += r.Different;
+                };
+                for (SLONG c = Clans.AnzEntries() - 1; c >= 0; c--) {
+                    if (Clans.IsInAlbum(c) != 0) {
+                        check(Clans[c].ClanPool);
+                        check(Clans[c].ClanGimmick);
+                        check(Clans[c].ClanWarteGimmick);
+                    }
+                }
+                check(SkelettPool);
+                AT_Log_I("HD", "Pol-Pruefung gesamt: %d Bilder, %d gleich, %d fehlen, %d abweichend%s", total.Objects, total.Ok, total.Missing,
+                         total.Different, (total.Missing == 0 && total.Different == 0) ? " -> Abweichung 0" : "");
             }
         }
 

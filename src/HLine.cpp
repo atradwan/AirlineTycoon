@@ -6,6 +6,9 @@
 #include "HLine.h"
 
 #include "global.h"
+
+#include <SDL_image.h>
+#include <filesystem>
 #include "helper.h"
 #include "Proto.h"
 
@@ -42,6 +45,13 @@ void CHLObj::BlitAt(SB_CBitmapCore *pBitmap, XY Target) {
         return;
     }
     auto *bm = ((static_cast<UWORD *>(Key.Bitmap)) + Target.x + Target.y * (Key.lPitch >> 1));
+
+    // H21b: HD-Fassung in die HD-Zeichenliste; die 1x-Pixel zeichnet BlitAt wie immer
+    if (HdHall && SB_GetRenderScale() > 1) {
+        if (const auto *hd = pHLPool->GetHdFigure(*this)) {
+            SB_RecordHdSprite(pBitmap, hd->Src1x, hd->Tex.get(), Target.x, Target.y);
+        }
+    }
 
     SLONG Min = 0;
     SLONG Max = 0; // Vertikales Clipping
@@ -246,6 +256,19 @@ void CHLObj::BlitLargeAt(SB_CBitmapCore *pBitmap, XY Target) {
     Min = max(0, ClipRect.top - Target.y);
     Max = min(HLineEntries.AnzEntries(), (ClipRect.bottom - Target.y) / 2);
 
+    // H23: HD-Fassung (2-fach) in die HD-Liste des Ziels (Hallenblick der Raeume). Die Referenz ist die 1x-Figur, Pixel
+    // fuer Pixel verdoppelt; wo BlitLargeAt beim Beschneiden oben/links anders zeichnet, zeigt das Overlay dort 1x.
+    if (HdHall && SB_GetRenderScale() > 1 && SB_GetRenderScale() % 2 == 0) {
+        if (auto *hd = pHLPool->GetHdFigure(*this)) {
+            if (!hd->Src2x) {
+                hd->Src2x = Double1x(hd->Src1x.get());
+            }
+            if (hd->Src2x) {
+                SB_RecordHdSprite(pBitmap, hd->Src2x, hd->Tex.get(), Target.x, Target.y, SB_GetRenderScale() / 2);
+            }
+        }
+    }
+
     ClipRect.left -= Target.x;
     ClipRect.right -= Target.x;
 
@@ -309,6 +332,7 @@ void CHLPool::Destroy() {
     BytesReal = BytesCompressed = BytesAdministration = 0;
 
     Filename.Empty();
+    ForgetHd();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1129,4 +1153,290 @@ void UpdateHLinePool() {
     if (DontSaveSkeletons == 0) {
         SkelettPool.Save();
     }
+}
+
+//--------------------------------------------------------------------------------------------
+// H21a: Prueft die PNGs von tools/pol_export.py gegen das, was CHLObj::BlitAt zeichnet. Jedes Bild wird zweimal
+// auf verschiedene Hintergruende gezeichnet: wo beide gleich sind, hat BlitAt geschrieben (PNG deckend, gleiche
+// Farbe in RGB565), sonst nicht (PNG durchsichtig). Ergebnis und Abweichungen stehen im Log (debug.txt).
+//--------------------------------------------------------------------------------------------
+static std::string PolChunkName(__int64 graphicID) {
+    char raw[9] = {};
+    memcpy(raw, &graphicID, 8);
+    std::string name(raw);
+    for (auto &c : name) {
+        if (!isalnum(static_cast<unsigned char>(c)) && c != '_' && c != '-') {
+            c = '_';
+        }
+    }
+    return name.empty() ? "_" : name;
+}
+
+void CHLPool::CheckExport(const std::string &dir, ExportCheck &result) {
+    namespace fs = std::filesystem;
+    const SLONG wasLoaded = Loaded;
+    if (Load() == 0) {
+        return;
+    }
+
+    std::string pool = (LPCTSTR)Filename;
+    std::string folder = fs::path((LPCTSTR)FullFilename(Filename, GliPath)).parent_path().filename().string();
+    for (auto *str : {&pool, &folder}) {
+        for (auto &c : *str) {
+            c = static_cast<char>(tolower(static_cast<unsigned char>(c)));
+        }
+    }
+
+    SLONG shown = 0;
+    for (SLONG n = 0; n < HLObjects.AnzEntries(); n++) {
+        CHLObj &obj = HLObjects[n];
+        result.Objects++;
+        const SLONG w = obj.Size.x;
+        const SLONG h = obj.Size.y;
+        if (w <= 0 || h <= 0) {
+            result.Ok++; // leeres Bild: der Export schreibt keine PNG
+            continue;
+        }
+        const std::string name = PolChunkName(obj.graphicID);
+        const fs::path file = fs::path(dir) / folder / pool / (name + ".png");
+
+        SDL_Surface *png = IMG_Load(file.string().c_str());
+        SDL_Surface *rgba = png != nullptr ? SDL_ConvertSurfaceFormat(png, SDL_PIXELFORMAT_RGBA32, 0) : nullptr;
+        if (png != nullptr) {
+            SDL_FreeSurface(png);
+        }
+        if (rgba == nullptr) {
+            result.Missing++;
+            if (shown++ < 10) {
+                AT_Log_I("HD", "Pol-Pruefung %s: %s fehlt", pool.c_str(), file.string().c_str());
+            }
+            continue;
+        }
+
+        // Zweimal zeichnen: auf 0x0000 und auf 0xFFFF
+        std::vector<UWORD> a(size_t(w) * h), b(size_t(w) * h);
+        for (SLONG pass = 0; pass < 2; pass++) {
+            SBBM bm(w, h);
+            bm.pBitmap->Clear(SB_Hardwarecolor(pass == 0 ? 0x0000 : 0xFFFF));
+            obj.BlitAt(bm.pBitmap, XY(0, 0));
+            SB_CBitmapKey key(*bm.pBitmap);
+            for (SLONG y = 0; y < h; y++) {
+                const auto *row = reinterpret_cast<const UWORD *>(static_cast<const UBYTE *>(key.Bitmap) + y * key.lPitch);
+                std::copy(row, row + w, (pass == 0 ? a : b).begin() + y * w);
+            }
+        }
+
+        SLONG diff = 0;
+        if (rgba->w != w || rgba->h != h) {
+            diff = w * h;
+        } else {
+            SDL_LockSurface(rgba);
+            for (SLONG y = 0; y < h; y++) {
+                const auto *p = static_cast<const Uint8 *>(rgba->pixels) + y * rgba->pitch;
+                for (SLONG x = 0; x < w; x++, p += 4) {
+                    const size_t i = size_t(y) * w + x;
+                    const bool written = a[i] == b[i];
+                    const bool opaque = p[3] != 0;
+                    const UWORD v = UWORD(((p[0] >> 3) << 11) | ((p[1] >> 2) << 5) | (p[2] >> 3));
+                    if (written != opaque || (written && v != a[i])) {
+                        diff++;
+                    }
+                }
+            }
+            SDL_UnlockSurface(rgba);
+        }
+        SDL_FreeSurface(rgba);
+
+        if (diff == 0) {
+            result.Ok++;
+        } else {
+            result.Different++;
+            if (shown++ < 10) {
+                AT_Log_I("HD", "Pol-Pruefung %s: %s weicht in %d von %d Pixeln ab", pool.c_str(), name.c_str(), diff, w * h);
+            }
+        }
+    }
+
+    if (wasLoaded < 2) {
+        Unload();
+    }
+}
+
+//--------------------------------------------------------------------------------------------
+// H21b: HD-Figuren der Halle. Die HD-PNG (tools/hd_generate.py, Verfahren figur_rgba) liegt unter
+// hd/<ordner>/<pool>/<ID>.png wie der Export von tools/pol_export.py, in s-facher Groesse mit Alpha.
+// Fuer die Referenz bekommt jede Figur eine 1x-Fassung mit Colorkey: genau die Pixel, die BlitAt schreibt.
+//--------------------------------------------------------------------------------------------
+bool CHLObj::HdHall = false;
+
+std::shared_ptr<SDL_Surface> CHLObj::Render1x() {
+    const SLONG w = Size.x;
+    const SLONG h = Size.y;
+    if (w <= 0 || h <= 0 || pHLPool == nullptr || pHLPool->Load() == 0) {
+        return nullptr;
+    }
+    std::vector<SLONG> pixels(size_t(w) * h, -1);
+    std::vector<bool> used(65536, false);
+    SLONG count = 0;
+    for (SLONG cy = 0; cy < HLineEntries.AnzEntries(); cy++) {
+        for (SLONG cx = HLineEntries[cy]; cx > 0; cx--, count++) {
+            CHLGene &qHLGene = HLines[count];
+            if (cy >= h) {
+                continue;
+            }
+            const UBYTE *source = qHLGene.Anz <= 4 ? reinterpret_cast<const UBYTE *>(&qHLGene.pPixel) : qHLGene.pPixel;
+            for (SLONG c = 0; c < qHLGene.Anz; c++) {
+                const SLONG x = qHLGene.Offset + c;
+                if (x < w) {
+                    const UWORD v = pHLPool->PaletteMapper[static_cast<SLONG>(source[c])];
+                    pixels[size_t(cy) * w + x] = v;
+                    used[v] = true;
+                }
+            }
+        }
+    }
+    SLONG key = 0;
+    while (key < 65536 && used[key]) {
+        key++;
+    }
+    SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, w, h, 16, SDL_PIXELFORMAT_RGB565);
+    if (s == nullptr || key == 65536) {
+        SDL_FreeSurface(s);
+        return nullptr;
+    }
+    SDL_LockSurface(s);
+    for (SLONG y = 0; y < h; y++) {
+        auto *row = reinterpret_cast<UWORD *>(static_cast<UBYTE *>(s->pixels) + y * s->pitch);
+        for (SLONG x = 0; x < w; x++) {
+            const SLONG v = pixels[size_t(y) * w + x];
+            row[x] = UWORD(v < 0 ? key : v);
+        }
+    }
+    SDL_UnlockSurface(s);
+    SDL_SetColorKey(s, SDL_TRUE, Uint32(key));
+    return std::shared_ptr<SDL_Surface>(s, SDL_FreeSurface);
+}
+
+// H23: 1x-Fassung Pixel fuer Pixel verdoppelt (wie BlitLargeAt), gleicher Colorkey
+std::shared_ptr<SDL_Surface> CHLObj::Double1x(SDL_Surface *src) {
+    Uint32 key = 0;
+    if (src == nullptr || SDL_GetColorKey(src, &key) != 0) {
+        return nullptr;
+    }
+    SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, src->w * 2, src->h * 2, 16, SDL_PIXELFORMAT_RGB565);
+    if (s == nullptr) {
+        return nullptr;
+    }
+    SDL_LockSurface(s);
+    for (SLONG y = 0; y < s->h; y++) {
+        const auto *in = reinterpret_cast<const UWORD *>(static_cast<const UBYTE *>(src->pixels) + (y / 2) * src->pitch);
+        auto *row = reinterpret_cast<UWORD *>(static_cast<UBYTE *>(s->pixels) + y * s->pitch);
+        for (SLONG x = 0; x < s->w; x++) {
+            row[x] = in[x / 2];
+        }
+    }
+    SDL_UnlockSurface(s);
+    SDL_SetColorKey(s, SDL_TRUE, key);
+    return std::shared_ptr<SDL_Surface>(s, SDL_FreeSurface);
+}
+
+// Gleiche sichtbare Pixel (bei verschiedenem Colorkey)?
+static bool SameFigure(SDL_Surface *a, SDL_Surface *b) {
+    Uint32 ka = 0;
+    Uint32 kb = 0;
+    if (a == nullptr || b == nullptr || a->w != b->w || a->h != b->h || SDL_GetColorKey(a, &ka) != 0 || SDL_GetColorKey(b, &kb) != 0) {
+        return false;
+    }
+    for (SLONG y = 0; y < a->h; y++) {
+        const auto *ra = reinterpret_cast<const UWORD *>(static_cast<const UBYTE *>(a->pixels) + y * a->pitch);
+        const auto *rb = reinterpret_cast<const UWORD *>(static_cast<const UBYTE *>(b->pixels) + y * b->pitch);
+        for (SLONG x = 0; x < a->w; x++) {
+            const bool ta = ra[x] == ka;
+            if (ta != (rb[x] == kb) || (!ta && ra[x] != rb[x])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+CHLPool::HdFigure *CHLPool::GetHdFigure(CHLObj &obj) {
+    namespace fs = std::filesystem;
+    if (!HdChecked) {
+        HdChecked = true;
+        std::string pool = (LPCTSTR)Filename;
+        std::string folder = fs::path((LPCTSTR)FullFilename(Filename, GliPath)).parent_path().filename().string();
+        for (auto *str : {&pool, &folder}) {
+            for (auto &c : *str) {
+                c = static_cast<char>(tolower(static_cast<unsigned char>(c)));
+            }
+        }
+        const fs::path dir = fs::path(AppPath.c_str()) / "hd" / folder / pool;
+        std::error_code ec;
+        if (fs::is_directory(dir, ec)) {
+            HdDir = dir.string();
+            AT_Log_I("HD", "HD-Figuren aus %s", HdDir.c_str());
+        }
+    }
+    if (HdDir.empty() || HLObjects.AnzEntries() == 0) {
+        return nullptr;
+    }
+    const SLONG n = SLONG(&obj - &HLObjects[0]);
+    if (n < 0 || n >= HLObjects.AnzEntries()) {
+        return nullptr;
+    }
+    auto it = HdFigures.find(n);
+    if (it != HdFigures.end()) {
+        return it->second.Tex != nullptr ? &it->second : nullptr;
+    }
+
+    HdFigure &fig = HdFigures[n];
+    const std::string name = PolChunkName(obj.graphicID);
+    const fs::path file = fs::path(HdDir) / (name + ".png");
+    const SLONG s = SB_GetRenderScale();
+    std::error_code ec;
+    if (!fs::is_regular_file(file, ec)) {
+        if (SB_GetHdMissingLog() && obj.Size.x > 0 && obj.Size.y > 0) {
+            SB_ReportHdMissing(file.string(), obj.Size.x, obj.Size.y, " (Figur)");
+        }
+        return nullptr;
+    }
+    fig.Src1x = obj.Render1x();
+    if (!fig.Src1x) {
+        return nullptr;
+    }
+    // Der Export schreibt bei mehrfach vergebener ID das erste Objekt: andere nur, wenn sie genauso aussehen
+    for (SLONG m = 0; m < n; m++) {
+        if (HLObjects[m].graphicID == obj.graphicID) {
+            if (!SameFigure(HLObjects[m].Render1x().get(), fig.Src1x.get())) {
+                AT_Log_I("HD", "%s gehoert zu einem anderen Bild mit derselben ID, Figur bleibt 1x", file.string().c_str());
+                fig.Src1x.reset();
+                return nullptr;
+            }
+            break;
+        }
+    }
+    SDL_Surface *hd = IMG_Load(file.string().c_str());
+    if (hd == nullptr) {
+        AT_Log_I("HD", "%s nicht lesbar: %s", file.string().c_str(), IMG_GetError());
+    } else if (hd->w != obj.Size.x * s || hd->h != obj.Size.y * s) {
+        AT_Log_I("HD", "%s hat %dx%d statt %dx%d Pixel, wird ignoriert", file.string().c_str(), hd->w, hd->h, obj.Size.x * s, obj.Size.y * s);
+    } else {
+        SDL_Texture *tex = SB_CreateHdSpriteTexture(hd);
+        if (tex != nullptr) {
+            fig.Tex = std::shared_ptr<SDL_Texture>(tex, SB_ForgetHdTexture); // frei, wenn die letzte Kopie des Pools sie vergisst
+        }
+    }
+    SDL_FreeSurface(hd);
+    if (fig.Tex == nullptr) {
+        fig.Src1x.reset();
+        return nullptr;
+    }
+    return &fig;
+}
+
+void CHLPool::ForgetHd() {
+    HdFigures.clear();
+    HdDir.clear();
+    HdChecked = false;
 }

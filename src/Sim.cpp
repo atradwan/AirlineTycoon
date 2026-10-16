@@ -4068,6 +4068,18 @@ void COptions::ReadOptions() {
         if (!reg.ReadRegistryKey_l(OptionWidescreenRoomBorder) || OptionWidescreenRoomBorder < 0 || OptionWidescreenRoomBorder > 1) {
             OptionWidescreenRoomBorder = 1;
         }
+        if (!reg.ReadRegistryKey_l(OptionHdPolCheck) || OptionHdPolCheck < 0 || OptionHdPolCheck > 1) {
+            OptionHdPolCheck = 0;
+        }
+        {
+            CString type;
+            if (!reg.ReadRegistryKeyEx_s(OptionHdVideoExport, "OptionHdVideoExport", &type)) {
+                OptionHdVideoExport = "";
+            }
+            if (OptionHdVideoExport.GetLength() > 0 || type != "fehlt") {
+                AT_Log_I("HD", "OptionHdVideoExport aus AT.json: '%s' (%s)", (LPCTSTR)OptionHdVideoExport, (LPCTSTR)type);
+            }
+        }
         if (!reg.ReadRegistryKey_l(OptionHdOverlayFilter) || OptionHdOverlayFilter < 0 || OptionHdOverlayFilter > 1) {
             OptionHdOverlayFilter = 0;
         }
@@ -4359,6 +4371,8 @@ void COptions::WriteOptions() {
     reg.WriteRegistryKey_l(OptionRenderScale);
     reg.WriteRegistryKey_l(OptionWidescreen);
     reg.WriteRegistryKey_l(OptionWidescreenRoomBorder);
+    reg.WriteRegistryKey_l(OptionHdPolCheck);
+    reg.WriteRegistryKeyEx(OptionHdVideoExport, "OptionHdVideoExport");
     reg.WriteRegistryKey_l(OptionHdOverlayFilter);
     reg.WriteRegistryKey_b(OptionHdDebugMask);
     reg.WriteRegistryKey_b(OptionHdMissingLog);

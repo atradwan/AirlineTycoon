@@ -1237,6 +1237,9 @@ template <typename T> class ALBUM_V {
             List[i].second = 0;
         }
         List.resize(anz);
+        // IdxFront/IdxBack sind nur Suchhinweise (davor bzw. dahinter ist alles belegt). Nach einer Groessenaenderung
+        // (und beim Laden, das die Belegung komplett neu schreibt) gilt das nicht mehr sicher: von vorn bzw. hinten suchen.
+        IdxFront = 0;
         IdxBack = AnzEntries() - 1;
     }
 
@@ -1323,13 +1326,16 @@ template <typename T> class ALBUM_V {
 
     ULONG push_front(ULONG id, T rhs) {
         if (id >= 0x1000000 && (Hash.end() == Hash.find(id))) {
-            for (SLONG i = IdxFront; i < AnzEntries(); ++i) {
-                if (List[i].second == 0) {
-                    std::swap(List[i].first, rhs);
-                    List[i].second = id;
-                    Hash[id] = i;
-                    IdxFront = i + 1;
-                    return id;
+            // Erst ab dem Hinweis suchen, dann (falls der Hinweis veraltet ist) noch einmal von vorn
+            for (SLONG pass = 0; pass < 2; ++pass) {
+                for (SLONG i = (pass == 0 ? std::max(IdxFront, SLONG(0)) : 0); i < AnzEntries(); ++i) {
+                    if (List[i].second == 0) {
+                        std::swap(List[i].first, rhs);
+                        List[i].second = id;
+                        Hash[id] = i;
+                        IdxFront = i + 1;
+                        return id;
+                    }
                 }
             }
         }
@@ -1339,13 +1345,16 @@ template <typename T> class ALBUM_V {
 
     ULONG push_back(ULONG id, T rhs) {
         if (id >= 0x1000000 && (Hash.end() == Hash.find(id))) {
-            for (SLONG i = IdxBack; i >= 0; --i) {
-                if (List[i].second == 0) {
-                    std::swap(List[i].first, rhs);
-                    List[i].second = id;
-                    Hash[id] = i;
-                    IdxBack = i - 1;
-                    return id;
+            // Erst ab dem Hinweis suchen, dann (falls der Hinweis veraltet ist) noch einmal vom Ende
+            for (SLONG pass = 0; pass < 2; ++pass) {
+                for (SLONG i = (pass == 0 ? std::min(IdxBack, AnzEntries() - 1) : AnzEntries() - 1); i >= 0; --i) {
+                    if (List[i].second == 0) {
+                        std::swap(List[i].first, rhs);
+                        List[i].second = id;
+                        Hash[id] = i;
+                        IdxBack = i - 1;
+                        return id;
+                    }
                 }
             }
         }
@@ -1434,6 +1443,8 @@ template <typename T> class ALBUM_V {
         }
 
         buffer.rebuild_hash_table();
+        buffer.IdxFront = 0; // Belegung ist neu: Suchhinweise zuruecksetzen (sonst "+= failed" nach dem Laden, H20)
+        buffer.IdxBack = buffer.AnzEntries() - 1;
         return File;
     }
 

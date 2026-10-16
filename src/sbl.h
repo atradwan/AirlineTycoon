@@ -151,6 +151,7 @@ struct SB_HdEntry {
     SLONG Kind{0};                     // 0 Blit, 1 Schatten, 2 Transparenz, 3 Sprechblase (BlitWhiteTrans), 4 Text-Hervorhebung
     bool Glyph{false};                 // Zeichen aus einem HD-Glyphenblatt (H7)
     bool KeyZero{false};               // Pixel 0 der 1x-Quelle durchsichtig, obwohl die Quelle keinen Colorkey hat (H14)
+    bool FlipX{false};                 // gespiegelter Blit (H19): Src ist die gespiegelte 1x-Kopie, Tex wird gespiegelt gezeichnet
     SDL_Texture *Tex2{nullptr};        // Kind 3: Weiss-Schicht (Alpha = Deckkraft)
     SDL_Texture *Tex3{nullptr};        // Kind 3: deckender Rest in 1x, Alpha = Maske fuer die HD-Inhalte
     std::shared_ptr<const std::vector<SB_HdEntry>> Sub; // Kind 3: HD-Inhalte der Quelle (in Quellkoordinaten)
@@ -179,6 +180,7 @@ class SB_CBitmapCore {
     void InitClipRect(void);
     void SetClipRect(const CRect &);
     void RecordHd(SB_CBitmapCore *target, const SDL_Rect &srcRect, SLONG x, SLONG y, bool colorKey);
+    void RecordHdFlipped(SB_CBitmapCore *target, SLONG x, SLONG y); // horizontal gespiegelter Colorkey-Blit (H19)
     void HdWritten(const SDL_Rect *rect = nullptr, bool opaque = false); // 1x-Inhalt direkt veraendert (Clear, SetPixel, Text ...)
     void HdBeforeWrite();  // vor einem Blit/Text in diese Bitmap: eigene HD-Textur als Basiseintrag uebernehmen (H11)
     bool HdIsValid();      // eigene HD-Textur passt (noch) zu den 1x-Pixeln
@@ -294,6 +296,14 @@ SDL_Texture *SB_GetHdTexture(SDL_Surface *hd, const SDL_Surface *orig1x, bool co
 bool SB_GetHdMissingLog();
 void SB_SetHdRoom(const char *room);
 
+// HD-Figuren der Halle (H21b): Ein HLine-Objekt hat keine 1x-Bitmap. Der Aufrufer legt eine 1x-Fassung mit Colorkey
+// an (src1x, genau die Pixel, die CHLObj::BlitAt schreibt); die Referenz spielt sie nach, die GPU zeichnet tex.
+// Die Textur gehoert dem Aufrufer und wird mit SB_ForgetHdTexture freigegeben. texScale: Texturpixel je Pixel von src1x
+// (0 = Render-Faktor; H23: 2-fach vergroesserte Figuren nehmen dieselbe Textur mit dem halben Faktor).
+SDL_Texture *SB_CreateHdSpriteTexture(SDL_Surface *hd);
+void SB_RecordHdSprite(class SB_CBitmapCore *target, const std::shared_ptr<SDL_Surface> &src1x, SDL_Texture *tex, SLONG x, SLONG y, SLONG texScale = 0);
+void SB_ForgetHdTexture(SDL_Texture *tex);
+
 // Effekte ueber HD (Phase 2, H5/H6): ColorFX meldet Abdunkeln (BlitAlpha, kind 1) und Transparenz
 // (BlitTrans, kind 2, alpha = Deckkraft der Quelle). replay spielt dieselbe Rechnung auf der Referenz nach.
 void SB_RecordHdEffect(class SB_CBitmapCore *target, class SB_CBitmapCore *src, const SDL_Rect &srcRect, XY pos, const SDL_Rect &clip, SLONG kind,
@@ -353,7 +363,10 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
     void ForgetHdSurface(const SDL_Surface *hd);
     void RecordHdBlit(SB_CBitmapCore *src, SB_CBitmapCore *target, const SDL_Rect &srcRect, SLONG x, SLONG y, bool colorKey);
     void RecordHdTex(SB_CBitmapCore *target, SDL_Surface *src, SDL_Texture *tex, const SDL_Rect &srcRect, SLONG x, SLONG y, bool colorKey,
-                     bool glyph = false, SB_CBitmapCore *core = nullptr);
+                     bool glyph = false, SB_CBitmapCore *core = nullptr, bool flipX = false, const std::shared_ptr<SDL_Surface> &keep = nullptr,
+                     SLONG texScale = 0);
+    SDL_Texture *CreateHdSpriteTexture(SDL_Surface *hd); // RGBA-PNG -> Textur mit dem Alpha des PNG, ohne Cache (H21b)
+    void RecordHdFlipped(SB_CBitmapCore *src, SB_CBitmapCore *target, SDL_Surface *flipped, SLONG x, SLONG y);
     void RecordHdScaled(SB_CBitmapCore *src, SB_CBitmapCore *target, const SDL_Rect &srcRect, const SDL_Rect &dstRect, bool colorKey);
     void KeepHdSource(SDL_Surface *src);
     void SeedHdList(SB_CBitmapCore *core);

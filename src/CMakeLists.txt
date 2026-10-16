@@ -96,6 +96,7 @@ add_executable (AT
     Globe.cpp
     HalldiskMenu.cpp
     HLine.cpp
+    HdVideoExport.cpp
     Init.cpp
     Insel.cpp
     Intro.cpp

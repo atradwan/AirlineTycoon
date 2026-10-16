@@ -1,0 +1,5 @@
+# Fuer tools/hd_generate.py. Mit Grafikkarte (CUDA) torch nach https://pytorch.org/get-started/locally/ installieren.
+numpy
+pillow
+torch
+spandrel

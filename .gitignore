@@ -39,6 +39,7 @@ gamefiles/*
 hd/
 hd_debug/
 hd_assets/
+models/
 assets_export/
 upscaled/
 

@@ -8,6 +8,10 @@
 #include "sbl.h"
 #include "TeakLibW.h"
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+
 class CHLPool;
 
 #pragma pack(push, pragma_gene)
@@ -67,6 +71,12 @@ class CHLObj {
     void BlitAt(SB_CBitmapCore *pBitmap, SLONG tx, SLONG ty) { BlitAt(pBitmap, XY(tx, ty)); }
     void BlitLargeAt(SB_CBitmapCore *pBitmap, XY Target);
     void BlitLargeAt(SB_CBitmapCore *pBitmap, SLONG tx, SLONG ty) { BlitLargeAt(pBitmap, XY(tx, ty)); }
+
+    // H21b: HD-Figuren. Nur solange HdHall gesetzt ist (Personen in der Halle, H23 auch im Hallenblick der Raeume per
+    // BlitLargeAt), suchen BlitAt und BlitLargeAt eine HD-Fassung.
+    static bool HdHall;
+    std::shared_ptr<SDL_Surface> Render1x(); // genau die Pixel von BlitAt, Rest = Colorkey (eine Farbe, die nicht vorkommt)
+    static std::shared_ptr<SDL_Surface> Double1x(SDL_Surface *src); // H23: pixelgenau verdoppelt, gleicher Colorkey
 
     friend TEAKFILE &operator<<(TEAKFILE &File, const CHLObj &obj) {
         File.Write((const UBYTE *)&obj.graphicID, 8);
@@ -135,6 +145,28 @@ class CHLPool {
     CHLObj *GetHLObj(__int64 graphicID);
     CHLObj *GetHLObj(const CString &String);
 
+    // H21a: Export-PNGs von tools/pol_export.py gegen CHLObj::BlitAt pruefen (Debug, OptionHdPolCheck)
+    struct ExportCheck {
+        SLONG Objects{0}, Ok{0}, Missing{0}, Different{0};
+    };
+    void CheckExport(const std::string &dir, ExportCheck &result);
+    const CString &GetFilename() const { return Filename; }
+
+    // H21b: HD-Figuren aus hd/<ordner>/<pool>/<ID>.png (s-fache Groesse), beim ersten Zeichnen geladen
+    struct HdFigure {
+        std::shared_ptr<SDL_Surface> Src1x; // 1x-Fassung mit Colorkey, die Referenz spielt sie nach
+        std::shared_ptr<SDL_Texture> Tex;   // leer: keine passende HD-Datei, bleibt 1x (Pools werden flach kopiert)
+        std::shared_ptr<SDL_Surface> Src2x; // H23: 2-fach vergroessert wie BlitLargeAt, beim ersten Gebrauch angelegt
+    };
+    HdFigure *GetHdFigure(CHLObj &obj);
+
+  private:
+    void ForgetHd();
+    std::unordered_map<SLONG, HdFigure> HdFigures; // je Objekt-Index
+    std::string HdDir;                             // leer: keine HD-Figuren fuer diesen Pool
+    bool HdChecked{false};
+
+  public:
     friend class CHLObj;
 };
 

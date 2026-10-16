@@ -1,0 +1,8063 @@
+{
+ "version": 2,
+ "scale": 4,
+ "hinweis": "Nur Namen von Grafik-Chunks und Verfahren, keine Spieldaten. Pfade relativ zum Export von tools/gli_export.py bzw. tools/mcf_export.py.",
+ "regeln": [
+  {
+   "muster": "gli/*.pol/*",
+   "verfahren": "figur_rgba",
+   "modell": "x4plus",
+   "anmerkung": "Figuren der Halle (tools/pol_export.py): Alpha aus dem Export, Kante per Modell"
+  },
+  {
+   "muster": "gli/glbrick*.gli/*",
+   "verfahren": "colorkey_rgba",
+   "modell": "ultrasharp",
+   "anmerkung": "Hallen-Bausteine, alle 5 Saetze (glbrick.gli, glbrick0-3.gli)"
+  },
+  {
+   "muster": "gli/*1.gli/*",
+   "verfahren": "foto_rgb",
+   "modell": "x4plus",
+   "anmerkung": "Stadtfotos Globus/Filofax (am Stueck, ohne Kacheln)"
+  },
+  {
+   "muster": "gli/*1.glj/*",
+   "verfahren": "foto_rgb",
+   "modell": "x4plus",
+   "anmerkung": "Stadtfotos Laptop (am Stueck, ohne Kacheln)"
+  },
+  {
+   "muster": "*",
+   "verfahren": "auto",
+   "anmerkung": "Alles ohne Eintrag: colorkey_rgba, wenn das 1x-Bild reines Schwarz enthaelt, sonst deckend_rgba"
+  }
+ ],
+ "eintraege": [
+  {
+   "pfad": "room/abend.gli/AIRPORT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend.gli/NACHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend0.gli/AIRPORT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend0.gli/NACHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend1.gli/AIRPORT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend1.gli/NACHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend2.gli/AIRPORT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend2.gli/NACHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend3.gli/AIRPORT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/abend3.gli/NACHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/arab.gli/ARAB_AUS",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/aufsicht.gli/AUFSICHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/bank.gli/BANK",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/buerodrk.gli/BUERO",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/credits.gli/BACK",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/designer.gli/CONSTRUC",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/designer.gli/DESIGNER",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/dutyfree.gli/DUTYFREE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/editor.gli/EDITOR",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/fracht.gli/FRACHT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_aa.gli/GLOBE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_ab.gli/GLOBE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_ac.gli/GLOBE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_ad.gli/GLOBE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_b.gli/VR",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_c.gli/VR2",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/globe_d.gli/VR3",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/insel.gli/INSEL",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/kiosk.gli/KIOSK",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/lastmin.gli/LASTMIN",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/makler.gli/MAKLER",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/museum.gli/MUSEUM",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/nasa.gli/NASA",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/noinsel.gli/NOINSEL",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/nowerb.gli/WERBUNG",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/pause.gli/PAUSE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/personal.gli/PERSONAL",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/planprop.gli/BACK",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/planprop.gli/BACK2",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/reiseb.gli/REISEB",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/rick.gli/RICK",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/routebox.gli/ROUTEBOX",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/rushmore.gli/RUSHMORE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/sabotage.gli/SABOTAGE",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/security.gli/SECURITY",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/startup.gli/HAUPTMNU",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/statistk.gli/STATISTK",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/tafel.gli/TAFEL",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/titel.gli/SPELLOGO",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/titel.gli/TITEL",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/weltall.gli/WELTALL",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/werbung.gli/WERBUNG",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/werkstat.gli/WERKSTAT",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/world.gli/WORLD",
+   "verfahren": "deckend_rgb"
+  },
+  {
+   "pfad": "room/buero.gli/DOOR_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero.gli/DOOR_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero.gli/LETTERS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_a.gli/DOOR_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_a.gli/DOOR_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_a.gli/LETTERS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/DOOR_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/DOOR_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/LETTERS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/ZEIGER01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/ZEIGER02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/ZEIGER03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_b.gli/ZEIGER04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_c.gli/DOOR_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_c.gli/DOOR_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_c.gli/LETTERS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_d.gli/DOOR_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_d.gli/DOOR_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/buero_d.gli/LETTERS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/FUNK06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/arab.gli/GLOVE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/bank.gli/MONEY",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/bank.gli/MONI01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/bank.gli/MONI02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/bank.gli/MONI03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/bank.gli/MONI04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/bank.gli/MONI05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/credits.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/credits.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/KONTRA",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/OHNEHUF",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/OPAQUE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/SCHILDD",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/SCHILDE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/SCHILDF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/dutyfree.gli/TRANS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BODY_A01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BODY_A02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BODY_A03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BODY_A04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BODY_A05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_DL0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_DL1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_DL2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_DR0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_DR1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_DR2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_TL0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_TL1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_TL2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_TR0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_TR1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/BUT_TR2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CANCEL0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CANCEL1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CANCEL2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CPIT_A01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CPIT_A02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CPIT_A03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CPIT_A04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/CPIT_A05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/DELETE0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/DELETE1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/DELETE2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/HECK_A07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/LWNG_A01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/LWNG_A02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/LWNG_A03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/LWNG_A04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/LWNG_A05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/LWNG_A06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MASKE_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MASKE_U",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/MOT_A08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/NEW0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/NEW1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/NEW2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/OK0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/OK1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/OK2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/RWNG_A01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/RWNG_A02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/RWNG_A03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/RWNG_A04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/RWNG_A05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/RWNG_A06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_B_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_B_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_B_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_B_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_B_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_C_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_C_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_C_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_C_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_C_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_H_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_M_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_W_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_W_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_W_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_W_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_W_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/editor.gli/S_W_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/KISTE01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/KISTE02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/KISTE03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/KISTE04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/KISTE05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/KISTE06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/MASK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/NOGLUE",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/SEIL01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/SEIL02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/SEIL03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/fracht.gli/STEMPEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/AUFTR_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/CITY_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/EXIT_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/HELL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/INFO_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/PLANE_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/ROUTE_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/VR_EDGE1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/VR_EDGE2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/VR_EDGE3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe.gli/VR_EDGE4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/BACK",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/FILOECK2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/FILOECKE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/FILOFAX",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/FILOTOP1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/FILOTOP2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEX0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEX1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEX2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEX3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEXR_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEXR_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INDEXR_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/INHALT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/KARTE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/LOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/NEXT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_B08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_J08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_R08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/PL_V08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/TIMETAB1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_a.gli/TIMETAB2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_aa.gli/GLASS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_ab.gli/GLASS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_ac.gli/GLASS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_ad.gli/GLASS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BACK1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BACK2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BACK3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BACK4",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BACK5",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BACK6",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/BIGWIN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/CLOSE1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/CLOSE2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/DWNLEFT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/DWNLEFT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/DWNRIGT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/DWNRIGT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/INHALT0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/INHALT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/INHALT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/JUMP0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/JUMP1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/JUMP2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/JUMP3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/JUMP4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/KARTE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/LEFT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/LEFT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/LOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PFEIL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_B0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_B1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_G0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_G1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_R0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_R1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_V0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PLANE_V1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_B08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_J08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_R08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/PL_V08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/RIGHT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/RIGHT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_B0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_B1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_B2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_G0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_G1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_G2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_R0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_R1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_R2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_V0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_V1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/ROUTE_V2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SCROLLL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SCROLLR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/SWITCH7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/UPLEFT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/UPLEFT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/UPRIGHT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/UPRIGHT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/WARNING1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/WARNING2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/WARNING3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/globe_b.gli/WINDOW",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_001",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_002",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_003",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_004",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_005",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_006",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_007",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_008",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_009",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_010",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_011",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_012",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_013",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_014",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_015",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_016",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_017",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_018",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_019",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_020",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_021",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_022",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_023",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_024",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_025",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_026",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_027",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_028",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_029",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_030",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_031",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_032",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_033",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_034",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_035",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_036",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_037",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_038",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_039",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_040",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_041",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_042",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_043",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_044",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_045",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_046",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_047",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_048",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_049",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon1.gli/EXIT_050",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_001",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_002",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_003",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_004",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_005",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_006",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_007",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_008",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_009",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_010",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_011",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_012",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_013",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_014",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_015",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_016",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_017",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_018",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_019",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_020",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_021",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_022",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_023",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_024",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_025",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_026",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_027",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_028",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_029",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_030",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_031",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_032",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_033",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_034",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_035",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_036",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_037",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_038",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_039",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_040",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_041",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_042",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_043",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_044",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_045",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_046",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_047",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_048",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_049",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon2.gli/CITY_050",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_13",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_19",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_20",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_21",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_23",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_26",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_27",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_28",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_29",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_30",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_31",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_32",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_33",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_34",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_35",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_36",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_37",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_38",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_39",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_40",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_41",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_42",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_43",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_44",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_45",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_46",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_47",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_48",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_49",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon3.gli/PLANE_50",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_001",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_002",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_003",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_004",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_005",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_006",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_007",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_008",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_009",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_010",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_011",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_012",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_013",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_014",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_015",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_016",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_017",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_018",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_019",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_020",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_021",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_022",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_023",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_024",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_025",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_026",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_027",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_028",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_029",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_030",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_031",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_032",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_033",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_034",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_035",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_036",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_037",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_038",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_039",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_040",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_041",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_042",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_043",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_044",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_045",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_046",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_047",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_048",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_049",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon4.gli/INFO_050",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_13",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_19",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_20",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_21",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_23",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_26",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_27",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_28",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_29",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_30",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_31",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_32",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_33",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_34",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_35",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_36",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_37",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_38",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_39",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_40",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_41",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_42",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_43",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_44",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_45",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_46",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_47",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_48",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_49",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon5.gli/ROUTE_50",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_000",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_001",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_002",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_003",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_004",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_005",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_006",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_007",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_008",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_009",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_010",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_011",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_012",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_013",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_014",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_015",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_016",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_017",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_018",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_019",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_020",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_021",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_022",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_023",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_024",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_025",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_026",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_027",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_028",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_029",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_030",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_031",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_032",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_033",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_034",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_035",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_036",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_037",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_038",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_039",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_040",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_041",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_042",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_043",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_044",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_045",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_046",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_047",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_048",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_049",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/icon6.gli/INFO_050",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ABOTTOM",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/AL1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/AL2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/AL3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/AR1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/AR2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/AR3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ATOP",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/BOAT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/BOATM",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/BOATMASK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/BOATW01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/BOATW02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/BOATW03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/FRONT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/O1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/O2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/REFINSEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/REFLEX",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/REFMASK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK26",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK27",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK28",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK32",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK34",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK35",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK36",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK37",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/ROCK38",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK26",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK27",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK28",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK32",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK34",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK35",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK36",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK37",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/RROCK38",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/insel.gli/VOGEL08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_8",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_9",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_AE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_AMP",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_ANF1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_ANF2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_AUSR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_BULL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_C",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_D",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_DPKT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_E",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_F",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_FRAGE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_G",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_GLCH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_H",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_I",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_J",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_K",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_KLA",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_KLZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_KOMMA",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_KREUZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_L",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_LESS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_M",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_MAL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_MINUS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_MORE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_N",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_OE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_P",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_PKT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_PL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_Q",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_R",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_S",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_SEMI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_SLASH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_SP",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_U",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_UE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_V",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_W",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_X",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_Y",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KD_Z",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_4",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_5",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_6",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_7",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_8",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_9",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_AE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_AMP",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_ANF1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_ANF2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_AUSR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_BULL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_C",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_COMPI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_D",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_DPKT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_E",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_F",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_FRAGE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_G",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_GLCH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_H",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_HUMAN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_I",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_J",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_K8",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_KLA",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_KLZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_KOMMA",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_KREUZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_L",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_LESS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_M",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_MAL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_MINUS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_MORE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_N",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_O",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_OE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_P",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_PKT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_PL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_Q",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_R",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_S",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_SEMI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_SLASH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_SP",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_T",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_U",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_UE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_V",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_W",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_X",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_Y",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/klacker.gli/KL_Z",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/BUL06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH07",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH08",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH09",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH10",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH11",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH12",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH13",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH14",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH15",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH16",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH17",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH18",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH19",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH20",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH21",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH22",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH23",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH24",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH25",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH26",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH27",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH28",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH29",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH30",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH31",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH32",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH33",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/FISH34",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPOH00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPOH01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPOH02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPOH03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPPE00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPPE01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPPE02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/KLAPPE03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTL00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTL01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTL02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTL03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTL04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTR00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTR01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTR02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTR03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/LICHTR04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/OPAQUE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZ00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZ01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZ02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZA0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZA1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZE0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZE1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZE2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/SPRITZW0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/TRANS1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/TRANS2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/TRANS3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/makler.gli/TRANS4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/FLUG00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/FLUG01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/FLUG02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/FLUG03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0101",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0102",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0103",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0104",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0201",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0202",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0203",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0204",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0301",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0302",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0303",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/MINI0304",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/ROTOR01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/museum.gli/ROTOR02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/nowerb.gli/WERBUNG0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/nowerb.gli/WERBUNG1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/nowerb.gli/WERBUNG2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/nowerb.gli/WERBUNG3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/personal.gli/BRIEF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/personal.gli/KUGEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/personal.gli/MITTELB",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/personal.gli/ZEITSCHR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/0_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/100_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/10_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/20_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/30_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/40_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/50_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/60_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/70_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/80_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/90_PRZ",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/BADGE",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/COCKPIT2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/COCKPIT3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/COPY",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/DECO1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/DECO2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/ESSEN1A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/ESSEN1B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/ESSEN2A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/ESSEN2B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/ESSEN3A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/ESSEN3B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/HIGH08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_4",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_5",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_6",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_7",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_8",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/KL_9",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/MENUMASK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/MINUS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/OK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/PASTE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/PLUS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/REIFEN2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/REIFEN3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ1_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ1_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ1_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ2_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ2_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ2_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ3_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ3_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SITZ3_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SOS2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/SOS3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/STERN1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/STERN2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/STERN3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_A_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_A_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_A_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_BC_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_B_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_B_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_B_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_C_1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_C_2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/S_C_3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/TURBINE2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/TURBINE3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/USEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/USELOFF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/USER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/planprop.gli/USEROFF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/FILTER1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/FILTER2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/FILTER3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/HAKEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/HERE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/LINKS",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/NOPAPER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P1_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P1_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P1_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P2_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P2_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P2_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P3_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P3_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P3_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P4_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P4_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/P4_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/routebox.gli/RECHTS",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/rushmore.gli/LOGO00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/rushmore.gli/LOGO01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/rushmore.gli/LOGO02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/rushmore.gli/LOGO03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/AUGE06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/DAMPF07",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/FEUER00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/FEUER01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/FEUER02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/OHNEDART",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/PINCERS",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH00",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH07",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH08",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH09",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/RAUCH10",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/sabotage.gli/S_BASE16",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/HAKEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/startup.gli/PLAYER7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA1HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA1OFF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA1ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA2HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA2OFF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA2ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA3HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA3OFF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA3ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA4HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA4OFF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTA4ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTBHI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTBON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTCHI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/BUTCON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/DECKEL",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/DOWN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/DOWNHIGH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/EXIT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/EXITHIGH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/HAKCHEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/POBEL_1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/POBEL_2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/POBEL_3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/POBEL_4",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH1HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH1ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH1SU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH2HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH2ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH2SU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH3HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH3ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH3SU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH4HI",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH4ON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/SWTCH4SU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/TOPSAVER",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/UPHIGH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/ZOOMIN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/statistk.gli/ZOOMOUT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/tafel.gli/NOCARD",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/tafel.gli/ZETTEL04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/tafel.gli/ZETTEL05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/tafel.gli/ZETTEL06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/ABOTTOM",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/AL1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/AL2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/AL3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/AR1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/AR2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/AR3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/ATOP",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/BUSINES",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/BUSINESL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/CENTRAL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/CENTRALL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/COMM",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/COMML",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/LIVING",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/LIVINGL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/O1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/O2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/O2B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/O2G",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/O2R",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/O2Y",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING1B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING1G",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING1R",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING1Y",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING2B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING2G",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING2R",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING2Y",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING3B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING3G",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING3R",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/RING3Y",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/SOLAR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/STAR1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/STAR2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/weltall.gli/STAR3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/BOY_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/BOY_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/BOY_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE07",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE08",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE09",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE10",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE11",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE12",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE13",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE14",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/CAFE15",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/OHNEDISK",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SCREEN01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SCREEN02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SCREEN03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SCREEN04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SCREEN05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SCREEN06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SPRATZL0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SPRATZL1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SPRATZL2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SPRATZL3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/SPRATZL4",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/WERBUNG0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/WERBUNG1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/WERBUNG2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werbung.gli/WERBUNG3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/DOOR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/FLAME01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/FLAME02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/FLAME03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/LIGHT01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/LIGHT02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/OIL",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0000",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0001",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0002",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0003",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0004",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0005",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0006",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0007",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0008",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0009",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0010",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0011",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0012",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0013",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0014",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0015",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0016",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0017",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0018",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0019",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/werkstat.gli/SOUD0020",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "room/world.gli/SAT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/world.gli/SATLICHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/world.gli/SENDER1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/world.gli/SENDER2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/world.gli/SENDER3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER1A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER1B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER1C",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER1D",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER1E",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER2A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER2B",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER2C",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER2D",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER2E",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/PAPER3A",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/WET01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/WET02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/WET03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/WET04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/WET05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "room/kiosk.gli/WET06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/BLASE0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/BLASE1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/BLASE2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/BLASE3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/BLASE4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/BLASE5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CITYCUR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CLOCK0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CLOCK1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CLOCK2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CLOCK3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKL09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/CWALKR09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/DIALOG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/GELDHIGH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/IB_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/IB_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/IC_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/IC_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ID_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ID_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/IE_00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/IE_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/INFO01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/INFO02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM13",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM19",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM20",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM21",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM23",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ITEM25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/LOGO6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD13",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD19",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD20",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD21",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD23",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD26",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD27",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD28",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD29",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD30",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD31",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD32",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD33",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD34",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD35",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD36",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD37",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD38",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD39",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD40",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD41",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/MOOD42",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/NOTEB1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/NOTEB2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/NOTEB3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/OCLOCK7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_B1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_B2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_B3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_B4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_B5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_C1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_C2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_C3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_C4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_C5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_H7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_L1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_L2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_L3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_L4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_L5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_L6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_M8",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_R1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_R2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_R3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_R4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_R5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/P2D_R6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/POST_SB",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/POST_SB2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/POST_SG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/POST_SG2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/POST_SR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/POST_SR2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/PUTZ_SHL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/PUTZ_SHR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/REPEAT01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/REPEAT02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/REPEAT03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED13",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED15",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED16",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED17",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED18",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED19",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED20",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED21",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED22",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED23",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED24",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED25",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED26",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED27",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED28",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED29",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED30",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED31",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED32",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED33",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED34",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED35",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED36",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED37",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED38",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED39",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED40",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED41",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED42",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED43",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED44",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED45",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED46",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED47",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED48",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED49",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED50",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED51",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED52",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED53",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED54",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED55",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED56",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED57",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED58",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SCHED59",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SHADOW",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_BIG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_BIG2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_BIG3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_BIG4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P1_NS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P1_O1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P1_O2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P1_W1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P1_W2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P2_O1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P2_O2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P3_O1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P3_O2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P3_W1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SH_P3_W2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SLOGO0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SLOGO1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SLOGO2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SLOGO3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SMILEY0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SMILEY1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SMILEY2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SMILEY3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/SMOKE01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STAT01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STAT02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STAT03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STATLIN6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/STENCH01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TIMEHIGH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TLOGO0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TLOGO1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TLOGO2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TLOGO3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TOOLTIP1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TOOLTIP2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TOOLTIP3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TUT01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TUT02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TUT03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/TUTB02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE13",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/XBLASE14",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ZETTEL01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ZETTEL02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glstd.gli/ZETTEL03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/konto.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/konto.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/konto.gli/TIPMONEY",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER91_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER92_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER93_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BER94_08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA1_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA1_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA1_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA1_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA2_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA2_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA2_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA2_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA8_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA8_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA8_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA8_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA9_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA9_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA9_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glberatr.gli/BERA9_04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/BLINK1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/BLINK2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/DOT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/DOT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/DOT3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/DOT4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fluege.gli/MONITOR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tip.gli/BLOC1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/BLOC1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_B08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_J08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_R08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_SW08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tipau.gli/PL_V08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/tippl.gli/BLOC1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/adressen.gli/BLOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/adressen.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/adressen.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/askbrick.gli/ASKBRICK",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/AUSRUF",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/BRIAB01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/BRIAB02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/BRIFO01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/BRIFO02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/MENU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/PLAYER7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/briefing.gli/SABOT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/buykero.gli/CANCEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/buykero.gli/FORM",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/buykero.gli/OK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/dbllist.gli/BLOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/dbllist.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/dbllist.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/exitmenu.gli/EXITMENU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/BACKGND",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/FAL_HON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/FAL_PHO",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/FAL_SUN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/HON_FAL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/HON_PHO",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/HON_SUN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/PHO_FAL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/PHO_HON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/PHO_SUN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/ROT8",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/SUN_FAL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/SUN_HON",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/extrablt.gli/SUN_PHO",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/FAX",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/FEUER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/REIFEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/SALZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/SKELETT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/STREIK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/fax.gli/SUPERMAN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/form.gli/CANCEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/form.gli/FORM",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/form.gli/OK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/gameover.gli/GAMEOVER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/gameover.gli/OKAY",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSOR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORH",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORV",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORW",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/CURSORX",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glbasis.gli/EXIT12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glchat.gli/CHAT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glchat.gli/TEXTAREA",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glglow.gli/TUTMARK1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glglow.gli/TUTMARK2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glglow.gli/TUTMARK3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glglow.gli/TUTMARK4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glglow.gli/TUTMARK5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glnumber.gli/NUMBERS",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/999SB",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/999SG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/999SR",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/999SV",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUG07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUG08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUG09",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUG10",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUG11",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUG12",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB98",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGB99",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGG01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGG02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGG03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGG06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGG07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGR01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGR02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGR03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGR06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGR07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGV01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGV02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGV03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGV06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/glplanes.gli/FLUGV07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/halldisk.gli/HALLDISK",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/PASSAG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/PILOT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/STEWARD",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/TRASHP0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/TRASHP1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/TRASHP2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kioskloc.gli/TRASHP3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kiosks.gli/FEUER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kiosks.gli/REIFEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kiosks.gli/SALZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kiosks.gli/SKELETT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kiosks.gli/SUPERMAN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kredit.gli/CANCEL",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kredit.gli/KREDIT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/kredit.gli/OK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/FAX",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/FEUER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/LETTER",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/LOECHEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/NEXT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/NEXT_F",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/OK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/REIFEN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/RETURN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/RETURN_F",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/SALZ",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/SKELETT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/STREIK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/letter.gli/SUPERMAN",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/list.gli/BLOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/list.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/list.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/BLOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_B08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_J08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_R08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_SW08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V00",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V07",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/PL_V08",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listauft.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listrout.gli/BLOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listrout.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/listrout.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network1.gli/MENU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/MENU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL0",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL4",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL5",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL6",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/network3.gli/PL7",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/oilmenu.gli/OILMENU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/personal.gli/KREUZLE",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/personal.gli/ORDNER1",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/personal.gli/ORDNER2",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/personal.gli/ORDNER3",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/rename.gli/MENU",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/request.gli/REQUEST",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/telefons.gli/BLOCK",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/telefons.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/telefons.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/wartung.gli/LEFT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/wartung.gli/RIGHT",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/wartung.gli/WARTUNG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/BOY_01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/BOY_02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/BOY_03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE01",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE02",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE03",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE04",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE05",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE06",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE07",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE08",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE09",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE10",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE11",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE12",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE13",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE14",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/CAFE15",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/OHNEDISK",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SCREEN01",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SCREEN02",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SCREEN03",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SCREEN04",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SCREEN05",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SCREEN06",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SPRATZL0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SPRATZL1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SPRATZL2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SPRATZL3",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/SPRATZL4",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/WERBUNG",
+   "verfahren": "colorkey_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/WERBUNG0",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/WERBUNG1",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/WERBUNG2",
+   "verfahren": "deckend_rgba"
+  },
+  {
+   "pfad": "gli/werbung.gli/WERBUNG3",
+   "verfahren": "deckend_rgba"
+  }
+ ],
+ "schriften": {
+  "standard": {
+   "verfahren": "schrift_standard",
+   "dateien": [
+    "norm_drk",
+    "norm_gr",
+    "norm_pl",
+    "norm_rt",
+    "norm_ve",
+    "norm_wh",
+    "norm_x",
+    "small_gr",
+    "small_rt",
+    "small_wh",
+    "stat_0",
+    "stat_1",
+    "stat_2",
+    "stat_3",
+    "stat_4",
+    "status",
+    "dlgfont3"
+   ]
+  },
+  "standard_v1": {
+   "verfahren": "schrift_standard_v1",
+   "dateien": [
+    "cond_bl",
+    "norm_bl",
+    "small_bl"
+   ],
+   "anmerkung": "Vorgaengerfassung von schrift_standard: Farbe immer per Modell (kein bikubischer Zweig bei <= 3 Farben)"
+  },
+  "eingebackener_hintergrund": {
+   "verfahren": "schrift_projektion",
+   "dateien": {
+    "inkfont": [
+     [
+      0,
+      16,
+      82
+     ],
+     [
+      222,
+      231,
+      239
+     ]
+    ],
+    "dlgfont1": [
+     [
+      7,
+      7,
+      7
+     ],
+     [
+      186,
+      189,
+      203
+     ]
+    ],
+    "dlgfont2": [
+     [
+      12,
+      12,
+      224
+     ],
+     [
+      191,
+      191,
+      252
+     ]
+    ]
+   },
+   "anmerkung": "Werte: [Tintenfarbe, Hintergrundfarbe] (RGB)"
+  },
+  "bank": {
+   "verfahren": "schrift_bikubisch",
+   "dateien": {
+    "bank_bl": [
+     [
+      29,
+      29,
+      141
+     ],
+     [
+      255,
+      245,
+      134
+     ]
+    ],
+    "bank_ro": [
+     [
+      255,
+      0,
+      0
+     ],
+     [
+      255,
+      245,
+      134
+     ]
+    ]
+   },
+   "parameter": {
+    "gain": 2.5,
+    "off": 0.1,
+    "mix": 0.0
+   }
+  }
+ }
+}

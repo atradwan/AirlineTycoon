@@ -360,6 +360,7 @@ BOOL SBPRIMARYBM::FlipBlitFromT(SBBM &TecBitmap, XY Target) {
 
     // TODO(merten): Mirror the blit
     SDL_BlitSurface(TecBitmap.pBitmap->GetFlippedSurface(), &srcRect, PrimaryBm.GetSurface(), &destRect);
+    TecBitmap.pBitmap->RecordHdFlipped(&PrimaryBm, Target.x, Target.y); // HD (H19): gespiegelt auf der GPU
     // Clippen
     /*if (PrimaryBm.FastClip(PrimaryBm.GetClipRect(), &pt, &srcRect))
       DD_ERROR (PrimaryBm.GetSurface()->Blt (&destRect, TecBitmap.pBitmap->GetSurface(), &srcRect, DDBLT_DDFX | DDBLT_KEYSRC | DDBLT_WAIT, &DDBltFx));

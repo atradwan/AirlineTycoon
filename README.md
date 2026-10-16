@@ -46,6 +46,109 @@ It is therefore *not* open-source in the free software sense, for more informati
 4. Start the game using the new game executable (AT.exe on Windows, AT on macOS and Linux)
 5. Enjoy!
 
+## HD-Grafiken (ab Version 2.0.0, Anleitung auf Deutsch)
+
+Ab Version 2.0.0 kann das Spiel alle Grafiken in 4-facher Aufloesung zeichnen. Die HD-Grafiken sind **nicht** im
+Download enthalten: Jede Person erzeugt sie mit `tools/hd_generate.py` aus der eigenen, gekauften Spielkopie.
+Ohne HD-Grafiken laeuft das Spiel wie bisher.
+
+### Lizenz: bitte zuerst lesen
+
+- **Spiel selbst kaufen.** Der Generator arbeitet nur mit einer eigenen Installation von Airline Tycoon Deluxe
+  (GOG oder Steam). Die Originalgrafiken gehoeren BFG / Spellbound.
+- **Das HD-Paket nur privat nutzen.** Die erzeugten Bilder sind abgeleitete Werke der Originalgrafiken. Nicht
+  weitergeben, nicht hochladen, nicht verkaufen.
+- **Modelle:** `4x-UltraSharp` steht unter CC BY-NC-SA 4.0 und darf **nur nicht-kommerziell** genutzt werden.
+  `RealESRGAN_x4plus` steht unter BSD-3-Clause. Beide laedt jede Person selbst herunter; sie liegen nicht im
+  Repository, und der Generator laedt nichts selbst aus dem Netz.
+
+### Schritt fuer Schritt
+
+1. **Spiel und Version 2.0.0 installieren** wie unter [Installation](#installation) beschrieben. Die neue `AT.exe`
+   (bzw. `AT`) liegt danach im Spielordner.
+2. **Python installieren** (3.9 oder neuer): Windows von [python.org](https://www.python.org/downloads/) (beim
+   Installieren "Add python.exe to PATH" ankreuzen), Linux ueber die Paketverwaltung, macOS z. B. mit Homebrew.
+3. **Generator holen:** dieses Repository als ZIP herunterladen (gruener Knopf "Code" -> "Download ZIP") und
+   entpacken, oder `git clone`. Gebraucht wird der Ordner `tools/`.
+4. **Python-Pakete installieren** (in einer Konsole im entpackten Ordner):
+
+   ```sh
+   pip install -r tools/hdgen/requirements.txt
+   ```
+
+   Mit NVIDIA-Grafikkarte vorher `torch` mit CUDA nach [pytorch.org](https://pytorch.org/get-started/locally/)
+   installieren; dann geht alles in Minuten statt Stunden. Auf einem Mac mit Apple-Chip (M1 und neuer) bringt das
+   normale `torch` die Grafikkarten-Unterstuetzung (MPS) schon mit.
+5. **Modelle besorgen** und in einen Ordner `models/` neben die `AT.exe` legen:
+   - `4x-UltraSharp.pth` von [OpenModelDB](https://openmodeldb.info/models/4x-UltraSharp) (Kim2091,
+     CC BY-NC-SA 4.0, nur nicht-kommerziell): fuer Raeume, Oberflaeche, Hallen-Bausteine und Schriften
+   - `RealESRGAN_x4plus.pth` aus dem [Release v0.1.0 von Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.1.0)
+     (BSD-3-Clause): fuer die Stadtfotos und die Figuren in der Halle
+
+   Findet der Generator ein Modell nicht, fragt er nach dem Pfad (oder `--ultrasharp DATEI`, `--x4plus DATEI`,
+   `--modelle ORDNER`).
+6. **Generator starten** mit dem Spielordner als Ziel:
+
+   ```sh
+   python tools/hd_generate.py "C:/GOG Games/Airline Tycoon Deluxe"
+   ```
+
+   Er exportiert die Grafiken, rechnet sie 4-fach hoch und legt sie in den Ordner `hd/` neben die `AT.exe`.
+   Zwischendateien liegen in `hd_assets/` daneben (kann danach geloescht werden).
+   - Ohne Grafikkarte dauert das ganze Paket viele Stunden. Abbruch mit Strg+C ist jederzeit moeglich; ein neuer
+     Start setzt fort. Gleiche Bilder werden nur einmal gerechnet.
+   - Nur Teile rechnen: `--nur schriften`, `--nur stadtfotos`, `--nur ui`, `--nur raeume`, `--nur bausteine`,
+     `--nur figuren` (Personen in der Halle). `--bausteine-modellkante` rechnet die Hallen-Bausteine mit glatteren
+     Raendern (Kante per Modell, siehe ASSETS.md)
+     (auch kombiniert, z. B. `--nur schriften,stadtfotos`). Zuerst Schriften und Stadtfotos sind schnell und zeigen
+     sofort, ob alles klappt.
+   - `--gpu` rechnet auf der Grafikkarte: CUDA (NVIDIA, Windows/Linux) oder MPS (Mac mit Apple-Chip), sonst auf der
+     CPU. `--liste` zeigt nur, was zu tun ist.
+   - Das Ergebnis ist reproduzierbar: gleiche Spielkopie, gleiche Modelle und CPU ergeben dieselben Bilder.
+7. **Im Spiel einschalten:** Das Spiel einmal starten und beenden, dann in der Datei `AT.json` neben der `AT.exe`
+   eintragen bzw. aendern:
+
+   | Option | Wert | Bedeutung |
+   |---|---|---|
+   | `OptionRenderScale` | `4` | HD-Grafiken verwenden. Muss `4` sein, weil das Paket 4-fach ist (Standard `1` = aus) |
+   | `OptionWidescreen` | `1` / `0` | Breitbild an (Standard) bzw. aus (Bild wie im Original 4:3) |
+   | `OptionWidescreenRoomBorder` | `1` / `0` | Raender neben Raeumen weichgezeichnet (Standard) bzw. schwarz |
+
+### macOS
+
+> **HD und Breitbild sind auf dem Mac bisher ungetestet**, bis jemand es im Spiel bestaetigt. Getestet ist beides im
+> echten Spiel nur unter Windows. Rueckmeldungen gern als Issue.
+
+1. **Python:** entweder mit [Homebrew](https://brew.sh) (`brew install python`) oder mit dem Installer von
+   [python.org](https://www.python.org/downloads/macos/). Die Pakete am besten in eine eigene Umgebung installieren
+   (bei Homebrew-Python noetig, weil `pip install` dort sonst abgelehnt wird):
+
+   ```sh
+   python3 -m venv ~/at-hd
+   source ~/at-hd/bin/activate
+   pip install -r tools/hdgen/requirements.txt
+   ```
+
+   Auf Macs mit Intel-Prozessor gibt es aktuelle `torch`-Versionen nicht mehr; dort geht es nur mit einer aelteren
+   Python-Version (bis 3.12) und `torch` 2.2, ohne Grafikkarte (ungetestet).
+2. **Spieldaten aus der GOG-Mac-Version:** Das Spiel ist ein `.app`-Paket, z. B. `/Applications/Airline Tycoon
+   Deluxe.app`. Die Spieldaten liegen darin in einem Ordner mit `gli/`, `room/` und `misc/` (Rechtsklick auf die App ->
+   "Paketinhalt zeigen"; der genaue Pfad haengt von der Version ab). Der Generator findet diesen Ordner selbst:
+
+   ```sh
+   python3 tools/hd_generate.py "/Applications/Airline Tycoon Deluxe.app" --gpu
+   ```
+
+3. **Wohin gehoert `hd/`?** Der Mac-Build von Version 2.0.0 ist ein einzelnes Programm `AT` (kein `.app`). Das Spiel
+   sucht Spieldaten, `AT.json` und `hd/` im Ordner, in dem `AT` liegt. `AT` gehoert also in den Datenordner (den mit
+   `gli/`), und genau dorthin legt der Generator `hd/`. Liegt dort noch kein `AT`, nennt er den Ordner.
+4. **Grafik auf dem Mac:** Das Spiel zeichnet ueber SDL, auf dem Mac standardmaessig mit **Metal**. Zum Vergleich laesst
+   es sich mit OpenGL starten: `SDL_RENDER_DRIVER=opengl ./AT`. Auf Retina-Bildschirmen zeichnet das Spiel derzeit in der
+   Punkt-Aufloesung (z. B. 1440x900 statt 2880x1800); HD ist dort schaerfer als 1x, nutzt die volle Retina-Aufloesung
+   aber noch nicht.
+
+Technische Einzelheiten (Verfahren, Manifest, Dateinamen) stehen in [ASSETS.md](ASSETS.md).
+
 ## Building
 
 This is for the experts who want to contribute to development.

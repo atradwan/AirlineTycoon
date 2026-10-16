@@ -24,6 +24,15 @@ class TestElement {
         return stream;
     }
 
+    friend TEAKFILE &operator<<(TEAKFILE &File, const TestElement &i) {
+        File << i.Name << i.NumberA << i.Sinn;
+        return File;
+    }
+    friend TEAKFILE &operator>>(TEAKFILE &File, TestElement &i) {
+        File >> i.Name >> i.NumberA >> i.Sinn;
+        return File;
+    }
+
   private:
     CString Name;
     SLONG NumberA{};
@@ -182,6 +191,83 @@ template <typename T> bool run_test() {
     expect_val(list, id2, 5);
     expect_val(list, id3, 12);
     expect_list(list, std::vector<T>({11, 4, 2, 1, 12, 3, 5, 22, 23, T(), 21, 20}), 12, 1);
+
+    /* H20: nach dem Laden (operator>>) muessen *= und += freie Plaetze finden, auch wenn die Suchhinweise des
+       Albums vom vorherigen Spiel weit hinten standen (Absturz "Blocks += failed" am Globus) */
+    {
+        ALBUM_V<T> saved("Saved");
+        saved.ReSize(4);
+        saved += 1; // Platz 3
+        saved += 2; // Platz 2
+        saved += 3; // Platz 1, Platz 0 bleibt frei
+        TEAKFILE file;
+        file.Announce(1024);
+        file << saved;
+
+        ALBUM_V<T> game("Game");
+        game.ReSize(4);
+        game *= 7;
+        game *= 8;
+        game *= 9;
+        game *= 10; // voll, Suchhinweis vorn steht hinter dem letzten Platz
+        file.MemPointer = 0;
+        file >> game;
+        expect_list(game, std::vector<T>({T(), 3, 2, 1}), 4, 1);
+        bool ok = true;
+        try {
+            auto idNew = (game *= 11);
+            expect_val(game, idNew, 11);
+        } catch (const std::runtime_error &e) {
+            ok = false;
+        }
+        if (!ok) {
+            ++errors;
+            std::cout << "Test on line " << __LINE__ << " FAILED. push_front after load threw" << std::endl;
+        }
+        expect_list(game, std::vector<T>({11, 3, 2, 1}), 4, 0);
+
+        /* push_back nach dem Laden in ein Album, dessen hinterer Suchhinweis vorn stand */
+        ALBUM_V<T> game2("Game2");
+        game2.ReSize(4);
+        game2 += 7;
+        game2 += 8;
+        game2 += 9;
+        game2 += 10; // voll, Suchhinweis hinten steht vor dem ersten Platz
+        TEAKFILE file2;
+        file2.Announce(1024);
+        ALBUM_V<T> saved2("Saved2");
+        saved2.ReSize(4);
+        saved2 *= 1;
+        saved2 *= 2;
+        saved2 *= 3; // Platz 3 bleibt frei
+        file2 << saved2;
+        file2.MemPointer = 0;
+        file2 >> game2;
+        ok = true;
+        try {
+            auto idNew = (game2 += 12);
+            expect_val(game2, idNew, 12);
+        } catch (const std::runtime_error &e) {
+            ok = false;
+        }
+        if (!ok) {
+            ++errors;
+            std::cout << "Test on line " << __LINE__ << " FAILED. push_back after load threw" << std::endl;
+        }
+        expect_list(game2, std::vector<T>({1, 2, 3, 12}), 4, 0);
+
+        /* volles Album: weiterhin Exception */
+        ok = false;
+        try {
+            game2 *= 13;
+        } catch (const std::runtime_error &e) {
+            ok = true;
+        }
+        if (!ok) {
+            ++errors;
+            std::cout << "Test on line " << __LINE__ << " FAILED. push_front into full album did not throw" << std::endl;
+        }
+    }
 
     AT_Log("Errors: %d", errors);
     return (errors == 0);

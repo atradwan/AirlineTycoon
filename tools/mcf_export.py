@@ -66,8 +66,10 @@ def write_png(path, width, height, rows):
            + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
            + chunk(b"IDAT", zlib.compress(raw, 9))
            + chunk(b"IEND", b""))
-    with open(path, "wb") as fh:
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as fh:
         fh.write(png)
+    os.replace(tmp, path)  # abgebrochener Export hinterlaesst keine halbe PNG
 
 
 def find_fonts(sources, target):

@@ -171,6 +171,26 @@ bool CRegistryAccess::ReadRegistryKeyEx(char *Text, const CString &EntryName) {
     // return (ERROR_SUCCESS == RegQueryValueEx(settingsJSON, EntryName, NULL, NULL, (UBYTE *)Text, &TempSize));
 }
 
+bool CRegistryAccess::ReadRegistryKeyEx_s(CString &Text, const CString &EntryName, CString *type) {
+    json_t *Entry = settingsJSON != nullptr ? json_object_get(settingsJSON, EntryName) : nullptr;
+    if (type != nullptr) {
+        *type = Entry == nullptr ? "fehlt" : json_is_string(Entry) ? "Text" : json_is_integer(Entry) ? "Zahl" : json_is_boolean(Entry) ? "Wahrheitswert" : "anderer Typ";
+    }
+    if (Entry == nullptr) {
+        return false;
+    }
+    if (json_is_string(Entry)) {
+        Text = CString(json_string_value(Entry));
+    } else if (json_is_integer(Entry)) {
+        Text = bprintf("%lld", static_cast<long long>(json_integer_value(Entry)));
+    } else if (json_is_boolean(Entry)) {
+        Text = json_is_true(Entry) ? "1" : "";
+    } else {
+        return false;
+    }
+    return true;
+}
+
 bool CRegistryAccess::ReadRegistryKeyEx_b(BOOL &Bool, const CString &EntryName) {
     if (settingsJSON == nullptr) {
         return (0) != 0;

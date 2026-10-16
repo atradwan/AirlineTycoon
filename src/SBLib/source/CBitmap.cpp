@@ -93,6 +93,22 @@ static void HdMissingSurface(const std::string &name, SDL_Surface *surface, cons
     }
 }
 
+SDL_Texture *SB_CreateHdSpriteTexture(SDL_Surface *hd) {
+    return gHdPrimary != nullptr && SB_GetRenderScale() > 1 ? gHdPrimary->CreateHdSpriteTexture(hd) : nullptr;
+}
+
+void SB_RecordHdSprite(SB_CBitmapCore *target, const std::shared_ptr<SDL_Surface> &src1x, SDL_Texture *tex, SLONG x, SLONG y, SLONG texScale) {
+    if (gHdPrimary != nullptr && target != nullptr && src1x && tex != nullptr && SB_GetRenderScale() > 1) {
+        gHdPrimary->RecordHdTex(target, src1x.get(), tex, SDL_Rect{0, 0, src1x->w, src1x->h}, x, y, true, false, nullptr, false, src1x, texScale);
+    }
+}
+
+void SB_ForgetHdTexture(SDL_Texture *tex) {
+    if (gHdPrimary != nullptr) {
+        gHdPrimary->ForgetHdTexture(tex); // ohne Primaerpuffer gibt es auch den Renderer (und seine Texturen) nicht mehr
+    }
+}
+
 SDL_Texture *SB_GetHdTexture(SDL_Surface *hd, const SDL_Surface *orig1x, bool colorKey) {
     return gHdPrimary != nullptr && SB_GetRenderScale() > 1 ? gHdPrimary->GetHdTextureFor(hd, orig1x, colorKey) : nullptr;
 }
@@ -134,6 +150,33 @@ static Uint64 HdHashSurface(SDL_Surface *surface) {
     return h;
 }
 
+// 1x-Kopie einer Spielgrafik samt Colorkey (H18). Ueber Sperre und Zeilenkopie statt SDL_ConvertSurface: Unter
+// sdl2-compat (SDL3, z. B. der Mac-Build mit Homebrew) dekodiert SDL_ConvertSurface eine RLE-Grafik intern, ohne die
+// SDL2-Sicht der Quelle nachzuziehen. Der naechste Aufruf auf der Quelle (etwa SDL_GetColorKey) schreibt dann einen
+// veralteten Pixelzeiger zurueck, und der folgende Blit in die Grafik stuerzt ab. Lock/Unlock gleichen beide Sichten ab.
+static SDL_Surface *HdCopySurface(SDL_Surface *src) {
+    if (src == nullptr) {
+        return nullptr;
+    }
+    Uint32 key = 0;
+    const bool hasKey = SDL_GetColorKey(src, &key) == 0;
+    if (SDL_LockSurface(src) < 0) {
+        return nullptr;
+    }
+    SDL_Surface *c = SDL_CreateRGBSurfaceWithFormat(0, src->w, src->h, src->format->BitsPerPixel, src->format->format);
+    if (c != nullptr) {
+        const size_t rowBytes = size_t(src->w) * src->format->BytesPerPixel;
+        for (SLONG y = 0; y < src->h; y++) {
+            memcpy(static_cast<Uint8 *>(c->pixels) + y * c->pitch, static_cast<const Uint8 *>(src->pixels) + y * src->pitch, rowBytes);
+        }
+        if (hasKey) {
+            SDL_SetColorKey(c, SDL_TRUE, key);
+        }
+    }
+    SDL_UnlockSurface(src);
+    return c;
+}
+
 void SB_CBitmapCore::RecordHd(SB_CBitmapCore *target, const SDL_Rect &srcRect, SLONG x, SLONG y, bool colorKey) {
     if (gHdPrimary == nullptr || target == nullptr) {
         return;
@@ -146,6 +189,22 @@ void SB_CBitmapCore::RecordHd(SB_CBitmapCore *target, const SDL_Rect &srcRect, S
     const bool srcHd = HdTexture != nullptr || (HdList != nullptr && !HdList->empty());
     if (srcHd || target == gHdPrimary || target->HdList != nullptr) {
         gHdPrimary->RecordHdBlit(this, target, srcRect, x, y, colorKey);
+    }
+}
+
+// Horizontal gespiegelter Colorkey-Blit (FlipBlitFromT, H19): 1x kommt aus der gespiegelten Kopie, die HD-Textur der
+// Bitmap wird auf der GPU gespiegelt gezeichnet. Ohne eigene HD-Textur bleibt es beim 1x-Blit wie bisher.
+void SB_CBitmapCore::RecordHdFlipped(SB_CBitmapCore *target, SLONG x, SLONG y) {
+    if (gHdPrimary == nullptr || target == nullptr) {
+        return;
+    }
+    target->HdCheck = true;
+    if (HdTexture == nullptr && !HdName.empty()) {
+        HdMissingSurface(HdName, lpDDSurface, " (gespiegelt)");
+        HdName.clear();
+    }
+    if (HdTexture != nullptr && HdList == nullptr && flippedBufferSurface != nullptr) {
+        gHdPrimary->RecordHdFlipped(this, target, flippedBufferSurface, x, y);
     }
 }
 
@@ -1048,6 +1107,27 @@ SDL_Texture *SB_CPrimaryBitmap::GetHdTextureFor(SDL_Surface *hd, const SDL_Surfa
     return tex;
 }
 
+SDL_Texture *SB_CPrimaryBitmap::CreateHdSpriteTexture(SDL_Surface *hd) {
+    if (!CanUseHd() || hd == nullptr) {
+        return nullptr;
+    }
+    SDL_Surface *argb = SDL_ConvertSurfaceFormat(hd, SDL_PIXELFORMAT_ARGB8888, 0);
+    if (argb == nullptr) {
+        return nullptr;
+    }
+    HdBleedColors(argb, 2); // Farbe in die durchsichtigen Raender ziehen (lineare Filterung)
+    SDL_Texture *tex = SDL_CreateTextureFromSurface(lpDD, argb);
+    SDL_FreeSurface(argb);
+    if (tex == nullptr) {
+        AT_Log("HD: Textur %dx%d nicht angelegt: %s", hd->w, hd->h, SDL_GetError());
+        return nullptr;
+    }
+    SDL_SetTextureScaleMode(tex, SDL_ScaleModeLinear);
+    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+    HdAlphaTex.insert(tex);
+    return tex;
+}
+
 void SB_CPrimaryBitmap::ForgetHdSurface(const SDL_Surface *hd) {
     for (auto *cache : {&HdTexCache, &HdTexCacheOpaque, &HdTexCacheMask1x}) {
         auto it = cache->find(hd);
@@ -1103,11 +1183,7 @@ void SB_CPrimaryBitmap::KeepHdSource(SDL_Surface *src) {
                 continue;
             }
             if (!copy && !failed) {
-                SDL_Surface *c = SDL_ConvertSurface(src, src->format, 0);
-                Uint32 key = 0;
-                if (c != nullptr && SDL_GetColorKey(src, &key) == 0) {
-                    SDL_SetColorKey(c, SDL_TRUE, key);
-                }
+                SDL_Surface *c = HdCopySurface(src);
                 failed = c == nullptr;
                 if (c != nullptr) {
                     copy = std::shared_ptr<SDL_Surface>(c, SDL_FreeSurface);
@@ -1133,13 +1209,9 @@ void SB_CPrimaryBitmap::SeedHdList(SB_CBitmapCore *core) {
         return;
     }
     SDL_Surface *src = core->lpDDSurface;
-    SDL_Surface *c = SDL_ConvertSurface(src, src->format, 0);
+    SDL_Surface *c = HdCopySurface(src);
     if (c == nullptr) {
         return;
-    }
-    Uint32 key = 0;
-    if (SDL_GetColorKey(src, &key) == 0) {
-        SDL_SetColorKey(c, SDL_TRUE, key);
     }
     SB_HdEntry e;
     e.Keep = std::shared_ptr<SDL_Surface>(c, SDL_FreeSurface);
@@ -1284,7 +1356,7 @@ SB_CPrimaryBitmap::HdFlat *SB_CPrimaryBitmap::GetWhiteTextures(SDL_Surface *src,
     // die uebrigen Eintraege der Quelle in 1x auf eine Kopie nachspielen
     SDL_Surface *under = nullptr;
     if (sub != nullptr && std::any_of(sub->begin(), sub->end(), [](const SB_HdEntry &e) { return e.Glyph; })) {
-        under = SDL_ConvertSurface(src, src->format, 0);
+        under = HdCopySurface(src);
         if (under != nullptr) {
             for (const SB_HdEntry &e : *sub) {
                 if (e.Glyph || e.Replay != nullptr || e.Src == nullptr) {
@@ -1529,7 +1601,7 @@ void SB_CPrimaryBitmap::RecordHdBlit(SB_CBitmapCore *src, SB_CBitmapCore *target
 
 // Blit aus einer Textur: Sprite mit HD-Textur oder Zeichen aus einem HD-Glyphenblatt (H7)
 void SB_CPrimaryBitmap::RecordHdTex(SB_CBitmapCore *target, SDL_Surface *src, SDL_Texture *tex, const SDL_Rect &srcRect, SLONG x, SLONG y, bool colorKey,
-                                    bool glyph, SB_CBitmapCore *core) {
+                                    bool glyph, SB_CBitmapCore *core, bool flipX, const std::shared_ptr<SDL_Surface> &keep, SLONG texScale) {
     SDL_Surface *ts = target->lpDDSurface;
     SDL_Rect sr, dr, area;
     if (ts == nullptr || src == nullptr || tex == nullptr || SB_GetRenderScale() <= 1 || !CanUseHd() || !HdBlitArea(src, ts, srcRect, x, y, sr, dr, area)) {
@@ -1545,7 +1617,7 @@ void SB_CPrimaryBitmap::RecordHdTex(SB_CBitmapCore *target, SDL_Surface *src, SD
     SB_HdEntry e;
     e.Src = src;
     e.Tex = tex;
-    e.TexScale = SB_GetRenderScale();
+    e.TexScale = texScale > 0 ? texScale : SB_GetRenderScale();
     e.SrcRect = sr;
     e.Dst = dr;
     e.Clip = ts->clip_rect;
@@ -1553,11 +1625,13 @@ void SB_CPrimaryBitmap::RecordHdTex(SB_CBitmapCore *target, SDL_Surface *src, SD
     e.TexAlpha = HdAlphaTex.count(tex) != 0;
     e.Glyph = glyph;
     e.Core = core;
+    e.FlipX = flipX;
+    e.Keep = keep;
     if (target != this && !glyph) {
         // Dieselbe Grafik an dieselbe Stelle (z. B. Logo in der Stimmungsblase, jedes Frame): der fruehere
         // gleiche Eintrag wird vom neuen vollstaendig ueberdeckt und faellt weg, die Liste waechst nicht
         auto same = [&e](const SB_HdEntry &o) {
-            return o.Kind == 0 && o.Replay == nullptr && o.Src == e.Src && o.Tex == e.Tex && o.ColorKey == e.ColorKey && o.SrcRect.x == e.SrcRect.x &&
+            return o.Kind == 0 && o.Replay == nullptr && o.Src == e.Src && o.Tex == e.Tex && o.ColorKey == e.ColorKey && o.FlipX == e.FlipX && o.SrcRect.x == e.SrcRect.x &&
                    o.SrcRect.y == e.SrcRect.y && o.SrcRect.w == e.SrcRect.w && o.SrcRect.h == e.SrcRect.h && o.Dst.x == e.Dst.x && o.Dst.y == e.Dst.y &&
                    o.Clip.x == e.Clip.x && o.Clip.y == e.Clip.y && o.Clip.w == e.Clip.w && o.Clip.h == e.Clip.h;
         };
@@ -1565,6 +1639,17 @@ void SB_CPrimaryBitmap::RecordHdTex(SB_CBitmapCore *target, SDL_Surface *src, SD
     }
     list->push_back(e);
     HdLimit(*list, target == this ? 16384 : 4096);
+}
+
+// Gespiegelter Blit (H19): flipped ist die gespiegelte 1x-Kopie von src (die der 1x-Blit benutzt hat). Sie ist die
+// Quelle fuer die Referenz; gezeichnet wird die ungespiegelte HD-Textur von src mit SDL_FLIP_HORIZONTAL.
+void SB_CPrimaryBitmap::RecordHdFlipped(SB_CBitmapCore *src, SB_CBitmapCore *target, SDL_Surface *flipped, SLONG x, SLONG y) {
+    if (flipped == nullptr || src->lpDDSurface == nullptr || flipped->w != src->lpDDSurface->w || flipped->h != src->lpDDSurface->h ||
+        !HdCoreStillValid(src)) {
+        return;
+    }
+    RecordHdTex(target, flipped, src->HdTexture, SDL_Rect{0, 0, flipped->w, flipped->h}, x, y, SDL_HasColorKey(flipped) == SDL_TRUE, false, src,
+                true);
 }
 
 // Passt die HD-Textur einer Bitmap noch zu ihren 1x-Pixeln? (fuer Eintraege, die ueber Frames bestehen)
@@ -1877,6 +1962,14 @@ void SB_CPrimaryBitmap::RecordHdEffect(SB_CBitmapCore *target, SB_CBitmapCore *s
             e.Tex = Get1xTexture(surface);
         } else if (src->HdTexture != nullptr && SDL_HasColorKey(surface) == SDL_TRUE) {
             e.Tex = src->HdTexture;
+            e.TexScale = SB_GetRenderScale();
+            e.TexAlpha = HdAlphaTex.count(e.Tex) != 0;
+        } else if (SDL_Texture *keyed = (src->HdTexture != nullptr && src->HdSurface != nullptr)
+                                            ? GetHdTextureFor(src->HdSurface, surface, true, true)
+                                            : nullptr) {
+            // H22: BlitTrans laesst Pixel 0 der Quelle auch ohne Colorkey frei (Denkblasen MoodBms, Gestank):
+            // HD-Textur mit der Maske der 1x-Fassung, wie beim Colorkey-Blit einer zusammengesetzten Bitmap (H14)
+            e.Tex = keyed;
             e.TexScale = SB_GetRenderScale();
             e.TexAlpha = HdAlphaTex.count(e.Tex) != 0;
         } else {
@@ -2472,6 +2565,12 @@ void SB_CPrimaryBitmap::DrawHdEntry(const SB_HdEntry &b, XY offset, const SDL_Re
     }
     SDL_SetTextureBlendMode(b.Tex, blend ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
     SDL_SetTextureAlphaMod(b.Tex, b.Alpha);
+    if (b.FlipX && b.Src != nullptr) {
+        // Gespiegelter Blit (H19): SrcRect gilt in der gespiegelten 1x-Kopie, die Textur ist ungespiegelt
+        const SDL_Rect fsrc{(b.Src->w - b.SrcRect.x - b.SrcRect.w) * ts, src.y, src.w, src.h};
+        SDL_RenderCopyExF(lpDD, b.Tex, &fsrc, &dst, 0.0, nullptr, SDL_FLIP_HORIZONTAL);
+        return;
+    }
     SDL_RenderCopyF(lpDD, b.Tex, &src, &dst);
 }
 

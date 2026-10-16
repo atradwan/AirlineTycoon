@@ -51,6 +51,8 @@ class CRegistryAccess {
     bool ReadRegistryKeyEx_b(BOOL &Bool, const CString &EntryName);
     bool ReadRegistryKeyEx_l(SLONG &Long, const CString &EntryName);
     bool ReadRegistryKeyEx_u(ULONG &Long, const CString &EntryName);
+    // Text beliebiger Laenge (H25a); Zahlen und Wahrheitswerte werden als Text geliefert. type: JSON-Typ des Eintrags
+    bool ReadRegistryKeyEx_s(CString &Text, const CString &EntryName, CString *type = nullptr);
     bool WriteRegistryKeyEx(const char *Text, const CString &EntryName);
     bool WriteRegistryKeyEx_b(const BOOL &Bool, const CString &EntryName);
     bool WriteRegistryKeyEx_l(const SLONG &Long, const CString &EntryName);
