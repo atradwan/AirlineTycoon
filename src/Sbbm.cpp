@@ -582,7 +582,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
     }
 
     if (gNetworkBms.AnzEntries() > 0 && (gNetworkBms[0].Size.y != 0) && (Sim.Players.Players[Sim.localPlayer].LocationWin != nullptr)) {
-        BlitFrom(gNetworkBms[0], (640 - ((gNetworkBms[0].Size.x + 3) & 0xfffc)) / 2, (440 - gNetworkBms[0].Size.y) / 2);
+        BlitFrom(gNetworkBms[0], (640 - ((gNetworkBms[0].Size.x + 3) & 0xfffc)) / 2 + gHallMargin, (440 - gNetworkBms[0].Size.y) / 2);
 
         if ((gNetworkBmsType != 0) && gNetworkBms.AnzEntries() > 1) {
             for (SLONG c = 0; c < 4; c++) {
@@ -596,7 +596,7 @@ void SBPRIMARYBM::Flip(XY /*WindowPos*/, BOOL /*ShowFPS*/) {
                         add = Sim.Players.Players[c].bReadyForBriefing;
                     }
 
-                    BlitFrom(gNetworkBms[1 + c + 4 - 4 * add], (640 - ((gNetworkBms[0].Size.x + 3) & 0xfffc)) - 202 + c * 48,
+                    BlitFrom(gNetworkBms[1 + c + 4 - 4 * add], (640 - ((gNetworkBms[0].Size.x + 3) & 0xfffc)) - 202 + c * 48 + gHallMargin,
                              (440 - gNetworkBms[0].Size.y) / 2 + 76);
                 }
             }
