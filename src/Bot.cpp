@@ -806,7 +806,7 @@ SLONG Bot::getNextMood() {
 }
 
 TEAKFILE &operator<<(TEAKFILE &File, const Bot &bot) {
-    SLONG savegameVersion = 104;
+    SLONG savegameVersion = 105;
     File << savegameVersion;
 
     File << bot.LocalRandom;
@@ -1215,9 +1215,14 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
     if (savegameVersion < 104) {
         bot.mOptions.kRepairBudgetPercent = Bot::ConfigurableOptions{}.kRepairBudgetPercent;
         bot.mOptions.kStockWarfarce = Bot::ConfigurableOptions{}.kStockWarfarce;
+    } else {
+        File >> bot.mOptions.kRepairBudgetPercent >> bot.mOptions.kStockWarfarce;
+    }
+    /* Fork block 104 saves (before the upstream 1.9.1 merge) end here; 105 adds these two */
+    if (savegameVersion < 105) {
         bot.mOptions.kStockWarfarceTargetHuman = Bot::ConfigurableOptions{}.kStockWarfarceTargetHuman;
     } else {
-        File >> bot.mOptions.kRepairBudgetPercent >> bot.mOptions.kStockWarfarce >> bot.mOptions.kStockWarfarceTargetHuman;
+        File >> bot.mOptions.kStockWarfarceTargetHuman;
     }
 
     if (savegameVersion < 103) {
@@ -1235,7 +1240,7 @@ TEAKFILE &operator>>(TEAKFILE &File, Bot &bot) {
         File >> bot.mImagePreservationMode;
     }
 
-    if (savegameVersion >= 103) {
+    if (savegameVersion >= 105) {
         File >> bot.mBotWalk;
     }
 
