@@ -74,6 +74,19 @@ SLONG GenericAsyncIdPars[4 * 100] = {
 //--------------------------------------------------------------------------------------------
 static SLONG NetCheckPlayerNum(SLONG PlayerNum, ULONG MessageType);
 
+/* Whether to take a player's money or image the owner sent with this flight stamp (see
+   PLAYER::NetFlightStamp()). Normally only if we have booked the same flights. At the briefing
+   all peers stand at 9:00 and have booked every flight before it, so different counts there mean
+   that the peers' copies of the player have drifted apart, not that one is ahead. Skipping then
+   kept the drift for good - the boss judges bankruptcy from these figures, so a peer could put
+   out a human player whose owner was doing fine. The owner's figures win there. */
+static bool NetTakeOwnerState(const PLAYER &qPlayer, SLONG Stamp) {
+    if (Stamp == qPlayer.NetFlightStamp()) {
+        return true;
+    }
+    return Stamp / 100000 == Sim.Date && Sim.GetHour() == 9 && Sim.GetMinute() == 0;
+}
+
 SLONG NetJobsRefillEpoch() { return Sim.Date * 24 * 12 + (Sim.GetHour() * 60 + Sim.GetMinute()) / 5; }
 
 namespace {
@@ -962,7 +975,7 @@ void PumpNetwork() {
                     SLONG Image = 0;
                     BOOL ImageGotWorse = 0;
                     Message >> Stamp >> Image >> ImageGotWorse;
-                    const bool bApply = (Stamp == qPlayer.NetFlightStamp());
+                    const bool bApply = NetTakeOwnerState(qPlayer, Stamp);
                     if (bApply) {
                         qPlayer.Image = Image;
                         qPlayer.ImageGotWorse = ImageGotWorse;
@@ -1012,7 +1025,7 @@ void PumpNetwork() {
                     SLONG Stamp = 0;
                     __int64 Money = 0;
                     Message >> Stamp >> Money;
-                    if (Stamp == qPlayer.NetFlightStamp()) {
+                    if (NetTakeOwnerState(qPlayer, Stamp)) {
                         qPlayer.Money = Money;
                     } else {
                         NetTraceEvent("SKIP what=money player=%ld theirs=%ld mine=%ld", static_cast<long>(PlayerNum), static_cast<long>(Stamp),
@@ -1336,6 +1349,11 @@ void PumpNetwork() {
 
                 for (auto &qPending : Pending) {
                     PLAYER &qPlayer = Sim.Players.Players[qPending.PlayerNum];
+
+                    /* Every peer sends its own human player now; ours is only ever ours. */
+                    if (qPlayer.Owner == 0) {
+                        continue;
+                    }
 
                     qPlayer.Planes = std::move(qPending.Planes);
                     qPlayer.Auftraege = std::move(qPending.Auftraege);

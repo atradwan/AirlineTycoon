@@ -237,28 +237,32 @@ void PLAYER::NetSynchronizeItems() {
 //
 //--------------------------------------------------------------------------------------------
 void PLAYER::NetSynchronizePlanes() {
-    if (Sim.bIsHost != 0) {
-        TEAKFILE Message;
-        SLONG c = 0;
+    TEAKFILE Message;
+    SLONG c = 0;
 
-        Message.Announce(1024);
+    Message.Announce(1024);
 
-        Message << ATNET_SYNC_PLANES << NetSynchronizeGetNum(true);
+    /* This used to be sent by the host for the computer players only. A human player's planes
+       reached the others only through the messages for single changes (buying, flight plans,
+       ...), so a fleet that drifted apart once stayed apart for the rest of the game, also in
+       every savegame. The flights booked from it then differed, the owner's money was never
+       taken again (see ATNET_SYNC_MONEY) and a peer could see the player go bankrupt while the
+       owner did not. Every peer now sends its own human player as well, once a day. */
+    Message << ATNET_SYNC_PLANES << NetSynchronizeGetNum(false);
 
-        // Wenn dies der Server ist für alle Computerspieler:
-        for (c = 0; c < 4; c++) {
-            PLAYER &qPlayer = Sim.Players.Players[c];
+    // Für den lokalen Spieler und (wenn dies der Server ist) auch für Computerspieler:
+    for (c = 0; c < 4; c++) {
+        PLAYER &qPlayer = Sim.Players.Players[c];
 
-            if (needToSyncPlayer(qPlayer, true)) {
-                Message << c;
-                Message << qPlayer.Planes << qPlayer.Auftraege << qPlayer.Frachten << qPlayer.RentCities;
-            }
+        if (needToSyncPlayer(qPlayer, false)) {
+            Message << c;
+            Message << qPlayer.Planes << qPlayer.Auftraege << qPlayer.Frachten << qPlayer.RentCities;
         }
-
-        /* One file per day, to compare against what a receiver could not read. */
-        NetDumpMessage("sent", Message.MemBuffer, static_cast<SLONG>(Message.MemBufferUsed), true);
-        SIM::SendMemFile(Message);
     }
+
+    /* One file per day, to compare against what a receiver could not read. */
+    NetDumpMessage("sent", Message.MemBuffer, static_cast<SLONG>(Message.MemBufferUsed), true);
+    SIM::SendMemFile(Message);
 }
 
 //--------------------------------------------------------------------------------------------
