@@ -72,6 +72,9 @@ CAufsicht::CAufsicht(BOOL bHandy, ULONG PlayerNum) : CStdRaum(bHandy, PlayerNum,
     if ((Sim.bNetwork != 0) && bIsMorning) {
         PLAYER::NetSynchronizeMoney();
         PLAYER::NetSynchronizeImage();
+        /* Every peer is held at 9:00 until all are in the briefing, so the host's route demand
+           is the same moment everywhere; this clears whatever drifted apart during the day. */
+        PLAYER::NetSynchronizeDemand();
     }
 
     Sim.Players.Players[Sim.localPlayer].bReadyForBriefing = 1;

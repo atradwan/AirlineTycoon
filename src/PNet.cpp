@@ -597,6 +597,32 @@ void PLAYER::NetSynchronizeKerosin() {
 }
 
 //--------------------------------------------------------------------------------------------
+// Host only: broadcasts how many people want to fly each route (Routen[].Bedarf).
+//--------------------------------------------------------------------------------------------
+/* Every airline's flights take their passengers from this, but it was never sent: each peer
+   lowers it for the flights it books and blends it once a night. In a network save every peer
+   writes its own file when the save message reaches it, a few game minutes apart, so each
+   load started the peers off with different demand - and the nightly blend keeps 6/7 of any
+   difference, so it never went away. The host's copy wins. */
+void PLAYER::NetSynchronizeDemand() {
+    if (Sim.bNetwork == 0 || Sim.bIsHost == 0) {
+        return;
+    }
+
+    TEAKFILE Message;
+    const SLONG Anz = Routen.AnzEntries();
+
+    Message.Announce(64 + Anz * 4);
+
+    Message << ATNET_SYNC_DEMAND << Sim.Date << Anz;
+    for (SLONG d = 0; d < Anz; d++) {
+        Message << ((Routen.IsInAlbum(d) != 0) ? Routen[d].Bedarf : SLONG(0));
+    }
+
+    SIM::SendMemFile(Message);
+}
+
+//--------------------------------------------------------------------------------------------
 // Broadcasts a players kerosine state:
 //--------------------------------------------------------------------------------------------
 void PLAYER::NetUpdateKerosin() const {

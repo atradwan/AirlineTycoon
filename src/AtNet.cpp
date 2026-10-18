@@ -2536,6 +2536,7 @@ void PumpNetwork() {
                     SIM::SendSimpleMessage(ATNET_OPTIONS, 0, -1, Sim.localPlayer);
                     SIM::SendSimpleMessage(ATNET_IO_LOADREQUEST_DOIT, 0, Index);
                     Sim.LoadGame(Index);
+                    PLAYER::NetSynchronizeDemand();
                 }
             } break;
 
@@ -2557,6 +2558,8 @@ void PumpNetwork() {
                 Message >> Index;
 
                 Sim.LoadGame(Index);
+                /* Each peer loaded its own file, saved a few minutes apart from the others. */
+                PLAYER::NetSynchronizeDemand();
             } break;
 
                 //--------------------------------------------------------------------------------------------
@@ -2920,6 +2923,31 @@ void PumpNetwork() {
 
                     Anz--;
                 }
+            } break;
+
+            case ATNET_SYNC_DEMAND: {
+                SLONG Date = 0;
+                SLONG Anz = 0;
+
+                Message >> Date >> Anz;
+
+                /* A peer on another day, or with another route table, would only be scrambled. */
+                if (Sim.bIsHost != 0 || Date != Sim.Date || Anz != Routen.AnzEntries()) {
+                    NetTraceEvent("SYNC_DEMAND ignored theirs_day=%ld mine_day=%ld theirs_routes=%ld mine_routes=%ld", static_cast<long>(Date),
+                                  static_cast<long>(Sim.Date), static_cast<long>(Anz), static_cast<long>(Routen.AnzEntries()));
+                    break;
+                }
+
+                SLONG Changed = 0;
+                for (SLONG d = 0; d < Anz; d++) {
+                    SLONG Bedarf = 0;
+                    Message >> Bedarf;
+                    if (Routen.IsInAlbum(d) != 0 && Routen[d].Bedarf != Bedarf) {
+                        Routen[d].Bedarf = Bedarf;
+                        Changed++;
+                    }
+                }
+                NetTraceEvent("SYNC_DEMAND day=%ld changed=%ld", static_cast<long>(Date), static_cast<long>(Changed));
             } break;
 
             case ATNET_SYNCGEHALT: {
