@@ -3474,7 +3474,8 @@ void PLAYER::RobotPump() {
 //--------------------------------------------------------------------------------------------
 void PLAYER::RobotInit() {
     SLONG c = 0;
-    /* A bot's own init may already plan (see RobotExecuteAction()). */
+    /* A bot's own init runs at midnight, after the night's ATNET_SYNC_PLANES, and may already
+       change the plans; RobotPlan() and RobotExecuteAction() watch their own changes. */
     RobotPlanePropsWatch PlaneWatch(*this);
     RobotFlightplanWatch FlightplanWatch(*this);
 
@@ -4163,13 +4164,6 @@ void PLAYER::RobotExecuteAction() {
         WaitWorkTill = -1;
         return;
     }
-
-    /* Only the host carries the action out, and what it changes in the flight plans or the planes
-       reached the clients only when RobotPlan() changed it, or with the next night's
-       ATNET_SYNC_PLANES. An action executed just after that sync - the bot planning its day at
-       midnight - left the clients with the old, emptied plans for the whole day. */
-    RobotPlanePropsWatch PlaneWatch(*this);
-    RobotFlightplanWatch FlightplanWatch(*this);
 
     /* The action is carried out now, so its fast-forward countdown is used up. At walking pace
        nothing counts SpeedCount down: an action executed on arrival or by WaitWorkTill left it
