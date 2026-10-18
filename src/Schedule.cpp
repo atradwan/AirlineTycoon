@@ -251,7 +251,9 @@ void CFlugplanEintrag::CalcPassengers(SLONG PlayerNum, CPlane &qPlane) {
                 PLAYER &qPlayer = Sim.Players.Players[c];
                 CRentRoute &qRentRoute = qPlayer.RentRouten.RentRouten[Routen(ObjectId)];
 
-                if (qRentRoute.Rang != 0) {
+                /* A bankrupt airline keeps its route leases (GameMechanic::bankruptPlayer does not
+                   give them back) but flies nothing; it must not take a share of the passengers. */
+                if (qRentRoute.Rang != 0 && qPlayer.IsOut == 0) {
                     // Ticketpreis ist Basis der Rechnung:
                     if (Ticketpreis != 0) {
                         Gewichte[c] = 10000 / Ticketpreis;
@@ -432,7 +434,9 @@ void CFlugplanEintrag::CalcPassengers(SLONG PlayerNum, CPlane &qPlane) {
                 PLAYER &qPlayer = Sim.Players.Players[c];
                 CRentRoute &qRentRoute = qPlayer.RentRouten.RentRouten[Routen(ObjectId)];
 
-                if (qRentRoute.Rang != 0) {
+                /* A bankrupt airline keeps its route leases (GameMechanic::bankruptPlayer does not
+                   give them back) but flies nothing; it must not take a share of the passengers. */
+                if (qRentRoute.Rang != 0 && qPlayer.IsOut == 0) {
                     // Ticketpreis ist Basis der Rechnung:
                     if (TicketpreisFC != 0) {
                         Gewichte[c] = 10000 / TicketpreisFC;
