@@ -597,6 +597,28 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
     case SDL_MOUSEMOTION: {
         CPoint pos = CPoint(event.motion.x, event.motion.y);
         TranslatePointToGameSpace(&pos);
+
+        /* Diagnostic for the pointer that jumps now and then: log a move whose game position, or
+           whose window position, leaps much further than the mouse itself moved (xrel/yrel). */
+        static SLONG LastRawX = -1;
+        static SLONG LastRawY = -1;
+        static CPoint LastPos(-1, -1);
+        if (LastRawX >= 0) {
+            const SLONG RawJump = abs(event.motion.x - LastRawX) + abs(event.motion.y - LastRawY);
+            const SLONG RelMove = abs(event.motion.xrel) + abs(event.motion.yrel);
+            const SLONG GameJump = abs(pos.x - LastPos.x) + abs(pos.y - LastPos.y);
+            if (RawJump > RelMove + 40 || GameJump > 40 + RelMove) {
+                AT_Log_I("Mouse", "MOUSEJUMP raw=%d,%d (was %ld,%ld) rel=%d,%d game=%ld,%ld (was %ld,%ld) frameW=%ld margin=%ld topwin=%d t=%u",
+                         event.motion.x, event.motion.y, static_cast<long>(LastRawX), static_cast<long>(LastRawY), event.motion.xrel,
+                         event.motion.yrel, static_cast<long>(pos.x), static_cast<long>(pos.y), static_cast<long>(LastPos.x),
+                         static_cast<long>(LastPos.y), static_cast<long>(PrimaryBm.Size.x), static_cast<long>(gHallMargin),
+                         static_cast<int>(TopWin != nullptr), event.motion.timestamp);
+            }
+        }
+        LastRawX = event.motion.x;
+        LastRawY = event.motion.y;
+        LastPos = pos;
+
         FrameWnd->OnMouseMove(0, pos);
     } break;
     case SDL_TEXTINPUT:
