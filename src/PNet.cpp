@@ -200,6 +200,9 @@ void PLAYER::NetSynchronizeFlags() {
             Message << qPlayer.SickTokay << qPlayer.RunningToToilet << qPlayer.PlayerSmoking << qPlayer.Stunned << qPlayer.OfficeState << qPlayer.Koffein
                     << qPlayer.NumFlights << qPlayer.WalkSpeed << qPlayer.WerbeBroschuere << qPlayer.TelephoneDown << qPlayer.Presseerklaerung
                     << qPlayer.SecurityFlags << qPlayer.PlayerStinking << qPlayer.RocketFlags << qPlayer.LastRocketFlags << qPlayer.LaptopVirus;
+            /* Whether the player flies routes: a bot decides this in its office, on the host only,
+               but every peer's night (RobotPlanRoutes) plans and prices the routes from it. */
+            Message << qPlayer.DoRoutes << qPlayer.WantToDoRoutes;
         }
     }
 
@@ -620,6 +623,21 @@ void PLAYER::NetSynchronizeDemand() {
     }
 
     SIM::SendMemFile(Message);
+}
+
+//--------------------------------------------------------------------------------------------
+// After a network load: every peer sends what it owns (the host also its bots).
+//--------------------------------------------------------------------------------------------
+/* Each peer loads its own file, written when the save message reached it, so the copies of the
+   others' planes and flags differ from the start. Without this they stayed apart until the
+   night's sync - a whole day of other flights, money and route usage, during which the stamp
+   checks then refused the owner's money and route figures. */
+void PLAYER::NetSynchronizeLoadedPlayers() {
+    if (Sim.bNetwork == 0) {
+        return;
+    }
+    NetSynchronizePlanes();
+    NetSynchronizeFlags();
 }
 
 //--------------------------------------------------------------------------------------------

@@ -1209,6 +1209,10 @@ void PumpNetwork() {
                     /* Whether the laptop has a virus: the floppy disk cures it on its owner's peer
                        only, and the other peers kept the virus for good. */
                     Message >> qPlayer.LaptopVirus;
+                    /* Without this a client's bot never switched to routes: its nights neither planned
+                       nor priced its routes, it flew other flights than on the host, and the
+                       newspaper's "first routes" headline came a day late or not at all. */
+                    Message >> qPlayer.DoRoutes >> qPlayer.WantToDoRoutes;
 
                     Anz--;
                 }
@@ -2537,6 +2541,7 @@ void PumpNetwork() {
                     SIM::SendSimpleMessage(ATNET_IO_LOADREQUEST_DOIT, 0, Index);
                     Sim.LoadGame(Index);
                     PLAYER::NetSynchronizeDemand();
+                    PLAYER::NetSynchronizeLoadedPlayers();
                 }
             } break;
 
@@ -2560,6 +2565,7 @@ void PumpNetwork() {
                 Sim.LoadGame(Index);
                 /* Each peer loaded its own file, saved a few minutes apart from the others. */
                 PLAYER::NetSynchronizeDemand();
+                PLAYER::NetSynchronizeLoadedPlayers();
             } break;
 
                 //--------------------------------------------------------------------------------------------

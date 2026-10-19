@@ -2326,6 +2326,7 @@ class PLAYER {
     static void NetSynchronizeStaff();
     static void NetSynchronizeKerosin();
     static void NetSynchronizeDemand();
+    static void NetSynchronizeLoadedPlayers();
     void NetRouteUpdateTicketpreise(SLONG RouteId, SLONG Ticketpreis, SLONG TicketpreisFC) const;
     void NetUpdateFlightplan(SLONG Plane);
     void NetUpdateOrder(const CAuftrag &auftrag) const;
