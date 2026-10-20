@@ -611,7 +611,7 @@ void GameFrame::ProcessEvent(const SDL_Event &event) const {
                 AT_Log_I("Mouse", "MOUSEJUMP raw=%d,%d (was %ld,%ld) rel=%d,%d game=%ld,%ld (was %ld,%ld) viewW=%ld margin=%ld topwin=%d t=%u",
                          event.motion.x, event.motion.y, static_cast<long>(LastRawX), static_cast<long>(LastRawY), event.motion.xrel,
                          event.motion.yrel, static_cast<long>(pos.x), static_cast<long>(pos.y), static_cast<long>(LastPos.x),
-                         static_cast<long>(LastPos.y), static_cast<long>(PrimaryBm.PrimaryBm.Size.x), static_cast<long>(gHallMargin),
+                         static_cast<long>(LastPos.y), static_cast<long>(PrimaryBm.PrimaryBm.GetXSize()), static_cast<long>(gHallMargin),
                          static_cast<int>(TopWin != nullptr), event.motion.timestamp);
             }
         }
