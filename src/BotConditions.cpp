@@ -909,6 +909,9 @@ Bot::Prio Bot::condVisitBoss(__int64 &moneyAvailable) {
         if (mBossGateAvailable || (mBossNumCitiesAvailable == -1)) { /* there is gate available (or we don't know yet) */
             prio = std::max(prio, Prio::High);
         }
+        if (gateShortage() && hoursPassed(ACTION_VISITAUFSICHT, 4)) { /* look for new gates (and whether we can expand) */
+            prio = std::max(prio, Prio::Medium);
+        }
         if (qPlayer.RobotUse(ROBOT_USE_ABROAD) && (mBossNumCitiesAvailable > 0) && hoursPassed(ACTION_VISITAUFSICHT, 4)) {
             prio = std::max(prio, Prio::Low);
         }
@@ -928,8 +931,8 @@ Bot::Prio Bot::condExpandAirport(__int64 &moneyAvailable) {
     if (!mBossCanExpandAirport) {
         return Prio::None;
     }
-    if (!checkLaptop()) {
-        return Prio::None; /* no access to gate utilization */
+    if (!checkLaptop() && !gateShortage()) {
+        return Prio::None; /* no access to gate utilization (a shortage we know from planning) */
     }
     if (mRunToFinalObjective > FinalPhase::No) {
         return Prio::None;
@@ -940,7 +943,8 @@ Bot::Prio Bot::condExpandAirport(__int64 &moneyAvailable) {
     }
 
     if (moneyAvailable >= 1e6) {
-        return Prio::Medium;
+        /* flights without a gate cost image every day */
+        return gateShortage() ? Prio::High : Prio::Medium;
     }
     return Prio::None;
 }

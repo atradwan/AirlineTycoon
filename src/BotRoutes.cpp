@@ -890,6 +890,7 @@ void Bot::planRoutes() {
             Helper::checkPlaneSchedule(qPlayer, planeId, false);
         }
     }
+    fixFlightsWithoutGate();
     Helper::checkFlightJobs(qPlayer, false, false);
 
     if (mImageDecayPerDay >= 500 || getImage() < -500) {

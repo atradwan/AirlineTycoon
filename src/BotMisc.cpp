@@ -55,8 +55,18 @@ SLONG Bot::getImage() const { return (qPlayer.HasBerater(BERATERTYP_GELD) < 50) 
 
 void Bot::forceReplanning() { qPlayer.RobotActions[1].ActionId = ACTION_NONE; }
 
+bool Bot::gateShortage() const { return mGateShortageDay >= Sim.Date - 1; }
+
 bool Bot::doWeNeedMoreGates(bool print) const {
     if (qPlayer.Gates.NumRented == 0) {
+        return true;
+    }
+    /* the average below hides full peak hours: our last planning found flights without a gate */
+    if (gateShortage()) {
+        if (print) {
+            AT_Log("Bot::doWeNeedMoreGates(): Flights without a gate on day %d, rented gates: %d, need more: YES", mGateShortageDay,
+                   qPlayer.Gates.NumRented);
+        }
         return true;
     }
     DOUBLE gateUtilization = 0;

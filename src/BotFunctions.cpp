@@ -14,7 +14,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <climits>
 #include <map>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -533,6 +535,7 @@ void Bot::planFlights() {
     if (count > 0) {
         AT_Log("Bot::planFlights(): Replaced %d automatic flights with routes", count);
     }
+    fixFlightsWithoutGate();
     Helper::checkFlightJobs(qPlayer, false, true);
 
     /* check whether we will incur any fines */
@@ -568,6 +571,240 @@ void Bot::planFlights() {
     }
 
     forceReplanning();
+}
+
+/* Room: office or laptop (right after planning) */
+/* A flight from or to the home airport without a free gate costs image at every departure (Sim.cpp,
+   NOGATE) and angers its passengers: Sunshine Airways went bankrupt from it, and Honey Airlines
+   flew 30 to 45 such flights a day. The planners know nothing of gates, so what they planned is
+   checked here. A route flight without a gate is taken out (the plane flies empty instead, which
+   needs no gate). A job first takes the gate of one of our route flights at that hour, else moves
+   a few hours on its plane, else is taken out of the plan: it may be planned again at another time,
+   or costs its fine. The shortage is remembered so that we bid for gates and expand the airport. */
+SLONG Bot::fixFlightsWithoutGate() {
+    const auto home = static_cast<ULONG>(Sim.HomeAirportId);
+    const SLONG now = Sim.Date * 24 + Sim.GetHour();
+
+    /* GameMechanic::removeFromFlightPlan() refuses flights starting within the next hour */
+    auto isRemovable = [&](const CFlugplanEintrag &qFPE) { return qFPE.Startdate * 24 + qFPE.Startzeit > now + 1; };
+    /* the hours of the gate list a flight takes, as PLAYER::PlanGates() counts them */
+    auto gateSlots = [&](const CFlugplanEintrag &qFPE) {
+        std::vector<SLONG> slots;
+        if (qFPE.VonCity == home) {
+            SLONG t = qFPE.Startzeit + (qFPE.Startdate - Sim.Date) * 24;
+            slots = {t - 1, t};
+        } else if (qFPE.NachCity == home) {
+            slots = {qFPE.Landezeit - 1 + (qFPE.Landedate - Sim.Date) * 24};
+        }
+        return slots;
+    };
+    /* PLAYER::PlanGates() gives gates only to routes and jobs, and only within the week ahead */
+    auto needsGate = [&](const CFlugplanEintrag &qFPE) {
+        if (qFPE.ObjectType != 1 && qFPE.ObjectType != 2) {
+            return false;
+        }
+        auto slots = gateSlots(qFPE);
+        return !slots.empty() && slots.back() > 1 && slots.back() < 24 * 7 - 1;
+    };
+    auto gatesFree = [&](const std::vector<SLONG> &slots) {
+        for (auto s : slots) {
+            if (s < 0 || s >= 24 * 7 || qPlayer.Gates.Auslastung[s] >= qPlayer.Gates.NumRented) {
+                return false;
+            }
+        }
+        return !slots.empty();
+    };
+    /* the earliest flight of this type that we may still change and that has no gate */
+    auto findGateless = [&](SLONG type, const std::set<SLONG> &skipJobs, SLONG &planeOut, SLONG &idxOut) {
+        SLONG best = INT_MAX;
+        for (SLONG p = 0; p < qPlayer.Planes.AnzEntries(); p++) {
+            if (qPlayer.Planes.IsInAlbum(p) == 0) {
+                continue;
+            }
+            const auto &qFlug = qPlayer.Planes[p].Flugplan.Flug;
+            for (SLONG d = 0; d < qFlug.AnzEntries(); d++) {
+                const auto &qFPE = qFlug[d];
+                if (qFPE.ObjectType != type || qFPE.Gate != -1 || !needsGate(qFPE) || !isRemovable(qFPE) || skipJobs.count(qFPE.ObjectId) != 0) {
+                    continue;
+                }
+                SLONG start = qFPE.Startdate * 24 + qFPE.Startzeit;
+                if (start < best) {
+                    best = start;
+                    planeOut = p;
+                    idxOut = d;
+                }
+            }
+        }
+        return best != INT_MAX;
+    };
+    auto findJob = [&](SLONG planeId, SLONG jobId) -> SLONG {
+        const auto &qFlug = qPlayer.Planes[planeId].Flugplan.Flug;
+        for (SLONG d = 0; d < qFlug.AnzEntries(); d++) {
+            if (qFlug[d].ObjectType == 2 && qFlug[d].ObjectId == jobId) {
+                return d;
+            }
+        }
+        return -1;
+    };
+
+    SLONG numRoutes = 0;
+    SLONG numStolen = 0;
+    SLONG numMoved = 0;
+    SLONG numDropped = 0;
+    SLONG planeId = -1;
+    SLONG idx = -1;
+
+    /* jobs first, while the route flights still hold their gates */
+    qPlayer.PlanGates();
+    std::set<SLONG> doneJobs;
+    for (SLONG guard = 0; guard < 200 && findGateless(2, doneJobs, planeId, idx); guard++) {
+        const SLONG jobId = qPlayer.Planes[planeId].Flugplan.Flug[idx].ObjectId;
+        doneJobs.insert(jobId);
+        if (qPlayer.Auftraege.IsInAlbum(jobId) == 0) {
+            continue;
+        }
+        const SLONG jobIdx = qPlayer.Auftraege(jobId);
+        const CAuftrag qJob = qPlayer.Auftraege[jobIdx];
+        const std::vector<SLONG> jobSlots = gateSlots(qPlayer.Planes[planeId].Flugplan.Flug[idx]);
+        bool done = false;
+
+        /* 1. take the gate of one of our route flights at that hour */
+        for (SLONG tries = 0; tries < 3 && !done; tries++) {
+            SLONG routePlane = -1;
+            SLONG routeIdx = -1;
+            for (SLONG p = 0; p < qPlayer.Planes.AnzEntries() && routePlane == -1; p++) {
+                if (qPlayer.Planes.IsInAlbum(p) == 0) {
+                    continue;
+                }
+                const auto &qFlug = qPlayer.Planes[p].Flugplan.Flug;
+                for (SLONG d = 0; d < qFlug.AnzEntries(); d++) {
+                    const auto &qFPE = qFlug[d];
+                    if (qFPE.ObjectType != 1 || qFPE.Gate < 0 || !isRemovable(qFPE)) {
+                        continue;
+                    }
+                    auto slots = gateSlots(qFPE);
+                    if (std::find_first_of(slots.begin(), slots.end(), jobSlots.begin(), jobSlots.end()) != slots.end()) {
+                        routePlane = p;
+                        routeIdx = d;
+                        break;
+                    }
+                }
+            }
+            if (routePlane == -1 || !GameMechanic::removeFromFlightPlan(qPlayer, routePlane, routeIdx)) {
+                break;
+            }
+            numRoutes++;
+            qPlayer.PlanGates();
+            SLONG d = findJob(planeId, jobId);
+            done = (d != -1 && qPlayer.Planes[planeId].Flugplan.Flug[d].Gate != -1);
+        }
+        if (done) {
+            numStolen++;
+            AT_Log("Bot::fixFlightsWithoutGate(): Job %s takes the gate of a route flight", Helper::getJobName(qJob).c_str());
+            continue;
+        }
+
+        /* 2. move it a few hours on its plane */
+        idx = findJob(planeId, jobId);
+        if (idx == -1) {
+            continue;
+        }
+        const auto &qPlane = qPlayer.Planes[planeId];
+        const auto &qFlug = qPlane.Flugplan.Flug;
+        const SLONG start = qFlug[idx].Startdate * 24 + qFlug[idx].Startzeit;
+        const SLONG duration = qFlug[idx].Landedate * 24 + qFlug[idx].Landezeit - start;
+        if (!GameMechanic::removeFromFlightPlan(qPlayer, planeId, idx)) {
+            continue;
+        }
+        qPlayer.PlanGates();
+
+        /* the flights before and after it (empty flights are planned again around it) */
+        SLONG prevEnd = INT_MIN;
+        SLONG prevCity = -1;
+        SLONG nextStart = INT_MAX;
+        SLONG nextCity = -1;
+        for (SLONG d = 0; d < qFlug.AnzEntries(); d++) {
+            const auto &qFPE = qFlug[d];
+            if (qFPE.ObjectType == 0 || qFPE.ObjectType == 3) {
+                continue;
+            }
+            SLONG s = qFPE.Startdate * 24 + qFPE.Startzeit;
+            if (s < start) {
+                SLONG end = qFPE.Landedate * 24 + qFPE.Landezeit;
+                if (end > prevEnd) {
+                    prevEnd = end;
+                    prevCity = static_cast<SLONG>(qFPE.NachCity);
+                }
+            } else if (s < nextStart) {
+                nextStart = s;
+                nextCity = static_cast<SLONG>(qFPE.VonCity);
+            }
+        }
+        auto emptyFlight = [&](SLONG from, SLONG to) {
+            return (from == to || from == -1 || to == -1) ? 0 : kDurationExtra + Cities.CalcFlugdauer(from, to, qPlane.ptGeschwindigkeit);
+        };
+        /* without a flight before it we do not know where the plane is: then only later, never earlier */
+        const SLONG earliest =
+            std::max({prevEnd == INT_MIN ? start : prevEnd + emptyFlight(prevCity, static_cast<SLONG>(qJob.VonCity)), now + 2, static_cast<SLONG>(qJob.Date * 24)});
+        const SLONG latest = std::min({nextStart == INT_MAX ? SLONG(INT_MAX) : nextStart - emptyFlight(static_cast<SLONG>(qJob.NachCity), nextCity) - duration,
+                                       static_cast<SLONG>((qJob.BisDate + 1) * 24 - 1), static_cast<SLONG>((Sim.Date + 6) * 24 - 1)});
+
+        for (SLONG k = 1; k <= 12 && !done; k++) {
+            const SLONG shift = (k % 2 == 1) ? (k + 1) / 2 : -(k / 2);
+            const SLONG s = start + shift;
+            if (s < earliest || s > latest) {
+                continue;
+            }
+            CFlugplanEintrag probe;
+            probe.VonCity = qJob.VonCity;
+            probe.NachCity = qJob.NachCity;
+            probe.Startdate = s / 24;
+            probe.Startzeit = s % 24;
+            probe.Landedate = (s + duration) / 24;
+            probe.Landezeit = (s + duration) % 24;
+            if (!gatesFree(gateSlots(probe))) {
+                continue;
+            }
+            if (!GameMechanic::planFlightJob(qPlayer, planeId, jobIdx, s / 24, s % 24)) {
+                continue;
+            }
+            qPlayer.PlanGates();
+            SLONG d = findJob(planeId, jobId);
+            if (d != -1 && qFlug[d].Gate != -1 && qFlug[d].Startdate * 24 + qFlug[d].Startzeit == s) {
+                done = true;
+                numMoved++;
+                AT_Log("Bot::fixFlightsWithoutGate(): Job %s moved by %d hours", Helper::getJobName(qJob).c_str(), shift);
+            } else if (d != -1) {
+                GameMechanic::removeFromFlightPlan(qPlayer, planeId, d);
+                qPlayer.PlanGates();
+            }
+        }
+
+        /* 3. leave it out of the plan */
+        if (!done) {
+            numDropped++;
+            AT_Warn("Bot::fixFlightsWithoutGate(): Job %s has no gate, taken out of the plan", Helper::getJobName(qJob).c_str());
+        }
+    }
+
+    /* then the route flights that are still without a gate */
+    const std::set<SLONG> none;
+    for (SLONG guard = 0; guard < 2000 && findGateless(1, none, planeId, idx); guard++) {
+        if (!GameMechanic::removeFromFlightPlan(qPlayer, planeId, idx)) {
+            break;
+        }
+        numRoutes++;
+        qPlayer.PlanGates();
+    }
+
+    SLONG total = numRoutes + numStolen + numMoved + numDropped;
+    if (total > 0) {
+        mGateShortageDay = Sim.Date;
+        AT_Log("Bot::fixFlightsWithoutGate(): Short of gates: %d route flights taken out, %d jobs took a route's gate, %d jobs moved, %d jobs taken "
+               "out (rented gates: %d)",
+               numRoutes, numStolen, numMoved, numDropped, qPlayer.Gates.NumRented);
+    }
+    return total;
 }
 
 /* Room: office or laptop */

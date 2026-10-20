@@ -321,6 +321,8 @@ class Bot {
     SLONG getImage() const;
     void forceReplanning();
     bool doWeNeedMoreGates(bool print) const;
+    SLONG fixFlightsWithoutGate();
+    bool gateShortage() const;
     SLONG numPlanes() const;
     std::vector<SLONG> getAllPlanes() const;
     bool isOfficeUsable() const;
@@ -425,6 +427,9 @@ class Bot {
     SLONG mBossNumCitiesAvailable{-1};
     bool mBossGateAvailable{false};
     bool mBossCanExpandAirport{false};
+
+    /* last day a planned flight had no gate at the home airport (not saved: set again by the next planning) */
+    SLONG mGateShortageDay{-1};
 
     /* detect tanks being too small */
     DOUBLE mTankRatioEmptiedYesterday{0};
