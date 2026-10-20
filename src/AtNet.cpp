@@ -2936,6 +2936,10 @@ void PumpNetwork() {
                     Message >> PlayerNum >> FlightsDate >> FlightsToday;
                     PlayerNum = NetCheckPlayerNum(PlayerNum, MessageType);
                     PLAYER &qPlayer = Sim.Players.Players[PlayerNum];
+                    /* only the owner's count counts: never our own players' */
+                    if (PlayerNum == Sim.localPlayer || (qPlayer.Owner == 1 && Sim.bIsHost != 0)) {
+                        continue;
+                    }
                     NetTraceEvent("SYNC_STAMPS player=%ld theirs=%ld/%ld mine=%ld/%ld", static_cast<long>(PlayerNum), static_cast<long>(FlightsDate),
                                   static_cast<long>(FlightsToday), static_cast<long>(qPlayer.NetFlightsDate), static_cast<long>(qPlayer.NetFlightsToday));
                     qPlayer.NetFlightsDate = FlightsDate;
@@ -3107,6 +3111,8 @@ void NetResetGenericSync() {
     }
     /* Orders taken in another game, or before the savegame was loaded, belong to other boards. */
     gPendingTook.clear();
+    /* A load that never reached the game must not resync the next one (SIM::LoadGame sets it again). */
+    gNetResyncAfterLoad = false;
 }
 
 //--------------------------------------------------------------------------------------------

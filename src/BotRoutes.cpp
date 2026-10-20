@@ -769,6 +769,32 @@ void Bot::releaseStarterRoutes() {
 }
 
 /* Room: office or laptop */
+/* Room: any. Whether a route leg starting at absolute hour t (Sim.Date * 24 + hour) finds a free gate at
+   home for its departure or arrival, counted as PLAYER::PlanGates() does (duration includes kDurationExtra). */
+bool Bot::routeLegHasGate(SLONG routeIdx, SLONG t, SLONG duration) {
+    const auto &qRoute = Routen[routeIdx];
+    const auto home = static_cast<ULONG>(Sim.HomeAirportId);
+    std::vector<SLONG> slots;
+    if (qRoute.VonCity == home) {
+        SLONG s = t - Sim.Date * 24;
+        slots = {s - 1, s};
+    } else if (qRoute.NachCity == home) {
+        slots = {t + duration - kDurationExtra - 1 - Sim.Date * 24};
+    } else {
+        return true;
+    }
+    if (slots.back() <= 1 || slots.back() >= 24 * 7 - 1) {
+        return true; /* no gate planned there (yet) */
+    }
+    qPlayer.PlanGates();
+    for (auto s : slots) {
+        if (s < 0 || qPlayer.Gates.Auslastung[s] >= qPlayer.Gates.NumRented) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Bot::planRoutes() {
     mNeedToPlanRoutes = false;
 
@@ -874,9 +900,21 @@ void Bot::planRoutes() {
 
             /* schedule route jobs */
             SLONG numScheduled = 0;
+            SLONG numSkipped = 0;
             auto currentTime = startTime;
             while (currentTime.getDate() < Sim.Date + 6) {
                 auto routeId = useRouteA ? qRoute.routeId : qRoute.routeReverseId;
+                /* a round trip whose departure or arrival at home finds no free gate is left out as a
+                   whole, so that the plane stays where it is (see fixFlightsWithoutGate()) */
+                if (numScheduled % 2 == 0) {
+                    auto otherId = useRouteA ? qRoute.routeReverseId : qRoute.routeId;
+                    SLONG t = currentTime.getDate() * 24 + currentTime.getHour();
+                    if (!routeLegHasGate(routeId, t, duration) || !routeLegHasGate(otherId, t + duration, duration)) {
+                        numSkipped++;
+                        currentTime += 2 * duration;
+                        continue;
+                    }
+                }
                 if (!GameMechanic::planRouteJob(qPlayer, planeId, routeId, currentTime.getDate(), currentTime.getHour())) {
                     AT_Error("Bot::planRoutes(): GameMechanic::planRouteJob returned error!");
                     return;
@@ -887,6 +925,10 @@ void Bot::planRoutes() {
             }
             AT_Log("Bot::planRoutes(): Scheduled route %s %d times for plane %s, starting at %s %d", Helper::getRouteName(getRoute(qRoute)).c_str(),
                    numScheduled, Helper::getPlaneName(qPlane).c_str(), Helper::getWeekday(currentTime.getDate()).c_str(), currentTime.getHour());
+            if (numSkipped > 0) {
+                AT_Log("Bot::planRoutes(): Left out %d round trips of plane %s for lack of a gate", numSkipped, Helper::getPlaneName(qPlane).c_str());
+                mGateShortageDay = Sim.Date;
+            }
             Helper::checkPlaneSchedule(qPlayer, planeId, false);
         }
     }

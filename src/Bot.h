@@ -322,6 +322,7 @@ class Bot {
     void forceReplanning();
     bool doWeNeedMoreGates(bool print) const;
     SLONG fixFlightsWithoutGate();
+    bool routeLegHasGate(SLONG routeIdx, SLONG t, SLONG duration);
     bool gateShortage() const;
     SLONG numPlanes() const;
     std::vector<SLONG> getAllPlanes() const;

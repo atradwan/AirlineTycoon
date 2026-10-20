@@ -669,6 +669,10 @@ SLONG Bot::fixFlightsWithoutGate() {
         bool done = false;
 
         /* 1. take the gate of one of our route flights at that hour */
+        struct RemovedRoute {
+            SLONG planeId, routeId, date, hour;
+        };
+        std::vector<RemovedRoute> removedRoutes;
         for (SLONG tries = 0; tries < 3 && !done; tries++) {
             SLONG routePlane = -1;
             SLONG routeIdx = -1;
@@ -690,13 +694,27 @@ SLONG Bot::fixFlightsWithoutGate() {
                     }
                 }
             }
-            if (routePlane == -1 || !GameMechanic::removeFromFlightPlan(qPlayer, routePlane, routeIdx)) {
+            if (routePlane == -1) {
                 break;
             }
-            numRoutes++;
+            const auto &qRouteFPE = qPlayer.Planes[routePlane].Flugplan.Flug[routeIdx];
+            RemovedRoute removed{routePlane, qRouteFPE.ObjectId, qRouteFPE.Startdate, qRouteFPE.Startzeit};
+            if (!GameMechanic::removeFromFlightPlan(qPlayer, routePlane, routeIdx)) {
+                break;
+            }
+            removedRoutes.push_back(removed);
             qPlayer.PlanGates();
             SLONG d = findJob(planeId, jobId);
             done = (d != -1 && qPlayer.Planes[planeId].Flugplan.Flug[d].Gate != -1);
+        }
+        if (done) {
+            numRoutes += static_cast<SLONG>(removedRoutes.size());
+        } else {
+            /* the gates went to other flights: give the route flights back */
+            for (const auto &r : removedRoutes) {
+                GameMechanic::planRouteJob(qPlayer, r.planeId, r.routeId, r.date, r.hour);
+            }
+            qPlayer.PlanGates();
         }
         if (done) {
             numStolen++;
