@@ -2508,6 +2508,21 @@ void SIM::NewDay() {
         }
     }
 
+    /* A bot's NewDay plans and prices its routes (RobotPlanRoutes) on every peer, from that
+       peer's own route usage - after the planes were sent at its start. One differing passenger
+       count was enough for the client to fly other flights for the bot than the host, every day
+       anew, and for its money and route figures to be refused (other flight stamps). Once all
+       have planned, the host's plans win: wait for everyone, send, and wait again so that the
+       clients have taken them over before they go on. */
+    if (bNetwork != 0) {
+        NetGenericSync(0x4211020);
+        if (bIsHost != 0) {
+            PLAYER::NetSynchronizePlanes();
+            PLAYER::NetSynchronizeRoutes();
+        }
+        NetGenericSync(0x4211021);
+    }
+
     AIRPORT::UpdateStaticDoorImage();
 
     // Neue Flugzeuge für's Museum:
@@ -3372,6 +3387,13 @@ BOOL SIM::LoadGame(SLONG Number) {
     /* Every peer loads its own copy of the savegame, so this is the first chance to see whether
        they saved the same game. */
     NetTraceFingerprint("loaded");
+
+    /* Every peer loaded its own file, saved when the save message reached it, so the copies of
+       the others' players differ from the start. Resend what each peer owns once all have
+       loaded - from the lobby too, which net 5 missed (CTakeOffApp::GameLoop). */
+    if (bNetwork != 0) {
+        gNetResyncAfterLoad = true;
+    }
 
     return (TRUE);
 }

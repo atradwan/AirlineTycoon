@@ -2540,8 +2540,6 @@ void PumpNetwork() {
                     SIM::SendSimpleMessage(ATNET_OPTIONS, 0, -1, Sim.localPlayer);
                     SIM::SendSimpleMessage(ATNET_IO_LOADREQUEST_DOIT, 0, Index);
                     Sim.LoadGame(Index);
-                    PLAYER::NetSynchronizeDemand();
-                    PLAYER::NetSynchronizeLoadedPlayers();
                 }
             } break;
 
@@ -2563,9 +2561,6 @@ void PumpNetwork() {
                 Message >> Index;
 
                 Sim.LoadGame(Index);
-                /* Each peer loaded its own file, saved a few minutes apart from the others. */
-                PLAYER::NetSynchronizeDemand();
-                PLAYER::NetSynchronizeLoadedPlayers();
             } break;
 
                 //--------------------------------------------------------------------------------------------
@@ -2928,6 +2923,23 @@ void PumpNetwork() {
                     }
 
                     Anz--;
+                }
+            } break;
+
+            case ATNET_SYNC_STAMPS: {
+                SLONG Anz = 0;
+                Message >> Anz;
+                for (SLONG e = 0; e < Anz && e < 4; e++) {
+                    SLONG PlayerNum = 0;
+                    SLONG FlightsDate = 0;
+                    SLONG FlightsToday = 0;
+                    Message >> PlayerNum >> FlightsDate >> FlightsToday;
+                    PlayerNum = NetCheckPlayerNum(PlayerNum, MessageType);
+                    PLAYER &qPlayer = Sim.Players.Players[PlayerNum];
+                    NetTraceEvent("SYNC_STAMPS player=%ld theirs=%ld/%ld mine=%ld/%ld", static_cast<long>(PlayerNum), static_cast<long>(FlightsDate),
+                                  static_cast<long>(FlightsToday), static_cast<long>(qPlayer.NetFlightsDate), static_cast<long>(qPlayer.NetFlightsToday));
+                    qPlayer.NetFlightsDate = FlightsDate;
+                    qPlayer.NetFlightsToday = FlightsToday;
                 }
             } break;
 

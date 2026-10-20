@@ -178,6 +178,7 @@ extern BOOL bMidiAvailable;      // Ist ein Midi-Sequenzer vorhanden?
 extern SLONG nOptionsOpen;       // Fummelt gerade wer an den Options?
 extern SLONG nAppsDisabled;      // Ist ein anderer Spieler gerade in einer anderen Anwendung?
 extern SLONG nWaitingForPlayer;  // Müssen wir da auf einen anderen Spieler warten?
+extern bool gNetResyncAfterLoad; // Netzwerkspiel geladen: eigene Spieler senden, sobald keiner mehr wartet
 extern BOOL bTwoWins;            // SplitScreen Testen?
 extern SLONG Editor;             // Ist der Flughafeneditor aktiv ? (=0)
 extern BOOL gDisablePauseKey;    // Pause-Key für Texteingabe abgeschaltet?

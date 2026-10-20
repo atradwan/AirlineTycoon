@@ -636,8 +636,33 @@ void PLAYER::NetSynchronizeLoadedPlayers() {
     if (Sim.bNetwork == 0) {
         return;
     }
+    NetTraceEvent("RESYNC after load");
+
+    /* First the owner's count of today's flights: the files were saved minutes apart, so the
+       counts differ, and the money and route figures below would be skipped as "not the same
+       flights" (NetTakeOwnerState) - for a bot until the next briefing. */
+    TEAKFILE Message;
+    Message.Announce(64);
+    SLONG Anz = 0;
+    for (SLONG c = 0; c < 4; c++) {
+        Anz += static_cast<SLONG>(needToSyncPlayer(Sim.Players.Players[c], false));
+    }
+    Message << ATNET_SYNC_STAMPS << Anz;
+    for (SLONG c = 0; c < 4; c++) {
+        PLAYER &qPlayer = Sim.Players.Players[c];
+        if (needToSyncPlayer(qPlayer, false)) {
+            Message << c << qPlayer.NetFlightsDate << qPlayer.NetFlightsToday;
+        }
+    }
+    SIM::SendMemFile(Message);
+
     NetSynchronizePlanes();
     NetSynchronizeFlags();
+    NetSynchronizeRoutes();
+    NetSynchronizeMoney();
+    NetSynchronizeImage();
+    NetSynchronizeItems();
+    NetSynchronizeDemand();
 }
 
 //--------------------------------------------------------------------------------------------

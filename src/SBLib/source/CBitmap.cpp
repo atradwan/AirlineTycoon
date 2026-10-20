@@ -2751,18 +2751,24 @@ void SB_CPrimaryBitmap::UpdateFrameTarget() {
     TargetOffset = XY(CanvasOffset.x + (CanvasSize.x - w) / 2, CanvasOffset.y);
 }
 
+/* The window shows the whole frame. While a view is open (BeginView) Size.x is only the view's
+   width, and a mouse move handled meanwhile was scaled by 640 instead of the frame width: the
+   pointer flipped by a quarter of its distance from the left edge, back and forth. */
+SLONG SB_CPrimaryBitmap::FrameSizeX() const { return ViewSurface != nullptr ? FullSizeX : Size.x; }
+
 XY SB_CPrimaryBitmap::GameToWindow(XY p) const {
-    if (Size.x <= 0 || Size.y <= 0) {
+    const SLONG w = FrameSizeX();
+    if (w <= 0 || Size.y <= 0) {
         return p;
     }
-    return XY(TargetOffset.x + SLONG(float(p.x) * float(TargetSize.x) / float(Size.x)), TargetOffset.y + SLONG(float(p.y) * float(TargetSize.y) / float(Size.y)));
+    return XY(TargetOffset.x + SLONG(float(p.x) * float(TargetSize.x) / float(w)), TargetOffset.y + SLONG(float(p.y) * float(TargetSize.y) / float(Size.y)));
 }
 
 XY SB_CPrimaryBitmap::WindowToGame(XY p) const {
     if (TargetSize.x <= 0 || TargetSize.y <= 0) {
         return p;
     }
-    return XY(SLONG(float(p.x - TargetOffset.x) * float(Size.x) / float(TargetSize.x)), SLONG(float(p.y - TargetOffset.y) * float(Size.y) / float(TargetSize.y)));
+    return XY(SLONG(float(p.x - TargetOffset.x) * float(FrameSizeX()) / float(TargetSize.x)), SLONG(float(p.y - TargetOffset.y) * float(Size.y) / float(TargetSize.y)));
 }
 
 void SB_CPrimaryBitmap::ShiftHdEntries(SLONG dx) {

@@ -155,6 +155,7 @@ BOOL bNoQuickMouse = FALSE;       // Keine Maus-Aufrufe beim OnMouseMove
 BOOL bCursorCaptured;             // Cursor gekidnappt und muß jetzt selbst gemalt werden?
 BOOL bMidiAvailable;              // Ist ein Midi-Sequenzer vorhanden?
 SLONG nOptionsOpen = 0;           // Fummelt gerade wer an den Options?
+bool gNetResyncAfterLoad = false;
 SLONG nWaitingForPlayer = 0;      // Müssen wir da auf einen anderen Spieler warten?
 SLONG nAppsDisabled = 0;          // Ist ein anderer Spieler gerade in einer anderen Anwendung?
 BOOL bTwoWins;                    // SplitScreen Testen?

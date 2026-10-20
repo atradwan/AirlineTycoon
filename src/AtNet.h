@@ -172,6 +172,7 @@ static const ULONG ATNET_STRIKE = 0xadaa1809;          // Hello all, the strike 
 static const ULONG ATNET_KILL_CITY = 0xadaa180a;       // Hello all, player x just gave up the branch in city y
 static const ULONG ATNET_SYNC_STAFF = 0xadaa180b;      // Synchronizes what my people earn and how they feel
 static const ULONG ATNET_SYNC_DEMAND = 0xadaa180c;     // Host: this many people want to fly each route
+static const ULONG ATNET_SYNC_STAMPS = 0xadaa180d;     // After a load: how many of today's flights my players have booked
 
 static const ULONG ATNET_BOTSELECT = 0xadab0000;
 
@@ -292,5 +293,6 @@ DEFINE_NAME_ENTRY(ATNET_STRIKE, "The strike at player x ended")
 DEFINE_NAME_ENTRY(ATNET_KILL_CITY, "Player x just gave up the branch in city y")
 DEFINE_NAME_ENTRY(ATNET_SYNC_STAFF, "What my people earn and how they feel")
 DEFINE_NAME_ENTRY(ATNET_SYNC_DEMAND, "Host: this many people want to fly each route")
+DEFINE_NAME_ENTRY(ATNET_SYNC_STAMPS, "After a load: flights my players have booked today")
 DEFINE_NAME_ENTRY(ATNET_BOTSELECT, "I've chosen bot difficulty")
 END_NAME_MAP

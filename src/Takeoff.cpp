@@ -1212,6 +1212,12 @@ void CTakeOffApp::GameLoop(void * /*unused*/) {
 
             if (Sim.Gamestate == (GAMESTATE_PLAYING | GAMESTATE_WORKING)) {
                 // Feierabend berechnen:
+                /* After a network load, once every peer has loaded (see SIM::LoadGame). */
+                if (gNetResyncAfterLoad && Sim.bNetwork != 0 && nWaitingForPlayer == 0) {
+                    gNetResyncAfterLoad = false;
+                    PLAYER::NetSynchronizeLoadedPlayers();
+                }
+
                 if (Sim.bNetwork != 0) {
                     if (Sim.CallItADay == FALSE && (Sim.bIsHost != 0) && Sim.CallItADayAt == 0) {
                         Sim.CallItADay = TRUE;

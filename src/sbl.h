@@ -339,6 +339,7 @@ class SB_CPrimaryBitmap : public SB_CBitmapCore {
     SLONG GetViewOffset() const { return ViewOffset; }
     XY GameToWindow(XY p) const; // Bild -> Fenster (fuer den Mauszeiger)
     XY WindowToGame(XY p) const; // Fenster -> Bild (Mausposition)
+    SLONG FrameSizeX() const;    // Breite des ganzen Bildes, auch waehrend BeginView
     void SetVSync(BOOL toggle) { SDL_RenderSetVSync(lpDD, toggle); }
 
     void AssignCursor(SB_CCursor *c) { Cursor = c; }
